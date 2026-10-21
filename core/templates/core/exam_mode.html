@@ -1,0 +1,632 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block body_class %}exam-page{% endblock %}
+{% block title %}Exam Mode — StudySync{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/focus.css' %}?v=19">
+<link rel="stylesheet" href="{% static 'css/daily_mode.css' %}?v=24">
+<style>
+.em-sea   { display: none !important; }
+.em-waves { display: none !important; }
+#em-constellation {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Create Plan Modal ── -->
+<div class="cp-overlay hidden" id="cp-overlay">
+  <div class="cp-box">
+    <div class="cp-accent-bar"></div>
+    <div class="cp-header">
+      <span class="cp-badge">🌊🌲 EXAM MODE</span>
+      <a href="/" class="cp-close" id="cp-close" title="Back to home">✕</a>
+    </div>
+    <h2 class="cp-title">Set up your<br>exam cycle</h2>
+    <div class="cp-section">
+      <div class="cp-step-label"><span class="cp-step-num">01</span> Exam Subject</div>
+      <input id="cp-subject" type="text" class="cp-input" placeholder="e.g. Maths, Biology, History…" autocomplete="off"/>
+    </div>
+    <div class="cp-section">
+      <div class="cp-step-label"><span class="cp-step-num">02</span> Exam Date &amp; Time</div>
+      <input id="cp-exam-date" type="date" class="cp-input" style="max-width:240px;"/>
+      <input id="cp-exam-time" type="time" class="cp-input" style="max-width:180px;margin-top:8px;" value="09:00"/>
+    </div>
+    <div class="cp-section">
+      <div class="cp-step-label"><span class="cp-step-num">03</span> Cycle timer</div>
+      <div class="cp-presets" id="cp-presets">
+        <button class="cp-preset cp-preset-active" data-focus="25" data-break="5" data-cycles="4">
+          <span class="cp-preset-name">Pomodoro</span>
+          <span class="cp-preset-sub">25 min · 5 break · 4 cycles</span>
+        </button>
+        <button class="cp-preset" data-focus="50" data-break="10" data-cycles="2">
+          <span class="cp-preset-name">Deep Work</span>
+          <span class="cp-preset-sub">50 min · 10 break · 2 cycles</span>
+        </button>
+        <button class="cp-preset" data-focus="15" data-break="3" data-cycles="6">
+          <span class="cp-preset-name">Short Sprint</span>
+          <span class="cp-preset-sub">15 min · 3 break · 6 cycles</span>
+        </button>
+        <button class="cp-preset" data-focus="" data-break="" data-cycles="">
+          <span class="cp-preset-name">Custom</span>
+          <span class="cp-preset-sub">Your own pace</span>
+        </button>
+      </div>
+      <div class="cp-custom-timer hidden" id="cp-custom-timer">
+        <div class="cp-custom-timer-row">
+          <div class="cp-custom-field">
+            <label class="cp-dur-label">Focus (min)</label>
+            <input id="cp-focus-min" type="number" class="cp-input cp-dur-input" min="5" max="120" value="25"/>
+          </div>
+          <div class="cp-custom-field">
+            <label class="cp-dur-label">Break (min)</label>
+            <input id="cp-break-min" type="number" class="cp-input cp-dur-input" min="1" max="30" value="5"/>
+          </div>
+          <div class="cp-custom-field">
+            <label class="cp-dur-label">Cycles</label>
+            <input id="cp-cycles-num" type="number" class="cp-input cp-dur-input" min="1" max="8" value="4"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="cp-error hidden" id="cp-error">Please enter a subject.</p>
+    <button class="cp-start-btn" id="cp-start-btn">
+      <span>🌊 Begin Cycle</span>
+      <span class="cp-start-arrow">→</span>
+    </button>
+  </div>
+</div>
+
+<!-- ── Cosmic Nav ── -->
+<nav class="em-nav">
+  <a href="/" class="em-nav-home">⌂ Home</a>
+  <a href="/" class="em-nav-logo"><span>Study</span>Sync</a>
+  <button class="em-change-btn" id="em-change-btn">⚙ Change Cycle</button>
+</nav>
+
+<!-- ── Aurora sky glow ── -->
+<div class="em-aurora" aria-hidden="true">
+  <div class="em-aurora-band em-aurora-band--1"></div>
+  <div class="em-aurora-band em-aurora-band--2"></div>
+  <div class="em-aurora-band em-aurora-band--3"></div>
+</div>
+
+<!-- ── Drizzle rain ── -->
+<div class="em-drizzle" id="em-drizzle" aria-hidden="true"></div>
+
+<!-- ── Constellation background ── -->
+<canvas id="em-constellation" aria-hidden="true"></canvas>
+
+<!-- ── Thunder flash + Lightning ── -->
+<div class="em-thunder-flash" id="em-thunder-flash" aria-hidden="true"></div>
+<div class="em-lightning" id="em-lightning" aria-hidden="true">
+  <svg id="em-bolt-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"></svg>
+</div>
+
+<!-- ── Mission Banner ── -->
+<div class="em-mission-banner">
+  <span class="em-eyebrow"><span class="em-eyebrow-dot"></span>Exam Mode</span>
+  <h1 class="em-heading" id="em-heading">Ready</h1>
+  <p class="em-subject-line hidden" id="em-subject-line"></p>
+</div>
+
+<!-- ── Page Body ── -->
+<div class="em-page">
+
+  <!-- Timer + Countdown side by side -->
+  <div class="em-top-row">
+
+    <!-- Hero: Pomodoro Timer -->
+    <div class="em-hero">
+      <div class="em-ring-wrap">
+        <svg viewBox="0 0 160 160" width="220" height="220">
+          <defs>
+            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2d5a42"/>
+              <stop offset="50%" stop-color="#1a9a8a"/>
+              <stop offset="100%" stop-color="#3ac8b8"/>
+            </linearGradient>
+          </defs>
+          <circle class="em-ring-bg" cx="80" cy="80" r="68"/>
+          <circle class="em-ring-fill" id="em-ring-fill" cx="80" cy="80" r="68" stroke="url(#ringGrad)"/>
+        </svg>
+        <div class="em-ring-center">
+          <span class="em-ring-time" id="focus-display">25:00</span>
+          <span class="em-ring-mode" id="em-ring-mode">FOCUS</span>
+        </div>
+      </div>
+
+      <div class="em-pips">
+        <span class="em-pip" id="em-pip-1"></span>
+        <span class="em-pip" id="em-pip-2"></span>
+        <span class="em-pip" id="em-pip-3"></span>
+        <span class="em-pip" id="em-pip-4"></span>
+      </div>
+      <p class="em-cycle-text" id="em-cycle-text">Cycle 1 of 4</p>
+
+      <div class="em-controls">
+        <button class="em-btn em-btn-primary" id="focus-start">▶ Start</button>
+        <button class="em-btn em-btn-ghost em-btn-hidden" id="focus-pause">⏸ Pause</button>
+        <button class="em-btn em-btn-ghost em-btn-hidden" id="focus-reset">↺ Reset</button>
+        <button class="em-btn em-btn-ghost fs-toggle-btn" id="fs-toggle-em" title="Fullscreen">⛶</button>
+      </div>
+    </div>
+
+    <!-- Exam Countdown -->
+    <div class="em-countdown-card" id="em-countdown-card">
+      <span class="em-card-label">// EXAM COUNTDOWN</span>
+
+      <!-- Setup form -->
+      <div id="ec-setup">
+        <p class="ec-hint">Set your exam date to track the countdown.</p>
+        <input id="ec-subject" type="text" class="ec-input" placeholder="Subject" autocomplete="off"/>
+        <input id="ec-date" type="date" class="ec-input"/>
+        <input id="ec-time" type="time" class="ec-input" value="09:00"/>
+        <p class="ec-error hidden" id="ec-error">Fill in subject and date.</p>
+        <button class="em-btn em-btn-primary" id="ec-set-btn">Set Countdown</button>
+      </div>
+
+      <!-- Display -->
+      <div id="ec-display" class="hidden">
+        <p class="ec-subject-name" id="ec-subject-display"></p>
+        <div class="ec-clock-grid">
+          <div class="ec-clock-box" id="ec-clock-days-box">
+            <span class="ec-clock-num" id="ec-clock-days">--</span>
+            <span class="ec-clock-label">DAYS</span>
+          </div>
+          <div class="ec-clock-box">
+            <span class="ec-clock-num" id="ec-clock-hours">--</span>
+            <span class="ec-clock-label">HOURS</span>
+          </div>
+          <div class="ec-clock-box">
+            <span class="ec-clock-num" id="ec-clock-mins">--</span>
+            <span class="ec-clock-label">MINS</span>
+          </div>
+          <div class="ec-clock-box">
+            <span class="ec-clock-num" id="ec-clock-secs">--</span>
+            <span class="ec-clock-label">SECS</span>
+          </div>
+        </div>
+        <div class="ec-meta">
+          <p class="ec-date-line" id="ec-date-line"></p>
+          <p class="ec-message" id="ec-message"></p>
+        </div>
+        <button class="em-btn em-btn-ghost ec-edit-btn" id="ec-edit-btn">✏ Edit</button>
+      </div>
+    </div>
+
+  </div><!-- /.em-top-row -->
+
+  <!-- Flashcards + Practice -->
+  <div class="dm-main-grid" style="padding: 0 0 40px;">
+
+    <!-- FLASHCARDS CARD -->
+    <div class="dm-card dm-card-flashcards">
+      <div class="dm-panel-header">
+        <div>
+          <h2 class="dm-panel-title"> FLASHCARDS</h2>
+        </div>
+        <div class="dm-panel-actions">
+          <button class="dm-btn dm-btn-ghost" id="fc-add-btn">+ Add Card</button>
+          <button class="dm-btn dm-btn-ghost" id="fc-generate-btn">✦ Generate from Files</button>
+          <button class="dm-btn dm-btn-ghost" id="fc-study-btn">📖 Study</button>
+          <button class="dm-btn dm-btn-primary" id="fc-guessit-btn">🎯 Guess It</button>
+          <button class="dm-btn dm-btn-ghost fc-review-due hidden" id="fc-review-due-btn">📅 Review Due</button>
+          <span class="fc-due-badge hidden" id="fc-due-badge">0</span>
+        </div>
+      </div>
+
+      <!-- Sources section: files + URL → generate -->
+      <div class="dm-fc-sources-wrap" id="fc-sources-wrap">
+        <div class="dm-fc-sources-header">
+          <span class="dm-fc-sources-label">Sources</span>
+          <span class="dm-fc-sources-count" id="fc-sources-count">0 files · 0 URLs</span>
+        </div>
+        <div class="dm-upload-zone" id="practice-upload-zone">
+          <input type="file" id="practice-file-input" multiple accept=".txt,.md,.pdf,.docx" style="display:none">
+          <span class="dm-upload-icon">📎</span>
+          <p class="dm-upload-label">Drop files or <button type="button" class="dm-upload-browse-btn" id="practice-upload-btn">browse</button></p>
+          <p class="dm-upload-hint">Supports .txt · .md · .pdf · .docx</p>
+        </div>
+        <div class="dm-fc-url-row">
+          <input type="url" id="fc-src-url" class="dm-fc-input" placeholder="Or paste a URL as reference…" autocomplete="off" />
+          <button class="dm-btn dm-btn-ghost dm-btn-sm" id="fc-src-url-add">+ Add URL</button>
+        </div>
+        <div id="practice-file-list" class="dm-file-list"></div>
+        <div id="fc-url-list" class="dm-file-list"></div>
+      </div>
+
+      <!-- Manual add-card form -->
+      <div class="dm-fc-add-form hidden" id="fc-add-form">
+        <input id="fc-front-input" class="dm-fc-input" type="text" placeholder="Front — key term or question" />
+        <textarea id="fc-back-input" class="dm-fc-textarea" placeholder="Back — definition or answer"></textarea>
+        <div class="dm-fc-form-actions">
+          <button class="dm-btn dm-btn-primary dm-btn-sm" id="fc-save-btn">Save Card</button>
+          <button class="dm-btn dm-btn-ghost dm-btn-sm" id="fc-cancel-btn">Cancel</button>
+        </div>
+      </div>
+
+      <div class="dm-fc-loading hidden" id="fc-generate-loading">
+        <div class="dm-spinner"></div>
+        <p>Extracting key terms with AI…</p>
+      </div>
+
+      <div id="fc-deck-section">
+        <div class="dm-fc-empty hidden" id="fc-empty">
+          <span class="dm-empty-icon">🃏</span>
+          <p>No flashcards yet. Upload a file and generate, or add one manually.</p>
+        </div>
+        <div class="dm-fc-grid" id="fc-deck"></div>
+      </div>
+
+      <div class="dm-fc-study-wrap hidden" id="fc-study">
+        <div class="dm-fc-progress-row">
+          <span id="fc-progress-text">Card 1 of 10</span>
+          <div class="dm-fc-progress-bar-wrap">
+            <div class="dm-fc-progress-bar" id="fc-progress-bar"></div>
+          </div>
+          <button class="dm-btn dm-btn-ghost dm-btn-sm" id="fc-exit-study">✕ Exit</button>
+        </div>
+        <div class="dm-fc-flip-area">
+          <div class="dm-fc-flipper" id="fc-flipper">
+            <div class="dm-fc-face dm-fc-front" id="fc-face-front">
+              <span class="dm-fc-label">TERM</span>
+              <p id="fc-front-text"></p>
+            </div>
+            <div class="dm-fc-face dm-fc-back" id="fc-face-back">
+              <span class="dm-fc-label">DEFINITION</span>
+              <p id="fc-back-text"></p>
+            </div>
+            <div class="dm-fc-feedback hidden" id="fc-feedback">
+              <span class="dm-fc-feedback-emoji" id="fc-feedback-emoji"></span>
+              <span class="dm-fc-feedback-msg" id="fc-feedback-msg"></span>
+              <p class="dm-fc-feedback-answer" id="fc-feedback-answer"></p>
+            </div>
+          </div>
+        </div>
+        <div class="dm-fc-study-nav hidden" id="fc-study-nav">
+          <button class="dm-btn dm-btn-ghost" id="fc-prev-btn">← Prev</button>
+          <p class="dm-fc-hint">Click card or press Space to flip</p>
+          <button class="dm-btn dm-btn-primary" id="fc-next-btn">Next →</button>
+        </div>
+        <div class="dm-fc-guess-area hidden" id="fc-guess-area">
+          <input id="fc-guess-input" class="dm-fc-guess-input" type="text" placeholder="Type your answer and press Enter…" autocomplete="off" />
+          <button class="dm-btn dm-btn-primary" id="fc-check-btn">Check</button>
+          <button class="dm-btn dm-btn-ghost dm-fc-skip-btn" id="fc-skip">→ Skip</button>
+        </div>
+        <div class="dm-fc-actions hidden" id="fc-answer-btns">
+          <button class="dm-btn dm-fc-unknown-btn" id="fc-unknown">✗ Still don't know</button>
+          <button class="dm-btn dm-fc-known-btn" id="fc-known">✓ Got it</button>
+        </div>
+        <div class="dm-fc-results hidden" id="fc-results">
+          <p class="dm-fc-results-score" id="fc-results-score"></p>
+          <p class="dm-fc-results-sub" id="fc-results-sub"></p>
+          <div class="dm-fc-results-actions">
+            <button class="dm-btn dm-btn-primary" id="fc-restart-btn">↺ Guess Again</button>
+            <button class="dm-btn dm-btn-ghost" id="fc-back-deck-btn">← Back to Deck</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRACTICE CARD -->
+    <div class="dm-card dm-card-practice">
+      <div class="dm-panel-header">
+        <div class="dm-practice-header-left">
+          <h2 class="dm-panel-title"> PRACTICE</h2>
+          <span class="dm-practice-context" id="practice-context">0 files loaded</span>
+        </div>
+        <button class="dm-btn dm-btn-primary" id="generate-questions-btn">✦ Generate Questions</button>
+      </div>
+      <div class="dm-practice-controls">
+        <div class="dm-practice-control-group">
+          <label class="dm-field-label">Number of Questions</label>
+          <select id="practice-count" class="dm-select">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+        <div class="dm-practice-control-group">
+          <label class="dm-field-label">Question Types</label>
+          <div class="dm-practice-types">
+            <label class="dm-type-check"><input type="checkbox" value="mcq" checked> Multiple Choice</label>
+            <label class="dm-type-check"><input type="checkbox" value="truefalse" checked> True / False</label>
+            <label class="dm-type-check"><input type="checkbox" value="shortanswer" checked> Short Answer</label>
+            <label class="dm-type-check"><input type="checkbox" value="fillinblank" checked> Fill in Blank</label>
+          </div>
+        </div>
+      </div>
+      <p class="dm-fc-sources-note">Files uploaded in the Flashcards section are shared here.</p>
+      <div class="dm-practice-loading hidden" id="practice-loading">
+        <div class="dm-spinner"></div>
+        <p>Generating your questions with AI…</p>
+      </div>
+      <div class="dm-questions-output hidden" id="practice-questions-output">
+        <div class="dm-questions-header">
+          <span class="dm-questions-meta" id="practice-q-count"></span>
+          <div class="dm-questions-actions">
+            <button class="dm-btn dm-btn-primary" id="practice-score-btn">Check Score</button>
+            <button class="dm-btn dm-btn-ghost" id="practice-retry-btn">↺ New Set</button>
+          </div>
+        </div>
+        <div id="practice-questions-list" class="dm-questions-list"></div>
+        <div class="dm-score-banner hidden" id="practice-score-banner"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Shuffle overlay -->
+<div class="fc-shuffle-overlay hidden" id="fc-shuffle-overlay">
+  <p class="fc-shuffle-msg" id="fc-shuffle-msg">Shuffling your deck…</p>
+  <div class="fc-shuffle-deck" id="fc-shuffle-deck">
+    <div class="fc-shuffle-card" style="--i:0"></div>
+    <div class="fc-shuffle-card" style="--i:1"></div>
+    <div class="fc-shuffle-card" style="--i:2"></div>
+    <div class="fc-shuffle-card" style="--i:3"></div>
+    <div class="fc-shuffle-card" style="--i:4"></div>
+  </div>
+  <p class="fc-shuffle-sub" id="fc-shuffle-sub">Get ready to test yourself!</p>
+</div>
+
+<!-- "Ready to Guess?" overlay -->
+<div class="fc-ready-overlay hidden" id="fc-ready-overlay">
+  <div class="fc-ready-box">
+    <div class="fc-ready-icon">🎯</div>
+    <h3 class="fc-ready-title">Ready to test yourself?</h3>
+    <p class="fc-ready-sub">You've reviewed all the cards. Want to see how much you actually remember?</p>
+    <div class="fc-ready-actions">
+      <button class="dm-btn dm-btn-primary" id="fc-ready-yes">Let's Go!</button>
+      <button class="dm-btn dm-btn-ghost" id="fc-ready-later">Maybe Later</button>
+    </div>
+  </div>
+</div>
+
+<!-- Study Tree Widget -->
+<div class="st-widget" id="study-tree-widget" data-mode="exam" aria-label="Study tree">
+  <button class="st-pill" id="st-toggle" aria-expanded="false" aria-controls="st-panel">
+    <canvas class="st-pill-mini" id="st-mini-canvas" width="36" height="36"></canvas>
+    <span class="st-pill-label"><span id="st-pill-sessions">0</span>/<span id="st-pill-max">5</span> &middot; <span id="st-pill-subject">Study</span> Tree</span>
+    <span class="st-pill-chevron">▲</span>
+  </button>
+  <div class="st-panel" id="st-panel" hidden>
+    <div class="st-panel-header">
+      <span class="st-panel-title" id="st-panel-subject">Study Tree</span>
+      <span class="st-panel-stage" id="st-stage-label">Seedling</span>
+    </div>
+    <canvas class="st-canvas" id="st-main-canvas" width="220" height="200"></canvas>
+    <div class="st-pips"></div>
+    <p class="st-message" id="st-message">Complete a cycle to grow your tree.</p>
+    <div class="st-tree-fact hidden" id="st-tree-fact">
+      <span class="st-species-name" id="st-species-name"></span>
+      <p class="st-species-fact" id="st-species-fact"></p>
+    </div>
+    <canvas class="st-burst-canvas" id="st-burst-canvas" width="220" height="200" aria-hidden="true"></canvas>
+  </div>
+</div>
+
+<!-- Tree growth overlay -->
+<div class="tree-growth-overlay hidden" id="tree-growth-overlay">
+  <div class="tree-growth-box">
+    <p class="tree-growth-eyebrow">Cycle Complete</p>
+    <h3 class="tree-growth-title" id="tg-title">Your tree is growing!</h3>
+    <canvas id="tg-canvas" width="220" height="220" class="tree-growth-canvas"></canvas>
+    <p class="tree-growth-stage" id="tg-stage"></p>
+    <p class="tree-growth-fact" id="tg-fact"></p>
+    <div class="tree-growth-progress"></div>
+    <button class="dm-btn dm-btn-primary" id="tg-continue-btn">Continue →</button>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/tree_widget.js' %}?v=11" defer></script>
+<script src="{% static 'js/focus.js' %}?v=26" defer></script>
+<script src="{% static 'js/exam_features.js' %}?v=5" defer></script>
+<script>
+// ── Forest River scene ────────────────────────────────────
+(function () {
+  var canvas = document.getElementById('em-constellation');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var W, H, riverY, riverH;
+  var trees = [], waterPts = [], shimmer = [], fireflies = [];
+  var waveT = 0;
+
+  /* ── helpers ── */
+  function r(min, max) { return min + Math.random() * (max - min); }
+
+  /* ── scene layout ── */
+  function buildScene() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    riverY = H * 0.60;
+    riverH = H * 0.33;
+
+    // Trees — left bank, right bank, far bank (smaller)
+    trees = [];
+    var x;
+    for (x = -20; x < W * 0.32; x += r(28, 55))
+      trees.push(mkTree(x, riverY + riverH * 0.03, r(0.18, 0.28), 1));
+    for (x = W * 0.68; x < W + 40; x += r(28, 55))
+      trees.push(mkTree(x, riverY + riverH * 0.03, r(0.18, 0.28), 1));
+    for (x = -10; x < W + 20; x += r(18, 38))          // far bank
+      trees.push(mkTree(x, riverY - H * 0.01, r(0.08, 0.14), 0.55));
+
+    // Water flow particles
+    waterPts = [];
+    for (var i = 0; i < 220; i++) waterPts.push(mkDrop());
+
+    // Caustic shimmer
+    shimmer = [];
+    for (var j = 0; j < 24; j++)
+      shimmer.push({ x: r(0, W), ry: r(0.15, 0.75), ph: r(0, 6.28), spd: r(0.018, 0.04), rad: r(2, 7) });
+
+    // Fireflies (forest side, above river)
+    fireflies = [];
+    for (var k = 0; k < 22; k++)
+      fireflies.push({ x: r(0, W), y: r(0.02, 0.42) * H, vx: r(-0.12, 0.12), vy: r(-0.08, 0.08),
+        ph: r(0, 6.28), spd: r(0.012, 0.025), c: ['#ffe566','#ccff88','#aaffdd'][Math.floor(r(0,3))] });
+  }
+
+  function mkTree(x, groundY, hFrac, opacity) {
+    return { x, groundY, h: H * hFrac, w: H * hFrac * r(0.28, 0.46),
+      pine: Math.random() > 0.42, sph: r(0, 6.28), sspd: r(0.002, 0.006), op: opacity };
+  }
+
+  function mkDrop() {
+    return { x: r(-10, W), ry: r(0.05, 0.92), spd: r(0.6, 2.8),
+      r: r(0.5, 1.8), a: r(0.12, 0.45), bright: Math.random() > 0.82 };
+  }
+
+  /* ── draw layers ── */
+  function drawBg() {
+    // Forest canopy / sky
+    var g = ctx.createLinearGradient(0, 0, 0, riverY);
+    g.addColorStop(0,   '#020806');
+    g.addColorStop(0.5, '#030d09');
+    g.addColorStop(1,   '#051410');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, riverY);
+    // Forest floor
+    var g2 = ctx.createLinearGradient(0, riverY + riverH, 0, H);
+    g2.addColorStop(0, '#040e08'); g2.addColorStop(1, '#010402');
+    ctx.fillStyle = g2; ctx.fillRect(0, riverY + riverH, W, H - riverY - riverH);
+  }
+
+  function drawRiver() {
+    // Base water
+    var g = ctx.createLinearGradient(0, riverY, 0, riverY + riverH);
+    g.addColorStop(0,   'rgba(8,50,62,0.96)');
+    g.addColorStop(0.4, 'rgba(10,62,76,0.92)');
+    g.addColorStop(1,   'rgba(5,32,42,0.98)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    // Top wave edge
+    ctx.moveTo(0, riverY + riverH);
+    ctx.lineTo(W, riverY + riverH);
+    for (var x = W; x >= 0; x -= 3)
+      ctx.lineTo(x, riverY + Math.sin(x / 75 + waveT) * 5 + Math.sin(x / 30 + waveT * 1.4) * 2);
+    ctx.closePath();
+    ctx.fill();
+
+    // Highlight on water surface
+    ctx.strokeStyle = 'rgba(50,160,155,0.18)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (var x2 = 0; x2 <= W; x2 += 3)
+      x2 === 0 ? ctx.moveTo(x2, riverY + Math.sin(x2/75+waveT)*5 + Math.sin(x2/30+waveT*1.4)*2)
+               : ctx.lineTo(x2, riverY + Math.sin(x2/75+waveT)*5 + Math.sin(x2/30+waveT*1.4)*2);
+    ctx.stroke();
+
+    // Flow particles
+    for (var i = 0; i < waterPts.length; i++) {
+      var p = waterPts[i];
+      var py = riverY + p.ry * riverH;
+      ctx.beginPath(); ctx.arc(p.x, py, p.r, 0, 6.28);
+      ctx.fillStyle = p.bright ? 'rgba(130,230,215,'+p.a+')' : 'rgba(28,105,118,'+p.a+')';
+      ctx.fill();
+      p.x += p.spd;
+      if (p.x > W + 8) { p.x = -8; p.ry = r(0.05, 0.92); }
+    }
+
+    // Caustic shimmer
+    for (var j = 0; j < shimmer.length; j++) {
+      var s = shimmer[j];
+      s.ph += s.spd; s.x += 0.35;
+      if (s.x > W + 20) s.x = -20;
+      var sa = Math.max(0, Math.sin(s.ph)) * 0.38;
+      if (sa > 0.04) {
+        ctx.beginPath();
+        ctx.ellipse(s.x, riverY + s.ry * riverH, s.rad, s.rad * 0.35, 0, 0, 6.28);
+        ctx.fillStyle = 'rgba(160,248,230,' + sa + ')';
+        ctx.fill();
+      }
+    }
+  }
+
+  function drawTree(t) {
+    t.sph += t.sspd;
+    var lean = Math.sin(t.sph) * 2;
+    ctx.save(); ctx.translate(t.x, t.groundY);
+    ctx.globalAlpha = t.op;
+    ctx.fillStyle = '#010804';
+    if (t.pine) {
+      ctx.beginPath(); ctx.moveTo(lean, -t.h); ctx.lineTo(-t.w/2, 0); ctx.lineTo(t.w/2, 0); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(lean*0.6, -t.h*0.6); ctx.lineTo(-t.w/2*1.3, -t.h*0.22); ctx.lineTo(t.w/2*1.3, -t.h*0.22); ctx.closePath(); ctx.fill();
+    } else {
+      ctx.beginPath(); ctx.arc(lean, -t.h * 0.72, t.w * 0.52, 0, 6.28); ctx.fill();
+      ctx.fillRect(-t.w*0.09, -t.h*0.32, t.w*0.18, t.h*0.32);
+    }
+    ctx.globalAlpha = 1; ctx.restore();
+  }
+
+  function drawFireflies() {
+    for (var i = 0; i < fireflies.length; i++) {
+      var f = fireflies[i];
+      f.ph += f.spd;
+      var g = Math.max(0, Math.sin(f.ph));
+      if (g > 0.08) {
+        ctx.beginPath(); ctx.arc(f.x, f.y, 1.5, 0, 6.28);
+        ctx.fillStyle = f.c; ctx.globalAlpha = g * 0.85;
+        ctx.shadowBlur = 10; ctx.shadowColor = f.c;
+        ctx.fill(); ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+      }
+      f.x += f.vx; f.y += f.vy;
+      if (f.x < 0) f.x = W; if (f.x > W) f.x = 0;
+      f.y = Math.max(0.02 * H, Math.min(0.42 * H, f.y));
+    }
+  }
+
+  /* ── loop ── */
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    waveT += 0.016;
+    drawBg();
+    drawRiver();
+    for (var i = 0; i < trees.length; i++) drawTree(trees[i]);
+    drawFireflies();
+    requestAnimationFrame(draw);
+  }
+
+  buildScene();
+  window.addEventListener('resize', buildScene);
+  draw();
+})();
+
+// ── Reset button — zero the tree ──────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+  var resetBtn = document.getElementById('em-reset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function () {
+      var treeKey = 'studySyncTree_exam';
+      localStorage.setItem(treeKey, JSON.stringify({ date: new Date().toDateString(), count: 0 }));
+      if (window.StudyTree) {
+        var plan = JSON.parse(localStorage.getItem('studySyncExamPlan') || '{}');
+        window.StudyTree.update(0, plan.subject || 'Study');
+      }
+    });
+  }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+<script type="module">
+  import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+  window._pdfjsLib = pdfjsLib;
+</script>
+{% endblock %}

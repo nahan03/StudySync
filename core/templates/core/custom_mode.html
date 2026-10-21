@@ -1,0 +1,194 @@
+﻿{% extends 'core/base.html' %}
+{% load static %}
+{% block body_class %}custom-page{% endblock %}
+{% block title %}Custom Mode — StudySync{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/custom_mode.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'css/daily_mode.css' %}?v=22">
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Create Plan Modal ── -->
+<div class="cp-overlay hidden" id="cp-overlay">
+  <div class="cp-box">
+    <div class="cp-accent-bar"></div>
+    <div class="cp-header">
+      <span class="cp-badge" id="cp-badge">🍂 Custom Mode</span>
+      <button class="cp-close" id="cp-close" aria-label="Close">✕</button>
+    </div>
+    <h2 class="cp-title">Design your<br>own session</h2>
+
+    <div class="cp-section">
+      <div class="cp-step-label"><span class="cp-step-num">01</span> Subject &amp; Topic</div>
+      <div class="cp-row">
+        <input id="cp-subject" type="text" class="cp-input" placeholder="Subject — Maths, Physics, Art…" autocomplete="off"/>
+        <input id="cp-topic"   type="text" class="cp-input" placeholder="Topic — optional" autocomplete="off"/>
+      </div>
+    </div>
+
+    <div class="cp-section">
+      <div class="cp-step-label"><span class="cp-step-num">02</span> Session length</div>
+      <div class="cp-chips" id="cp-chips">
+        <button class="cp-chip" data-min="30">30 min</button>
+        <button class="cp-chip" data-min="45">45 min</button>
+        <button class="cp-chip cp-chip-active" data-min="60">1 hr</button>
+        <button class="cp-chip" data-min="90">1.5 hr</button>
+        <button class="cp-chip" data-min="120">2 hr</button>
+        <button class="cp-chip" data-min="custom">Custom</button>
+      </div>
+      <div class="cp-custom-row hidden" id="cp-custom-row">
+        <div class="cp-dur-part">
+          <input id="cp-hr"  type="number" class="cp-input cp-dur-input" min="0" max="12" step="1" value="1" placeholder="0"/>
+          <span class="cp-dur-label">hr</span>
+        </div>
+        <span class="cp-dur-sep">:</span>
+        <div class="cp-dur-part">
+          <input id="cp-min" type="number" class="cp-input cp-dur-input" min="0" max="59" step="5" value="0" placeholder="0"/>
+          <span class="cp-dur-label">min</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cp-section">
+      <div class="cp-step-label"><span class="cp-step-num">03</span> Session goal</div>
+      <div class="cp-goal-chips" id="cp-goal-chips">
+        <button class="cp-chip cp-chip-active" data-goal="deep-work">🎯 Deep Work</button>
+        <button class="cp-chip" data-goal="revision">🔁 Revision</button>
+        <button class="cp-chip" data-goal="practice">✏ Practice</button>
+        <button class="cp-chip" data-goal="reading">📖 Reading</button>
+      </div>
+    </div>
+
+    <p class="cp-error hidden" id="cp-error">Please enter a subject.</p>
+
+    <button class="cp-start-btn" id="cp-start-btn">
+      <span>Start Custom Session</span>
+      <span class="cp-start-arrow">→</span>
+    </button>
+  </div>
+</div>
+
+<!-- Main page -->
+<div class="cm-page" id="cm-page">
+  <header class="cm-header">
+    <div class="cm-header-left">
+      <a href="/" class="cm-back">← Home</a>
+      <div>
+        <div class="cm-eyebrow">Custom Mode</div>
+        <h1 class="cm-heading" id="cm-heading">Your Session</h1>
+        <p class="cm-sub" id="cm-sub">Build it your way.</p>
+      </div>
+    </div>
+    <div class="cm-timer-ring" id="cm-timer-ring">
+      <svg viewBox="0 0 120 120" class="cm-ring-svg">
+        <circle class="cm-ring-bg" cx="60" cy="60" r="52"/>
+        <circle class="cm-ring-fill" id="cm-ring-fill" cx="60" cy="60" r="52"/>
+      </svg>
+      <div class="cm-ring-center">
+        <span class="cm-ring-time" id="cm-ring-time">—</span>
+        <span class="cm-ring-label">remaining</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="cm-controls" id="cm-controls">
+    <button class="cm-btn cm-btn-primary" id="cm-start-btn">▶ Start</button>
+    <button class="cm-btn" id="cm-pause-btn">⏸ Pause</button>
+    <button class="cm-btn cm-btn-ghost" id="cm-reset-btn">↺ Reset</button>
+    <button class="cm-btn cm-btn-ghost fs-toggle-btn" id="fs-toggle-cm" title="Fullscreen">⛶</button>
+  </div>
+
+  <div class="cm-widgets">
+    <!-- Notes widget -->
+    <section class="cm-card" id="cm-notes-card">
+      <h2 class="cm-card-title">📝 Session Notes</h2>
+      <textarea class="cm-notes-area" id="cm-notes-area" placeholder="Write your notes here…"></textarea>
+      <div class="cm-notes-actions">
+        <span class="cm-notes-count" id="cm-notes-count">0 chars</span>
+        <button class="cm-save-notes-btn" id="cm-save-notes-btn">Save Note</button>
+      </div>
+      <div class="cm-notes-list" id="cm-notes-list"></div>
+    </section>
+
+    <!-- AI Questions widget -->
+    <section class="cm-card" id="cm-questions-card">
+      <h2 class="cm-card-title">🧠 Practice Questions</h2>
+      <p class="cm-card-sub">Paste material and generate questions instantly.</p>
+      <textarea class="cm-notes-area" id="cm-q-material" placeholder="Paste text here…" style="height:100px;"></textarea>
+      <button class="cm-btn cm-btn-primary" id="cm-gen-q-btn" style="margin-top:10px;">✦ Generate</button>
+      <div id="cm-q-output" class="cm-q-output hidden"></div>
+    </section>
+
+    <!-- Progress widget -->
+    <section class="cm-card" id="cm-progress-card">
+      <h2 class="cm-card-title">📊 Session Progress</h2>
+      <div class="cm-progress-grid">
+        <div class="cm-prog-item">
+          <div class="cm-prog-num" id="prog-goal">—</div>
+          <div class="cm-prog-label">Goal</div>
+        </div>
+        <div class="cm-prog-item">
+          <div class="cm-prog-num" id="prog-elapsed">0:00</div>
+          <div class="cm-prog-label">Elapsed</div>
+        </div>
+        <div class="cm-prog-item">
+          <div class="cm-prog-num" id="prog-notes">0</div>
+          <div class="cm-prog-label">Notes</div>
+        </div>
+        <div class="cm-prog-item">
+          <div class="cm-prog-num" id="prog-tree">0/5</div>
+          <div class="cm-prog-label">Tree</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Study Tree Widget -->
+<div class="st-widget" id="study-tree-widget" data-mode="custom" aria-label="Study tree — session progress">
+  <button class="st-pill" id="st-toggle" aria-expanded="false" aria-controls="st-panel">
+    <canvas class="st-pill-mini" id="st-mini-canvas" width="36" height="36"></canvas>
+    <span class="st-pill-label"><span id="st-pill-sessions">0</span>/<span id="st-pill-max">5</span> &middot; <span id="st-pill-subject">Study</span> Tree</span>
+    <span class="st-pill-chevron">▲</span>
+  </button>
+  <div class="st-panel" id="st-panel" hidden>
+    <div class="st-panel-header">
+      <span class="st-panel-title" id="st-panel-subject">Study Tree</span>
+      <span class="st-panel-stage" id="st-stage-label">Seedling</span>
+    </div>
+    <canvas class="st-canvas" id="st-main-canvas" width="220" height="200"></canvas>
+    <div class="st-pips" aria-label="Session stages">
+    </div>
+    <p class="st-message" id="st-message">Start a session to grow your tree.</p>
+    <div class="st-tree-fact hidden" id="st-tree-fact">
+      <span class="st-species-name" id="st-species-name"></span>
+      <p class="st-species-fact" id="st-species-fact"></p>
+    </div>
+    <canvas class="st-burst-canvas" id="st-burst-canvas" width="220" height="200" aria-hidden="true"></canvas>
+  </div>
+</div>
+
+<!-- Tree growth overlay -->
+<div class="tree-growth-overlay hidden" id="tree-growth-overlay">
+  <div class="tree-growth-box">
+    <p class="tree-growth-eyebrow">Session Complete</p>
+    <h3 class="tree-growth-title" id="tg-title">Your tree is growing!</h3>
+    <canvas id="tg-canvas" width="220" height="220" class="tree-growth-canvas"></canvas>
+    <p class="tree-growth-stage" id="tg-stage"></p>
+    <p class="tree-growth-fact" id="tg-fact"></p>
+    <div class="tree-growth-progress">
+      <div class="tree-growth-pip" data-s="1"></div>
+      <div class="tree-growth-pip" data-s="2"></div>
+      <div class="tree-growth-pip" data-s="3"></div>
+      <div class="tree-growth-pip" data-s="4"></div>
+      <div class="tree-growth-pip" data-s="5"></div>
+    </div>
+    <button class="dm-btn dm-btn-primary" id="tg-continue-btn">Continue →</button>
+  </div>
+</div>
+
+<script src="{% static 'js/tree_widget.js' %}?v=9" defer></script>
+<script src="{% static 'js/custom_mode.js' %}?v=2" defer></script>
+{% endblock %}

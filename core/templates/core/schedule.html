@@ -1,0 +1,470 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Schedule — StudySync{% endblock %}
+{% block body_class %}schedule-page{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --soil:   #0E0A05;
+  --bark:   #1A1209;
+  --moss:   #1E2E1C;
+  --canopy: #2E4A2C;
+  --leaf:   #4E7A34;
+  --sprout: #7DB54A;
+  --lime:   #A8D870;
+  --amber:  #C9952A;
+  --cream:  #F6EDD8;
+  --fog:    #9A8870;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body.schedule-page {
+  background:
+    radial-gradient(ellipse 120% 70% at 50% -5%, rgba(46,80,38,0.55) 0%, transparent 55%),
+    linear-gradient(180deg, #070E06 0%, #050A04 60%, #040805 100%);
+  color: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+.sch-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 60px;
+  background: rgba(7,14,6,0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(78,122,52,0.1);
+}
+.sch-nav-left { display: flex; align-items: center; gap: 18px; }
+.sch-nav-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 999px;
+  background: rgba(78,122,52,0.1); border: 1px solid rgba(78,122,52,0.2);
+  color: var(--sprout); font-size: 13px; font-weight: 600;
+  text-decoration: none; transition: background .18s, border-color .18s;
+}
+.sch-nav-back:hover { background: rgba(78,122,52,0.2); border-color: rgba(125,181,74,0.4); }
+.sch-nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 800; font-style: italic;
+  color: var(--cream); text-decoration: none; letter-spacing: -.02em;
+}
+.sch-nav-logo span { color: var(--sprout); font-style: normal; }
+
+/* ── PAGE ── */
+.sch-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 96px 24px 120px;
+}
+
+.sch-header { margin-bottom: 40px; }
+.sch-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--sprout); margin-bottom: 12px; opacity: 0.85;
+}
+.sch-eyebrow::before { content: ''; display: block; width: 24px; height: 2px; background: var(--sprout); border-radius: 2px; }
+.sch-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 800; line-height: 1.05;
+  color: var(--cream); margin-bottom: 10px;
+}
+.sch-title em { font-style: italic; color: var(--sprout); }
+.sch-sub { font-size: 15px; color: var(--fog); line-height: 1.7; }
+
+.sch-actions { display: flex; gap: 10px; align-items: center; margin-top: 24px; flex-wrap: wrap; }
+.sch-notif-btn {
+  padding: 9px 18px; background: rgba(78,122,52,0.12);
+  border: 1px solid rgba(78,122,52,0.35); border-radius: 999px;
+  color: var(--sprout); font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: background .2s;
+}
+.sch-notif-btn:hover { background: rgba(78,122,52,0.25); }
+.sch-notif-btn.enabled { color: #A8D870; border-color: #A8D870; }
+.sch-clear-btn {
+  padding: 9px 16px; background: transparent;
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 999px;
+  color: var(--fog); font-size: 13px; cursor: pointer; transition: color .2s;
+}
+.sch-clear-btn:hover { color: var(--cream); }
+
+/* ── GRID ── */
+.planner-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+.planner-day {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px; overflow: hidden; min-height: 180px;
+  transition: border-color .2s;
+}
+.planner-day:hover { border-color: rgba(255,255,255,0.12); }
+.planner-day.today {
+  border-color: rgba(125,181,74,0.4);
+  background: rgba(78,122,52,0.07);
+}
+.planner-day-header {
+  padding: 12px 12px 9px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.planner-day-name {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--fog); margin-bottom: 2px;
+}
+.planner-day.today .planner-day-name { color: var(--sprout); }
+.planner-day-date {
+  font-size: 22px; font-weight: 800; color: var(--cream);
+  line-height: 1.1; font-family: 'Playfair Display', serif;
+}
+.planner-day.today .planner-day-date { color: var(--sprout); }
+
+.planner-blocks { padding: 7px; display: flex; flex-direction: column; gap: 5px; }
+.planner-block {
+  border-radius: 8px; padding: 6px 10px; font-size: 11px; font-weight: 600;
+  color: #fff; line-height: 1.3; cursor: default;
+  display: flex; flex-direction: column; gap: 2px; position: relative;
+}
+.planner-block-del {
+  position: absolute; top: 4px; right: 5px; font-size: 10px; opacity: 0;
+  cursor: pointer; color: rgba(255,255,255,0.85); background: rgba(0,0,0,0.35);
+  border-radius: 3px; padding: 1px 4px; border: none; transition: opacity .15s;
+}
+.planner-block:hover .planner-block-del { opacity: 1; }
+.planner-block-time { font-size: 10px; opacity: .7; }
+.planner-add-btn {
+  display: flex; align-items: center; justify-content: center;
+  margin: 7px; padding: 8px;
+  border: 1.5px dashed rgba(255,255,255,0.1); border-radius: 8px;
+  background: transparent; color: rgba(255,255,255,0.18); font-size: 18px;
+  cursor: pointer; transition: border-color .2s, color .2s; width: calc(100% - 14px);
+}
+.planner-add-btn:hover { border-color: rgba(125,181,74,0.45); color: var(--sprout); }
+
+/* ── ADD MODAL ── */
+.planner-add-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px); z-index: 1200;
+  display: flex; align-items: center; justify-content: center;
+}
+.planner-add-modal.hidden { display: none; }
+.planner-add-box {
+  background: #141A10; border: 1.5px solid rgba(78,122,52,0.35);
+  border-radius: 22px; padding: 30px 28px 26px;
+  width: 360px; max-width: calc(100vw - 40px);
+}
+.planner-add-box::before {
+  content: ''; display: block; height: 2px; margin: -30px -28px 24px;
+  border-radius: 22px 22px 0 0;
+  background: linear-gradient(90deg, var(--leaf), var(--sprout));
+}
+.planner-add-title {
+  font-family: 'Playfair Display', serif; font-size: 18px;
+  font-weight: 700; color: var(--cream); margin-bottom: 20px;
+}
+.planner-add-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.planner-add-field label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--fog);
+}
+.planner-add-field input,
+.planner-add-field select {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 13px; color: var(--cream); font-size: 14px; outline: none;
+  font-family: 'DM Sans', sans-serif;
+}
+.planner-add-field input:focus,
+.planner-add-field select:focus { border-color: rgba(125,181,74,0.5); }
+.planner-add-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.planner-add-colors { margin-bottom: 20px; }
+.planner-add-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--fog); display: block; margin-bottom: 10px;
+}
+.planner-color-swatches { display: flex; gap: 9px; }
+.planner-swatch {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 3px solid transparent; cursor: pointer;
+  transition: transform .15s, border-color .15s;
+}
+.planner-swatch.active { border-color: #fff; transform: scale(1.18); }
+.planner-add-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px; }
+.planner-cancel-btn {
+  padding: 10px 18px; background: transparent;
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+  color: var(--fog); cursor: pointer; font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+}
+.planner-save-btn {
+  padding: 10px 22px; background: var(--sprout); border: none;
+  border-radius: 10px; color: var(--soil); font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: background .2s; font-family: 'DM Sans', sans-serif;
+}
+.planner-save-btn:hover { background: var(--lime); }
+
+@media (max-width: 700px) {
+  .sch-nav { padding: 0 16px; }
+  .planner-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 440px) {
+  .planner-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- NAV -->
+<nav class="sch-nav">
+  <div class="sch-nav-left">
+    <a href="/" class="sch-nav-back">← Home</a>
+    <a href="/" class="sch-nav-logo"><span>Study</span>Sync</a>
+  </div>
+</nav>
+
+<!-- PAGE BODY -->
+<div class="sch-page">
+
+  <header class="sch-header">
+    <div class="sch-eyebrow">Weekly Schedule</div>
+    <h1 class="sch-title">Plan your week.<br><em>Study smarter.</em></h1>
+    <p class="sch-sub">Click any day to add a study session. Get browser notifications 10 minutes before each block.</p>
+    <div class="sch-actions">
+      <button class="sch-notif-btn" id="planner-notif-btn">🔔 Enable Notifications</button>
+      <button class="sch-clear-btn" id="planner-clear-btn">Clear All</button>
+    </div>
+  </header>
+
+  <!-- Day grid -->
+  <div class="planner-grid" id="planner-grid"></div>
+
+  <!-- Add session modal -->
+  <div class="planner-add-modal hidden" id="planner-add-modal">
+    <div class="planner-add-box">
+      <h3 class="planner-add-title" id="planner-add-title">Add session</h3>
+      <div class="planner-add-field">
+        <label>Subject</label>
+        <input id="planner-subj" type="text" placeholder="e.g. Maths, Biology…" autocomplete="off"/>
+      </div>
+      <div class="planner-add-row">
+        <div class="planner-add-field">
+          <label>Start time</label>
+          <input id="planner-time" type="time" value="09:00"/>
+        </div>
+        <div class="planner-add-field">
+          <label>Duration</label>
+          <select id="planner-dur">
+            <option value="30">30 min</option>
+            <option value="45">45 min</option>
+            <option value="60" selected>1 hr</option>
+            <option value="90">1.5 hr</option>
+            <option value="120">2 hr</option>
+          </select>
+        </div>
+      </div>
+      <div class="planner-add-colors">
+        <span class="planner-add-label">Colour</span>
+        <div class="planner-color-swatches" id="planner-color-swatches">
+          <button class="planner-swatch active" data-color="#4E7A34" style="background:#4E7A34"></button>
+          <button class="planner-swatch" data-color="#E4B84A" style="background:#E4B84A"></button>
+          <button class="planner-swatch" data-color="#5B7FD4" style="background:#5B7FD4"></button>
+          <button class="planner-swatch" data-color="#C05080" style="background:#C05080"></button>
+          <button class="planner-swatch" data-color="#E07840" style="background:#E07840"></button>
+        </div>
+      </div>
+      <div class="planner-add-btns">
+        <button class="planner-cancel-btn" id="planner-cancel-btn">Cancel</button>
+        <button class="planner-save-btn" id="planner-save-btn">Add Session</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  'use strict';
+
+  const PLANNER_KEY = 'studySyncPlanner';
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const now = new Date();
+  const todayIdx = now.getDay();
+
+  let addingDay = null;
+  let selectedColor = '#4E7A34';
+  let planner = JSON.parse(localStorage.getItem(PLANNER_KEY) || '{}');
+
+  function savePlanner() { localStorage.setItem(PLANNER_KEY, JSON.stringify(planner)); }
+
+  function escHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])
+    );
+  }
+
+  function formatTime(t) {
+    if (!t) return '';
+    const [h, m] = t.split(':');
+    const hh = parseInt(h, 10);
+    return (hh % 12 || 12) + ':' + m + (hh < 12 ? ' AM' : ' PM');
+  }
+
+  function getWeekDates() {
+    const dates = [];
+    const start = new Date(now);
+    start.setDate(now.getDate() - todayIdx);
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      dates.push(d);
+    }
+    return dates;
+  }
+
+  function renderPlanner() {
+    const grid = document.getElementById('planner-grid');
+    grid.innerHTML = '';
+    getWeekDates().forEach((date, i) => {
+      const dayKey = DAYS[i];
+      const blocks = planner[dayKey] || [];
+      const isToday = date.toDateString() === now.toDateString();
+
+      const col = document.createElement('div');
+      col.className = 'planner-day' + (isToday ? ' today' : '');
+
+      const hdr = document.createElement('div');
+      hdr.className = 'planner-day-header';
+      hdr.innerHTML = `<div class="planner-day-name">${dayKey}</div><div class="planner-day-date">${date.getDate()}</div>`;
+      col.appendChild(hdr);
+
+      const blocksEl = document.createElement('div');
+      blocksEl.className = 'planner-blocks';
+      blocks.forEach((b, bi) => {
+        const blk = document.createElement('div');
+        blk.className = 'planner-block';
+        blk.style.background = b.color || '#4E7A34';
+        blk.innerHTML = `
+          <span>${escHtml(b.subject)}</span>
+          <span class="planner-block-time">${formatTime(b.time)} · ${b.dur} min</span>
+          <button class="planner-block-del" data-day="${dayKey}" data-idx="${bi}" title="Remove">✕</button>`;
+        blk.querySelector('.planner-block-del').addEventListener('click', e => {
+          const d = e.currentTarget.dataset.day;
+          const idx = parseInt(e.currentTarget.dataset.idx, 10);
+          planner[d].splice(idx, 1);
+          savePlanner(); renderPlanner();
+        });
+        blocksEl.appendChild(blk);
+      });
+      col.appendChild(blocksEl);
+
+      const addBtn = document.createElement('button');
+      addBtn.className = 'planner-add-btn';
+      addBtn.title = 'Add session on ' + dayKey;
+      addBtn.textContent = '+';
+      addBtn.addEventListener('click', () => openAddModal(dayKey));
+      col.appendChild(addBtn);
+
+      grid.appendChild(col);
+    });
+  }
+
+  function openAddModal(dayKey) {
+    addingDay = dayKey;
+    document.getElementById('planner-add-title').textContent = 'Add session — ' + dayKey;
+    document.getElementById('planner-subj').value = '';
+    document.getElementById('planner-time').value = '09:00';
+    document.getElementById('planner-dur').value = '60';
+    selectedColor = '#4E7A34';
+    document.querySelectorAll('.planner-swatch').forEach(s =>
+      s.classList.toggle('active', s.dataset.color === selectedColor)
+    );
+    document.getElementById('planner-add-modal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('planner-subj').focus(), 50);
+  }
+
+  document.getElementById('planner-cancel-btn').addEventListener('click', () => {
+    document.getElementById('planner-add-modal').classList.add('hidden');
+  });
+
+  document.getElementById('planner-save-btn').addEventListener('click', () => {
+    const subj = document.getElementById('planner-subj').value.trim();
+    if (!subj) { document.getElementById('planner-subj').focus(); return; }
+    const time = document.getElementById('planner-time').value;
+    const dur  = parseInt(document.getElementById('planner-dur').value, 10);
+    if (!planner[addingDay]) planner[addingDay] = [];
+    planner[addingDay].push({ subject: subj, time, dur, color: selectedColor, id: Date.now() });
+    planner[addingDay].sort((a, b) => a.time.localeCompare(b.time));
+    savePlanner(); renderPlanner();
+    document.getElementById('planner-add-modal').classList.add('hidden');
+  });
+
+  document.querySelectorAll('.planner-swatch').forEach(sw => {
+    sw.addEventListener('click', () => {
+      selectedColor = sw.dataset.color;
+      document.querySelectorAll('.planner-swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+    });
+  });
+
+  document.getElementById('planner-clear-btn').addEventListener('click', () => {
+    if (confirm('Clear all sessions this week?')) {
+      planner = {}; savePlanner(); renderPlanner();
+    }
+  });
+
+  // Notifications
+  const notifBtn = document.getElementById('planner-notif-btn');
+  function updateNotifBtn() {
+    const granted = Notification.permission === 'granted';
+    notifBtn.classList.toggle('enabled', granted);
+    notifBtn.textContent = granted ? '🔔 Notifications On' : '🔔 Enable Notifications';
+  }
+  updateNotifBtn();
+  notifBtn.addEventListener('click', () => {
+    if (Notification.permission === 'granted') return;
+    Notification.requestPermission().then(() => updateNotifBtn());
+  });
+
+  const notified = new Set(JSON.parse(sessionStorage.getItem('plannedNotified') || '[]'));
+  function checkNotifications() {
+    if (Notification.permission !== 'granted') return;
+    const n = new Date();
+    const dayKey = DAYS[n.getDay()];
+    (planner[dayKey] || []).forEach(b => {
+      const [h, m] = b.time.split(':').map(Number);
+      const blockTime = new Date(n); blockTime.setHours(h, m, 0, 0);
+      const diff = blockTime - n;
+      const key = dayKey + '_' + b.time + '_' + b.subject;
+      if (diff > 0 && diff <= 10 * 60 * 1000 && !notified.has(key)) {
+        notified.add(key);
+        sessionStorage.setItem('plannedNotified', JSON.stringify([...notified]));
+        new Notification('📚 Upcoming session', {
+          body: `${b.subject} starts in ${Math.ceil(diff / 60000)} min — time to prepare!`,
+          icon: '/static/images/favicon.ico',
+        });
+      }
+    });
+  }
+  checkNotifications();
+  setInterval(checkNotifications, 60000);
+
+  renderPlanner();
+})();
+</script>
+{% endblock %}

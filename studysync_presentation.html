@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StudySync — Presentation Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green:  #3A6828;
+    --sprout: #5A8C38;
+    --lime:   #82B840;
+    --cream:  #F5EDD8;
+    --bark:   #1A1209;
+    --fog:    #7A6858;
+    --violet: #5B35AF;
+    --cyan:   #2AAFD4;
+    --ink:    #1A1A2E;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #fff;
+    color: #1A1A1A;
+    font-size: 11pt;
+    line-height: 1.7;
+  }
+
+  /* ── COVER PAGE ── */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #060E05 0%, #0A1808 50%, #05080A 100%);
+    color: #fff;
+    text-align: center;
+    padding: 60px 40px;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(46,90,38,0.55) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 10% 90%, rgba(30,60,28,0.4) 0%, transparent 55%);
+  }
+  .cover-inner { position: relative; z-index: 1; }
+  .cover-badge {
+    display: inline-block;
+    padding: 5px 18px;
+    border: 1px solid rgba(90,140,56,0.5);
+    border-radius: 999px;
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #82B840;
+    margin-bottom: 28px;
+    background: rgba(90,140,56,0.08);
+  }
+  .cover h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 52pt;
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: #F5EDD8;
+    margin-bottom: 16px;
+  }
+  .cover h1 em {
+    font-style: italic;
+    background: linear-gradient(100deg, #5A8C38, #82B840, #C9952A);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+  }
+  .cover-sub {
+    font-size: 14pt;
+    color: rgba(245,237,216,0.65);
+    max-width: 520px;
+    margin: 0 auto 52px;
+    line-height: 1.7;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 36px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .cover-meta-item { text-align: center; }
+  .cover-meta-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 28pt;
+    font-weight: 800;
+    color: #5A8C38;
+    display: block;
+  }
+  .cover-meta-label {
+    font-size: 9pt;
+    color: rgba(245,237,216,0.5);
+    letter-spacing: .06em;
+  }
+  .cover-divider { width: 1px; height: 44px; background: rgba(255,255,255,0.1); }
+
+  /* ── CONTENT ── */
+  .content {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 56px 48px;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 52px 0 24px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #E8E0D4;
+  }
+  .section-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 11pt;
+    font-weight: 800;
+    color: #5A8C38;
+    background: rgba(90,140,56,0.08);
+    border: 1px solid rgba(90,140,56,0.22);
+    border-radius: 6px;
+    padding: 2px 10px;
+    white-space: nowrap;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18pt;
+    font-weight: 700;
+    color: #1A1A1A;
+  }
+
+  /* ── SUBSECTIONS ── */
+  h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 13pt;
+    font-weight: 700;
+    color: #1A1A1A;
+    margin: 28px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h3::before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 16px;
+    background: linear-gradient(180deg, #5A8C38, #82B840);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  p { margin-bottom: 10px; }
+
+  /* ── FEATURE TAGS ── */
+  .tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 8.5pt;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-right: 5px;
+    margin-bottom: 5px;
+  }
+  .tag-green  { background: rgba(90,140,56,0.12);  color: #3A6828;  border: 1px solid rgba(90,140,56,0.25); }
+  .tag-violet { background: rgba(91,53,175,0.10);  color: #5B35AF;  border: 1px solid rgba(91,53,175,0.22); }
+  .tag-amber  { background: rgba(201,149,42,0.12); color: #8A6010;  border: 1px solid rgba(201,149,42,0.25); }
+  .tag-cyan   { background: rgba(42,175,212,0.10); color: #1A7A9A;  border: 1px solid rgba(42,175,212,0.22); }
+
+  /* ── TABLES ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 24px;
+    font-size: 10.5pt;
+  }
+  th {
+    background: #F0EAE0;
+    color: #3A3020;
+    font-weight: 700;
+    font-size: 9pt;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid #DDD4C4;
+  }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #EDE8E0;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-weight: 600; color: #3A3020; white-space: nowrap; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 18px 0;
+    display: flex;
+    gap: 14px;
+  }
+  .callout-green  { background: rgba(90,140,56,0.07);  border-left: 3px solid #5A8C38; }
+  .callout-violet { background: rgba(91,53,175,0.06);  border-left: 3px solid #7C5CBF; }
+  .callout-amber  { background: rgba(201,149,42,0.07); border-left: 3px solid #C9952A; }
+  .callout-icon { font-size: 16pt; flex-shrink: 0; }
+  .callout-body { flex: 1; }
+  .callout-title { font-weight: 700; font-size: 10.5pt; margin-bottom: 4px; }
+  .callout-green  .callout-title { color: #3A6828; }
+  .callout-violet .callout-title { color: #5B35AF; }
+  .callout-amber  .callout-title { color: #8A6010; }
+  .callout-text { font-size: 10pt; line-height: 1.65; color: #3A3020; }
+
+  /* ── Q&A CARDS ── */
+  .qa-grid {
+    display: grid;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .qa-card {
+    border: 1px solid #DDD4C4;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .qa-q {
+    background: #F5EDD8;
+    padding: 11px 16px;
+    font-weight: 700;
+    font-size: 10.5pt;
+    color: #3A3020;
+    border-bottom: 1px solid #DDD4C4;
+  }
+  .qa-q::before { content: 'Q  '; color: #5A8C38; font-family: 'Playfair Display', serif; }
+  .qa-a {
+    padding: 12px 16px;
+    font-size: 10pt;
+    line-height: 1.7;
+    color: #2A2A2A;
+  }
+  .qa-a::before { content: 'A  '; color: #5B35AF; font-weight: 700; font-family: 'Playfair Display', serif; }
+
+  /* ── FEATURE LIST ── */
+  .feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 18px;
+  }
+  .feature-list li {
+    padding: 6px 0 6px 22px;
+    position: relative;
+    font-size: 10.5pt;
+    border-bottom: 1px solid #F0EAE0;
+    color: #2A2A2A;
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: #5A8C38;
+    font-size: 9pt;
+    top: 8px;
+  }
+
+  /* ── MODE CARDS ── */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 18px 0;
+  }
+  .mode-card {
+    border-radius: 10px;
+    padding: 18px 16px;
+    border: 1.5px solid;
+  }
+  .mode-card-daily  { border-color: rgba(90,140,56,0.35);  background: rgba(90,140,56,0.05); }
+  .mode-card-exam   { border-color: rgba(91,53,175,0.30);  background: rgba(91,53,175,0.04); }
+  .mode-card-custom { border-color: rgba(201,149,42,0.32); background: rgba(201,149,42,0.05); }
+  .mode-icon { font-size: 20pt; margin-bottom: 8px; display: block; }
+  .mode-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 11.5pt;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .mode-card-daily  .mode-name { color: #3A6828; }
+  .mode-card-exam   .mode-name { color: #5B35AF; }
+  .mode-card-custom .mode-name { color: #8A6010; }
+  .mode-desc { font-size: 9.5pt; color: #5A5040; line-height: 1.55; }
+
+  /* ── API ENDPOINT TABLE ── */
+  .endpoint { font-family: monospace; font-size: 9.5pt; background: #F5F0E8; padding: 1px 6px; border-radius: 4px; color: #3A2808; }
+
+  /* ── PAGE BREAKS ── */
+  .page-break { page-break-before: always; }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 60px;
+    padding: 24px 0;
+    border-top: 1px solid #DDD4C4;
+    text-align: center;
+    font-size: 9pt;
+    color: #9A8878;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    body { font-size: 10pt; }
+    .cover { min-height: 100vh; }
+    .content { padding: 40px 36px; }
+    .section-header { margin-top: 36px; }
+    h3 { margin-top: 20px; }
+    .mode-grid { grid-template-columns: 1fr 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ COVER ══════════════ -->
+<div class="cover">
+  <div class="cover-inner">
+    <div class="cover-badge">Project Presentation</div>
+    <h1>StudySync<em>Grow your mind.</em></h1>
+    <p class="cover-sub">
+      A personalised, AI-powered study platform built for students who want
+      structure, focus, and motivation in one place.
+    </p>
+    <div class="cover-meta">
+      <div class="cover-meta-item">
+        <span class="cover-meta-num">3</span>
+        <span class="cover-meta-label">Study Modes</span>
+      </div>
+      <div class="cover-divider"></div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-num">5</span>
+        <span class="cover-meta-label">AI Endpoints</span>
+      </div>
+      <div class="cover-divider"></div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-num">7</span>
+        <span class="cover-meta-label">Pages</span>
+      </div>
+      <div class="cover-divider"></div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-num">∞</span>
+        <span class="cover-meta-label">Sessions</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CONTENT ══════════════ -->
+<div class="content">
+
+  <!-- 1. WHAT IS STUDYSYNC -->
+  <div class="section-header">
+    <span class="section-number">01</span>
+    <span class="section-title">What is StudySync?</span>
+  </div>
+
+  <p>StudySync is a <strong>personalised study platform</strong> built for students who want structure, focus, and motivation all in one place. Instead of juggling separate apps for notes, timers, flashcards, schedules, and music, StudySync unifies everything into one coherent environment — with three distinct study modes, each with its own visual identity and purpose.</p>
+
+  <div class="callout callout-green">
+    <span class="callout-icon">🌱</span>
+    <div class="callout-body">
+      <div class="callout-title">Core Concept</div>
+      <p class="callout-text">Studying should feel like growth. The metaphor throughout the app is a living forest — trees grow as you complete sessions, leaves fall in the background, and your progress has a visual life to it.</p>
+    </div>
+  </div>
+
+  <div class="mode-grid">
+    <div class="mode-card mode-card-daily">
+      <span class="mode-icon">🌱</span>
+      <div class="mode-name">Daily Mode</div>
+      <p class="mode-desc">Steady growth through consistent daily habits. Resources, notes, AI coach, and a living forest background.</p>
+    </div>
+    <div class="mode-card mode-card-exam">
+      <span class="mode-icon">🌌</span>
+      <div class="mode-name">Exam Mode</div>
+      <p class="mode-desc">Night sky cosmic theme. Hero timer ring, exam countdown, AI flashcards and practice questions.</p>
+    </div>
+    <div class="mode-card mode-card-custom">
+      <span class="mode-icon">🍂</span>
+      <div class="mode-name">Custom Mode</div>
+      <p class="mode-desc">Full control over time blocks, goals, and session structure. Adapts to any study style.</p>
+    </div>
+  </div>
+
+
+  <!-- 2. TECH STACK -->
+  <div class="section-header">
+    <span class="section-number">02</span>
+    <span class="section-title">Tech Stack</span>
+  </div>
+
+  <table>
+    <tr><th>Layer</th><th>Technology</th><th>Why</th></tr>
+    <tr><td>Backend</td><td>Django 5.x (Python)</td><td>Clean routing, built-in auth, calls Groq SDK directly</td></tr>
+    <tr><td>AI</td><td>Groq AI API (<code>llama-3.3-70b-versatile</code>)</td><td>Free tier, fast, handles long study text well</td></tr>
+    <tr><td>Frontend</td><td>Vanilla JavaScript, HTML5, CSS3</td><td>No build step, fast load, easy to maintain</td></tr>
+    <tr><td>PDF Parsing</td><td>PDF.js 4.4 + Mammoth (DOCX)</td><td>Runs entirely in the browser — no file upload to server</td></tr>
+    <tr><td>Music</td><td>iTunes Search API + YouTube Data API</td><td>iTunes is free with no key; YouTube for video results</td></tr>
+    <tr><td>Storage</td><td>localStorage + IndexedDB</td><td>Privacy-first — user data never leaves the browser</td></tr>
+    <tr><td>Fonts</td><td>Playfair Display + DM Sans (Google Fonts)</td><td>Playfair for editorial headings, DM Sans for UI clarity</td></tr>
+    <tr><td>Auth</td><td>Django built-in authentication</td><td>Secure, battle-tested, no third-party dependency</td></tr>
+  </table>
+
+  <div class="callout callout-amber">
+    <span class="callout-icon">💡</span>
+    <div class="callout-body">
+      <div class="callout-title">Why no React or Vue?</div>
+      <p class="callout-text">StudySync is page-based with full navigations between modes. Vanilla JS keeps it fast to load, simple to deploy, and readable without needing a build pipeline or package manager on the front end.</p>
+    </div>
+  </div>
+
+
+  <!-- 3. PAGES & FEATURES -->
+  <div class="section-header page-break">
+    <span class="section-number">03</span>
+    <span class="section-title">Pages &amp; Features</span>
+  </div>
+
+  <h3>Home Page <span style="font-size:9pt;color:#7A6858;font-family:'DM Sans',sans-serif;font-weight:400;">/</span></h3>
+  <span class="tag tag-green">Onboarding</span>
+  <span class="tag tag-green">Session Planner</span>
+  <span class="tag tag-green">Active Session Widget</span>
+
+  <p>The landing page and launchpad. First-time visitors see an <strong>onboarding modal</strong> that captures their grade (6–12) and subjects. This profile is saved in localStorage and pre-fills the session planner going forward.</p>
+  <p>Three <strong>mode cards</strong> animate on hover to reveal feature lists. Clicking a card opens an inline <strong>session planner</strong> asking: subject, topic, hours available, deadline in days, and session goal. This creates a "plan" object passed into whichever mode is launched.</p>
+  <p>An <strong>Active Session Widget</strong> floats bottom-left on the home page — if a session was left running on another tab, it shows the live countdown and a "Back to Session" button. The profile avatar dropdown (top-right) shows grade, subjects, streak count, and links to Forest and Stats.</p>
+
+  <h3>Daily Mode <span style="font-size:9pt;color:#7A6858;font-family:'DM Sans',sans-serif;font-weight:400;">/daily/</span></h3>
+  <span class="tag tag-green">Timer</span>
+  <span class="tag tag-green">Resources</span>
+  <span class="tag tag-green">PDF Viewer</span>
+  <span class="tag tag-green">AI Coach</span>
+  <span class="tag tag-green">Study Tree</span>
+
+  <p><strong>Visual Theme:</strong> Deep forest — three layers of SVG tree silhouettes (far pine, mid oak, near oak), animated floating leaf emojis, atmospheric green radial glows, and a ground mist layer. Everything feels like studying inside a forest at dusk.</p>
+
+  <p><strong>Two-column layout:</strong> Left sidebar holds the SVG ring timer, a session goal input, and a vertical 5-node timeline. Right main area holds the Resources panel.</p>
+
+  <ul class="feature-list">
+    <li><strong>Pomodoro timer</strong> — Up to 5 sessions. Each completed session advances the study tree by one growth stage. Auto-break triggers a "Watering your tree" overlay with animated water drops.</li>
+    <li><strong>Session complete overlay</strong> — Shows the tree at its current stage with a species fact. The streak counter increments and saves.</li>
+    <li><strong>Resources panel</strong> — Save links (URL + title + subject + chapter) or upload PDFs/DOCX files stored in IndexedDB. Filter by subject, search by keyword.</li>
+    <li><strong>In-app PDF Viewer</strong> — Full-screen overlay with page navigation. Three side panel tabs: AI Summary, Chat with PDF, and Annotations (highlights + bookmarks, all stored in IndexedDB).</li>
+    <li><strong>Dictionary lookup</strong> — Select any word → "Define" tooltip appears → click for definition, phonetics, and audio pronunciation from the free Dictionary API.</li>
+    <li><strong>AI Study Coach</strong> — Slide-in chat sidebar. Groq AI has your notes and subject as context. Quick chips: "Quiz me", "What should I focus on". Markdown + LaTeX math rendered in output.</li>
+    <li><strong>Study Tree Widget</strong> — Floating bottom-right pill. Canvas-drawn tree grows through 5 stages. Tree species changes by subject (Maths = Austrian Pine, History = Ancient Olive, Literature = Cherry Blossom, Science = Giant Sequoia). Particle burst fires on completing all 5 sessions.</li>
+  </ul>
+
+  <h3>Exam Mode <span style="font-size:9pt;color:#7A6858;font-family:'DM Sans',sans-serif;font-weight:400;">/exam/</span></h3>
+  <span class="tag tag-violet">Cosmic Theme</span>
+  <span class="tag tag-violet">Pomodoro Timer</span>
+  <span class="tag tag-violet">Flashcards</span>
+  <span class="tag tag-violet">Practice Questions</span>
+  <span class="tag tag-violet">Exam Countdown</span>
+
+  <p><strong>Visual Theme:</strong> Night Sky / Cosmic — deep near-black navy background, violet and cyan radial glows, slow-drifting glowing particle animation, and a fixed cosmic navigation bar.</p>
+
+  <ul class="feature-list">
+    <li><strong>Hero ring timer</strong> — 220px SVG circle with a violet-to-cyan gradient stroke and glow. The <code>stroke-dashoffset</code> animates as time depletes. 4 Pomodoro cycles with progress pips below.</li>
+    <li><strong>Mission Clock strip</strong> — Set exam date + subject → shows days remaining as a compact horizontal card beneath the timer.</li>
+    <li><strong>Flashcard system</strong> — Add manually or generate from uploaded files via Groq AI (5–15 cards). Study mode flips cards with a 3D CSS perspective transform. "Guess It" mode shuffles cards, tracks correct/wrong, and shows a progress bar.</li>
+    <li><strong>Practice Questions</strong> — Upload any file → Groq AI generates up to 50 questions across: Multiple Choice (4 options), True/False, Short Answer, Fill in the Blank. Each question has an explanation from Groq AI on reveal.</li>
+  </ul>
+
+  <h3>Schedule <span style="font-size:9pt;color:#7A6858;font-family:'DM Sans',sans-serif;font-weight:400;">/schedule/</span></h3>
+  <span class="tag tag-green">Weekly Planner</span>
+  <span class="tag tag-green">Notifications</span>
+  <p>Standalone weekly planner page. A 7-column grid shows the current week with today highlighted. Add session blocks to any day (subject, time, duration, colour). Data persists in localStorage. Browser notifications fire 10 minutes before any planned session if permission is granted.</p>
+
+  <h3>Forest <span style="font-size:9pt;color:#7A6858;font-family:'DM Sans',sans-serif;font-weight:400;">/forest/</span></h3>
+  <p>A gallery of all trees grown across study sessions — a visual history of progress over time.</p>
+
+  <h3>Stats <span style="font-size:9pt;color:#7A6858;font-family:'DM Sans',sans-serif;font-weight:400;">/stats/</span></h3>
+  <p>Session statistics: sessions completed, flashcard accuracy, and a study activity heatmap.</p>
+
+  <h3>Custom Mode <span style="font-size:9pt;color:#7A6858;font-family:'DM Sans',sans-serif;font-weight:400;">/custom/</span></h3>
+  <p>Fully flexible — the student defines their own time blocks, goals, and session structure. Adapts to any hours or deadline.</p>
+
+
+  <!-- 4. AI FEATURES -->
+  <div class="section-header page-break">
+    <span class="section-number">04</span>
+    <span class="section-title">AI Integration</span>
+  </div>
+
+  <p>All AI calls go through Django views so the API key stays on the server. The frontend never touches the key directly.</p>
+
+  <table>
+    <tr><th>Endpoint</th><th>What It Does</th></tr>
+    <tr><td><span class="endpoint">/api/generate-flashcards/</span></td><td>Reads uploaded study content, returns JSON array of <code>{front, back}</code> flashcard pairs (5–15 cards)</td></tr>
+    <tr><td><span class="endpoint">/api/generate-questions/</span></td><td>Generates MCQ, True/False, Short Answer, and Fill-in-Blank questions from study material</td></tr>
+    <tr><td><span class="endpoint">/api/study-coach/</span></td><td>Conversational AI with the student's notes as context — quiz mode, focus tips, concept explanations</td></tr>
+    <tr><td><span class="endpoint">/api/pdf-summary/</span></td><td>Returns structured JSON: summary paragraph, key concepts, definitions, keywords. Cached in localStorage after first call.</td></tr>
+    <tr><td><span class="endpoint">/api/pdf-chat/</span></td><td>Answers questions scoped exclusively to the current PDF's text — no hallucination beyond the document</td></tr>
+  </table>
+
+  <div class="callout callout-violet">
+    <span class="callout-icon">🛡️</span>
+    <div class="callout-body">
+      <div class="callout-title">Error Handling</div>
+      <p class="callout-text">Groq quota errors (HTTP 429) are distinguished: per-minute rate limits show "wait a few seconds and try again", while daily quota exhaustion shows "try again tomorrow or upgrade your Groq API plan." All non-AI features continue to work normally when the API is unavailable.</p>
+    </div>
+  </div>
+
+
+  <!-- 5. DATA STORAGE -->
+  <div class="section-header">
+    <span class="section-number">05</span>
+    <span class="section-title">Data Storage Architecture</span>
+  </div>
+
+  <p>No database is used for user study content. Only Django's auth system uses a database (for login). All study data is client-side:</p>
+
+  <table>
+    <tr><th>Store</th><th>What It Holds</th></tr>
+    <tr><td>localStorage</td><td>Session plans, timer state, user profile (grade/subjects), study streak, weekly planner blocks, PDF AI summary cache, onboarding status</td></tr>
+    <tr><td>IndexedDB</td><td>Binary PDF and DOCX files (can store megabytes per file), text highlights, annotation notes, bookmarks per PDF page</td></tr>
+  </table>
+
+  <div class="callout callout-green">
+    <span class="callout-icon">🔒</span>
+    <div class="callout-body">
+      <div class="callout-title">Privacy First</div>
+      <p class="callout-text">Student notes, PDFs, and plans never leave the browser. Only the text content sent to Groq AI endpoints travels over the network — and only when the student actively requests an AI action. The server never stores it.</p>
+    </div>
+  </div>
+
+
+  <!-- 6. DESIGN DECISIONS -->
+  <div class="section-header page-break">
+    <span class="section-number">06</span>
+    <span class="section-title">Design Decisions</span>
+  </div>
+
+  <h3>Visual Identity</h3>
+  <p>Two distinct visual worlds exist in the app — chosen deliberately to match emotional context:</p>
+  <table>
+    <tr><th>Mode</th><th>Theme</th><th>Palette</th><th>Why</th></tr>
+    <tr><td>Home + Daily</td><td>Forest</td><td>Deep greens, bark browns, cream, amber</td><td>Calm, growth-oriented, sustainable pace</td></tr>
+    <tr><td>Exam</td><td>Night Sky / Cosmic</td><td>Dark navy, violet, cyan</td><td>Focus, intensity, "mission control" urgency</td></tr>
+    <tr><td>Custom</td><td>Amber/Gold tones</td><td>Warm amber, dark brown</td><td>Warmth, flexibility, personal ownership</td></tr>
+  </table>
+
+  <h3>The Tree Metaphor</h3>
+  <p>Growth is the emotional core of studying. A tree growing visually over time gives students a reward that feels <em>earned</em> rather than gamified. The species tied to subjects (pine for maths via Fibonacci, olive for history as an ancient survivor) adds depth — each species has a real nature fact that appears in the widget, turning the reward into a moment of curiosity.</p>
+
+  <h3>Typography</h3>
+  <p><strong>Playfair Display</strong> (serif) is used for headings, timers, and key numbers — it gives weight and editorial quality to important information. <strong>DM Sans</strong> handles all body text and UI labels — clean, modern, and highly readable at small sizes.</p>
+
+
+  <!-- 7. Q&A -->
+  <div class="section-header">
+    <span class="section-number">07</span>
+    <span class="section-title">Anticipated Audience Questions</span>
+  </div>
+
+  <div class="qa-grid">
+
+    <div class="qa-card">
+      <div class="qa-q">Why three separate modes instead of one flexible interface?</div>
+      <div class="qa-a">Different study contexts need different environments. A student revising the night before an exam is in a completely different mindset to someone doing 30 minutes of daily reading. The modes reflect that emotionally — Exam Mode creates urgency with the cosmic countdown and dark palette; Daily Mode creates calm with the living forest. Forcing a student to configure a single flexible interface every session adds friction that kills habits.</div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q">How is the AI used responsibly — what does Groq actually see?</div>
+      <div class="qa-a">Groq only receives text content the student explicitly uploads or types. Nothing is stored on the server after the response is returned. The PDF chat endpoint is scoped to only the current document's extracted text — it cannot go beyond it. Flashcard and question generation are one-way read operations. No conversation history is saved server-side.</div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q">Why localStorage instead of saving data to a real database?</div>
+      <div class="qa-a">For a student-focused tool, privacy matters. Notes, plans, and PDFs never leave the browser, which is meaningful when you're storing personal study material, exam schedules, and progress. The tradeoff is no cross-device sync — which could be added as an opt-in feature later with Django models and user accounts, but was deliberately not included by default.</div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q">What happens if the Groq API quota runs out mid-session?</div>
+      <div class="qa-a">The app detects quota errors and shows a human-readable message distinguishing rate limits ("wait a few seconds") from daily exhaustion ("try again tomorrow"). All non-AI features — the timer, flashcard flipping, schedule, tree widget, PDF viewer, and study plan — continue working normally without any AI access.</div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q">Is the app mobile-responsive?</div>
+      <div class="qa-a">Yes. CSS breakpoints adjust layouts at 760px and 500px. Mode cards stack vertically, the weekly planner shifts to 3 columns, navigation elements resize, and fixed-position widgets (timer widget, music bar) adapt. The timer ring is SVG-based so it scales naturally.</div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q">Why no React, Next.js, or a modern JS framework?</div>
+      <div class="qa-a">StudySync has page-based navigation with full loads between modes, not a single-page app. Vanilla JS handles the interactivity well, removes a build step entirely, and keeps the codebase readable without framework knowledge. Django's templating handles server-side rendering. The result is fast first load times and no dependency on npm or Node.js to run the project.</div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q">What makes this different from apps like Notion, Forest, or Anki?</div>
+      <div class="qa-a">StudySync combines them into one context-aware environment. Notion gives you notes but no timer or AI. Forest grows trees but has no content. Anki has flashcards but no study environment. StudySync's key differentiator is the session plan as the connecting thread — one form at the start sets the subject, topic, goal, and hours, and every feature (timer, AI coach, flashcards, practice questions, tree species) responds to that plan contextually.</div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q">What would you build next if you had more time?</div>
+      <div class="qa-a">Spaced repetition algorithm for flashcards (currently random shuffle), cross-device sync by saving plans to the Django database as an opt-in, collaborative study rooms where two students share a timer and whiteboard, export of stats and session history as PDF, and a proper mobile app wrapper using a PWA manifest and service worker for offline AI caching.</div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q">How does the Study Tree species system work technically?</div>
+      <div class="qa-a">The tree widget reads the current subject string, lowercases it, and looks it up in a JS object mapping subjects to species. Each species has a type (conifer, gnarled, deciduous), bark colours, leaf colours, and a nature fact. The Canvas 2D drawing function then uses that data to render the correct tree shape and colour. The drawing is procedural — no images, just geometry and gradients — so it scales to any canvas size.</div>
+    </div>
+
+  </div>
+
+
+  <!-- FOOTER -->
+  <div class="footer">
+    StudySync &nbsp;·&nbsp; Built with Django 5, Groq AI, Vanilla JS &nbsp;·&nbsp; 2026
+  </div>
+
+</div>
+
+</body>
+</html>

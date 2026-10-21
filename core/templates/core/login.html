@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+{% block body_class %}login-page{% endblock %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+<nav class="top-navbar">
+    <div class="nav-left">
+        <a href="{% url 'home' %}" class="brand">StudySync</a>
+    </div>
+    <div class="nav-right">
+        <a href="{% url 'login' %}" class="nav-link">Login</a>
+        <a href="{% url 'signup' %}" class="nav-link">Sign Up</a>
+    </div>
+</nav>
+
+<div class="auth-container">
+    <h2>Login</h2>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username" required>
+
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required>
+
+        <button type="submit" class="auth-btn">Login</button>
+    </form>
+    <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+</div>
+
+{% endblock %}
+

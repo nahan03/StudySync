@@ -1,0 +1,224 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block body_class %}stats-page{% endblock %}
+{% block title %}Stats — StudySync{% endblock %}
+
+{% block extra_css %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--soil:#0E0A05;--bark:#1A1209;--moss:#1E2E1C;--canopy:#2E4A2C;--leaf:#4E7A34;--sprout:#7DB54A;--lime:#A8D870;--amber:#E4B84A;--cream:#F6EDD8;--fog:#9A8870;}
+body.stats-page{background:var(--soil);color:var(--cream);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+.stats-nav{display:flex;align-items:center;gap:16px;padding:20px 40px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.stats-nav-back{color:var(--fog);text-decoration:none;font-size:13px;display:flex;align-items:center;gap:6px;transition:color .2s;}
+.stats-nav-back:hover{color:var(--cream);}
+.stats-nav-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--cream);}
+
+.stats-wrap{max-width:960px;margin:0 auto;padding:40px;}
+.stats-hero{margin-bottom:40px;}
+.stats-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sprout);margin-bottom:10px;}
+.stats-heading{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,44px);font-weight:800;line-height:1.1;color:var(--cream);}
+
+/* top KPIs */
+.stats-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:36px;}
+.kpi-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px 22px;}
+.kpi-num{font-family:'Playfair Display',serif;font-size:36px;font-weight:800;color:var(--sprout);line-height:1;}
+.kpi-label{font-size:12px;color:var(--fog);margin-top:6px;text-transform:uppercase;letter-spacing:.06em;}
+
+/* sections */
+.stats-section{margin-bottom:36px;}
+.stats-section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--fog);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.stats-section-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.06);}
+
+/* heatmap */
+.heatmap-grid{display:flex;flex-direction:column;gap:4px;}
+.heatmap-row{display:flex;align-items:center;gap:6px;}
+.heatmap-label{font-size:11px;color:var(--fog);width:28px;text-align:right;flex-shrink:0;}
+.heatmap-cells{display:flex;gap:4px;}
+.hm-cell{width:18px;height:18px;border-radius:4px;background:rgba(78,122,52,0.1);border:1px solid rgba(78,122,52,0.1);transition:transform .1s;}
+.hm-cell:hover{transform:scale(1.2);}
+.hm-cell[data-level="1"]{background:rgba(78,122,52,0.3);border-color:rgba(78,122,52,0.3);}
+.hm-cell[data-level="2"]{background:rgba(125,181,74,0.5);border-color:rgba(125,181,74,0.4);}
+.hm-cell[data-level="3"]{background:#7DB54A;border-color:#7DB54A;}
+.hm-cell[data-level="4"]{background:#A8D870;border-color:#A8D870;}
+.heatmap-months{display:flex;gap:4px;padding-left:34px;margin-bottom:4px;}
+.heatmap-month{font-size:10px;color:var(--fog);}
+
+/* subject bars */
+.subject-bars{display:flex;flex-direction:column;gap:12px;}
+.subject-bar-row{display:flex;align-items:center;gap:12px;}
+.subject-bar-label{font-size:13px;color:var(--cream);width:100px;flex-shrink:0;text-transform:capitalize;}
+.subject-bar-track{flex:1;height:8px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden;}
+.subject-bar-fill{height:100%;background:linear-gradient(90deg,var(--leaf),var(--sprout));border-radius:999px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.subject-bar-val{font-size:12px;color:var(--fog);width:50px;text-align:right;flex-shrink:0;}
+
+/* accuracy */
+.accuracy-row{display:flex;gap:16px;flex-wrap:wrap;}
+.accuracy-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 20px;flex:1;min-width:140px;}
+.accuracy-pct{font-family:'Playfair Display',serif;font-size:28px;font-weight:800;line-height:1;}
+.accuracy-pct.green{color:var(--sprout);}
+.accuracy-pct.amber{color:var(--amber);}
+.accuracy-label{font-size:11px;color:var(--fog);margin-top:5px;text-transform:uppercase;letter-spacing:.06em;}
+
+/* empty */
+.stats-empty{text-align:center;padding:60px 20px;color:var(--fog);font-size:14px;}
+.stats-empty-icon{font-size:40px;margin-bottom:12px;}
+.stats-empty a{color:var(--sprout);text-decoration:none;}
+
+@media(max-width:700px){.stats-kpis{grid-template-columns:1fr 1fr}.stats-wrap{padding:24px 20px}}
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="stats-nav">
+  <a href="/" class="stats-nav-back">← Home</a>
+  <span class="stats-nav-title">📊 Your Stats</span>
+</nav>
+
+<div class="stats-wrap">
+  <div class="stats-hero">
+    <p class="stats-eyebrow">Progress Overview</p>
+    <h1 class="stats-heading">How you've been<br><em>growing.</em></h1>
+  </div>
+
+  <!-- KPIs -->
+  <div class="stats-kpis">
+    <div class="kpi-card"><div class="kpi-num" id="kpi-streak">—</div><div class="kpi-label">Day Streak 🔥</div></div>
+    <div class="kpi-card"><div class="kpi-num" id="kpi-sessions">—</div><div class="kpi-label">Total Sessions</div></div>
+    <div class="kpi-card"><div class="kpi-num" id="kpi-hours">—</div><div class="kpi-label">Hours Studied</div></div>
+    <div class="kpi-card"><div class="kpi-num" id="kpi-flashcards">—</div><div class="kpi-label">Flashcards</div></div>
+  </div>
+
+  <!-- Activity heatmap -->
+  <div class="stats-section">
+    <div class="stats-section-title">Activity — Last 12 Weeks</div>
+    <div id="heatmap-container"></div>
+  </div>
+
+  <!-- Subject breakdown -->
+  <div class="stats-section">
+    <div class="stats-section-title">Sessions by Subject</div>
+    <div class="subject-bars" id="subject-bars">
+      <div class="stats-empty"><div class="stats-empty-icon">🌱</div>Start a session to see subject breakdown.</div>
+    </div>
+  </div>
+
+  <!-- Accuracy -->
+  <div class="stats-section">
+    <div class="stats-section-title">Flashcard Accuracy</div>
+    <div class="accuracy-row" id="accuracy-row">
+      <div class="stats-empty"><div class="stats-empty-icon">🎯</div>Complete a Guess It session to see accuracy.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ── Read data from localStorage ───────────────
+  const streak     = JSON.parse(localStorage.getItem('studySyncStreak') || '{"count":0}');
+  const flashcards = JSON.parse(localStorage.getItem('studySyncFlashcards') || '[]');
+  const history    = JSON.parse(localStorage.getItem('studySyncSessionHistory') || '[]');
+  const fcStats    = JSON.parse(localStorage.getItem('studySyncFcStats') || 'null');
+
+  // ── KPIs ──────────────────────────────────────
+  document.getElementById('kpi-streak').textContent = streak.count || 0;
+  document.getElementById('kpi-sessions').textContent = history.length || 0;
+  const totalHours = history.reduce((s, h) => s + (h.hours || 0), 0);
+  document.getElementById('kpi-hours').textContent = totalHours.toFixed(1);
+  document.getElementById('kpi-flashcards').textContent = flashcards.length;
+
+  // ── Heatmap ───────────────────────────────────
+  const heatContainer = document.getElementById('heatmap-container');
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const WEEKS = 12;
+
+  // Build activity map: dateStr → session count
+  const actMap = {};
+  history.forEach(h => { actMap[h.date] = (actMap[h.date] || 0) + 1; });
+
+  // Build grid: 7 rows (days), WEEKS cols
+  const grid = document.createElement('div');
+  grid.className = 'heatmap-grid';
+
+  for (let d = 0; d < 7; d++) {
+    const row = document.createElement('div');
+    row.className = 'heatmap-row';
+    const lbl = document.createElement('div');
+    lbl.className = 'heatmap-label';
+    lbl.textContent = DAYS[d].slice(0,3);
+    row.appendChild(lbl);
+    const cells = document.createElement('div');
+    cells.className = 'heatmap-cells';
+    for (let w = WEEKS - 1; w >= 0; w--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - (w * 7) - (today.getDay() - d));
+      const ds = date.toISOString().split('T')[0];
+      const count = actMap[ds] || 0;
+      const cell = document.createElement('div');
+      cell.className = 'hm-cell';
+      const level = count === 0 ? 0 : count === 1 ? 1 : count <= 3 ? 2 : count <= 5 ? 3 : 4;
+      if (level > 0) cell.dataset.level = level;
+      cell.title = `${ds}: ${count} session${count !== 1 ? 's' : ''}`;
+      cells.appendChild(cell);
+    }
+    row.appendChild(cells);
+    grid.appendChild(row);
+  }
+  heatContainer.appendChild(grid);
+
+  // ── Subject bars ──────────────────────────────
+  const subjectMap = {};
+  history.forEach(h => { if (h.subject) subjectMap[h.subject] = (subjectMap[h.subject] || 0) + 1; });
+  const subjectEl = document.getElementById('subject-bars');
+  const subjects = Object.entries(subjectMap).sort((a,b) => b[1]-a[1]);
+  if (subjects.length) {
+    subjectEl.innerHTML = '';
+    const maxVal = subjects[0][1];
+    subjects.forEach(([sub, count]) => {
+      const pct = Math.round((count / maxVal) * 100);
+      const row = document.createElement('div');
+      row.className = 'subject-bar-row';
+      row.innerHTML = `
+        <div class="subject-bar-label">${sub}</div>
+        <div class="subject-bar-track"><div class="subject-bar-fill" style="width:0%" data-pct="${pct}"></div></div>
+        <div class="subject-bar-val">${count} session${count !== 1 ? 's':''}</div>
+      `;
+      subjectEl.appendChild(row);
+    });
+    // Animate bars
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.subject-bar-fill').forEach(el => {
+        el.style.width = el.dataset.pct + '%';
+      });
+    });
+  }
+
+  // ── Flashcard accuracy ────────────────────────
+  if (fcStats && (fcStats.known + fcStats.unknown + fcStats.skipped > 0)) {
+    const total = fcStats.known + fcStats.unknown + fcStats.skipped;
+    const pct = Math.round((fcStats.known / total) * 100);
+    const accRow = document.getElementById('accuracy-row');
+    accRow.innerHTML = `
+      <div class="accuracy-card">
+        <div class="accuracy-pct ${pct >= 70 ? 'green' : 'amber'}">${pct}%</div>
+        <div class="accuracy-label">Overall accuracy</div>
+      </div>
+      <div class="accuracy-card">
+        <div class="accuracy-pct green">${fcStats.known}</div>
+        <div class="accuracy-label">Known</div>
+      </div>
+      <div class="accuracy-card">
+        <div class="accuracy-pct amber">${fcStats.unknown}</div>
+        <div class="accuracy-label">To review</div>
+      </div>
+      <div class="accuracy-card">
+        <div class="accuracy-pct" style="color:var(--fog)">${total}</div>
+        <div class="accuracy-label">Total answered</div>
+      </div>
+    `;
+  }
+})();
+</script>
+{% endblock %}

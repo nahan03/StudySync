@@ -1,0 +1,37 @@
+{% extends 'core/base.html' %}
+{% block body_class %}signup-page{% endblock %}
+
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<!-- Navbar -->
+<nav class="top-navbar">
+    <div class="nav-left">
+        <a href="{% url 'home' %}" class="brand">StudySync</a>
+    </div>
+    <div class="nav-right">
+        <a href="{% url 'login' %}" class="nav-link">Login</a>
+        <a href="{% url 'signup' %}" class="nav-link">Sign Up</a>
+    </div>
+</nav>
+
+
+<div class="auth-container">
+    <h2 class="auth-title">Create Your Account</h2>
+
+    <form method="POST" class="auth-form">
+        {% csrf_token %}
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Enter your username" required class="auth-input">
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required class="auth-input">
+
+        <label for="password2">Confirm Password</label>
+        <input type="password" id="password2" name="password2" placeholder="Confirm your password" required class="auth-input">
+
+        <button type="submit" class="auth-btn">Sign Up</button>
+    </form>
+</div>
+{% endblock %}

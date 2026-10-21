@@ -1,0 +1,522 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block body_class %}forest-page{% endblock %}
+{% block title %}My Forest — StudySync{% endblock %}
+
+{% block content %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --soil:   #0E0A05;
+  --bark:   #1A1209;
+  --moss:   #1E2E1C;
+  --canopy: #2E4A2C;
+  --leaf:   #4E7A34;
+  --sprout: #7DB54A;
+  --lime:   #A8D870;
+  --gold:   #C9952A;
+  --amber:  #E4B84A;
+  --dawn:   #F0D080;
+  --cream:  #F6EDD8;
+  --fog:    #9A8870;
+}
+
+body.forest-page {
+  background: var(--soil);
+  color: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+/* ── NAVBAR ── */
+.ss-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 60px;
+  background: transparent;
+  border-bottom: none;
+}
+.ss-nav-logo {
+  font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 800;
+  color: var(--cream); text-decoration: none; letter-spacing: -0.02em; font-style: italic;
+}
+.ss-nav-logo span { color: var(--sprout); font-style: normal; }
+.ss-nav-right { display: flex; align-items: center; gap: 14px; }
+.ss-nav-greeting { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--fog); font-weight: 500; }
+.ss-nav-greeting strong { color: var(--cream); font-weight: 700; }
+.ss-nav-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--leaf), var(--sprout));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+  color: #0E1A08; flex-shrink: 0;
+  border: 1.5px solid rgba(125,181,74,0.4);
+  box-shadow: 0 0 14px rgba(125,181,74,0.2);
+  cursor: pointer; text-decoration: none;
+}
+.ss-nav-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 16px; border-radius: 999px; background: transparent;
+  border: 1px solid rgba(125,181,74,0.2); color: var(--fog);
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+  cursor: pointer; text-decoration: none;
+  transition: border-color .2s, color .2s, background .2s;
+}
+.ss-nav-back:hover { border-color: rgba(125,181,74,0.5); color: var(--sprout); background: rgba(125,181,74,0.07); }
+.ss-av-wrap { position: relative; }
+.ss-av-dropdown {
+  position: absolute; top: calc(100% + 10px); right: 0;
+  width: 218px;
+  background: rgba(22,15,7,0.97);
+  border: 1px solid rgba(125,181,74,0.15);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+  overflow: hidden;
+  opacity: 0; transform: translateY(-8px) scale(0.96);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 999;
+}
+.ss-av-dropdown::before {
+  content: ''; display: block; height: 2px;
+  background: linear-gradient(90deg, var(--leaf), var(--sprout), var(--lime));
+}
+.ss-av-dropdown.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+.ss-av-header { padding: 13px 15px 11px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.ss-av-name { font-size: 13px; font-weight: 700; color: var(--cream); margin: 0 0 2px; }
+.ss-av-meta { font-size: 11px; color: var(--fog); margin: 0; }
+.ss-av-items { padding: 5px 0; }
+.ss-av-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 15px; width: 100%; border: none; background: none;
+  color: var(--cream); font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px; font-weight: 500; cursor: pointer;
+  text-align: left; text-decoration: none;
+  transition: background 0.12s;
+}
+.ss-av-item:hover { background: rgba(255,255,255,0.05); }
+.ss-av-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.ss-av-item--edit   .ss-av-icon { background: rgba(78,122,52,0.18); }
+.ss-av-item--forest .ss-av-icon { background: rgba(46,74,44,0.22); }
+.ss-av-item--streak .ss-av-icon { background: rgba(201,149,42,0.15); }
+.ss-av-item--logout .ss-av-icon { background: rgba(180,70,50,0.12); }
+.ss-av-body { flex: 1; }
+.ss-av-label { display: block; line-height: 1.3; }
+.ss-av-sub { display: block; font-size: 11px; color: var(--fog); margin-top: 1px; }
+.ss-av-streak-pill {
+  font-size: 11px; font-weight: 700;
+  background: rgba(201,149,42,0.18); color: var(--amber);
+  border: 1px solid rgba(201,149,42,0.25);
+  padding: 2px 9px; border-radius: 999px; white-space: nowrap;
+}
+.ss-av-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 4px 0; }
+.ss-av-item--logout { color: #C0705A; }
+.ss-av-item--logout:hover { background: rgba(180,60,40,0.1); }
+/* ── PAGE LAYOUT ── */
+.forest-wrap { max-width: 1100px; margin: 0 auto; padding: 90px 24px 60px; }
+
+/* ── HEADER ── */
+.forest-header { margin-bottom: 48px; }
+.forest-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--sprout); margin-bottom: 14px; opacity: .85;
+}
+.forest-eyebrow::before { content:''; display:block; width:24px; height:2px; background:var(--sprout); border-radius:2px; }
+.forest-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(36px, 5vw, 56px); font-weight: 800; line-height: 1.05;
+  color: var(--cream); margin-bottom: 10px; letter-spacing: -0.02em;
+}
+.forest-title em {
+  font-style: italic;
+  background: linear-gradient(100deg, var(--sprout), var(--lime), var(--amber));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.forest-sub { font-size: 15px; color: var(--fog); line-height: 1.7; max-width: 480px; }
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 48px;
+}
+.stat-card {
+  background: rgba(20,14,8,.9); border: 1px solid rgba(255,255,255,.07);
+  border-radius: 16px; padding: 22px 24px; position: relative; overflow: hidden;
+  transition: border-color .2s, transform .2s;
+}
+.stat-card:hover { border-color: rgba(125,181,74,.25); transform: translateY(-2px); }
+.stat-card-icon { font-size: 24px; margin-bottom: 12px; display: block; }
+.stat-card-num {
+  font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 800;
+  color: var(--sprout); line-height: 1; margin-bottom: 4px;
+}
+.stat-card-label { font-size: 12px; color: var(--fog); letter-spacing: .04em; }
+.stat-card-glow {
+  position: absolute; bottom: -20px; right: -20px;
+  width: 80px; height: 80px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(125,181,74,.12), transparent 70%);
+}
+
+/* ── PROGRESS TO NEXT TREE ── */
+.next-tree-bar {
+  background: rgba(20,14,8,.9); border: 1px solid rgba(255,255,255,.07);
+  border-radius: 16px; padding: 24px 28px; margin-bottom: 48px;
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+}
+.next-tree-left { flex: 1; min-width: 200px; }
+.next-tree-label { font-size: 13px; color: var(--fog); margin-bottom: 6px; }
+.next-tree-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--cream); margin-bottom: 14px; }
+.progress-track {
+  height: 8px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--leaf), var(--sprout), var(--lime));
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+}
+.next-tree-sessions { font-size: 12px; color: var(--fog); margin-top: 8px; }
+.next-tree-sessions strong { color: var(--sprout); }
+.next-tree-emoji { font-size: 48px; flex-shrink: 0; }
+
+/* ── FOREST GRID ── */
+.forest-section-title {
+  font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
+  color: var(--cream); margin-bottom: 20px;
+}
+
+.forest-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px; margin-bottom: 60px;
+}
+
+.tree-card {
+  background: rgba(20,14,8,.9); border: 1.5px solid rgba(255,255,255,.07);
+  border-radius: 20px; padding: 20px 16px 16px;
+  text-align: center; cursor: default;
+  transition: transform .25s, border-color .25s, box-shadow .25s;
+  position: relative; overflow: hidden;
+  animation: tree-pop .5s cubic-bezier(.22,1,.36,1) both;
+}
+.tree-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(125,181,74,.35);
+  box-shadow: 0 12px 36px rgba(0,0,0,.4), 0 0 30px rgba(78,122,52,.15);
+}
+@keyframes tree-pop {
+  from { opacity:0; transform:scale(.88) translateY(12px); }
+  to   { opacity:1; transform:scale(1)   translateY(0);    }
+}
+
+.tree-emoji { font-size: 44px; display: block; margin-bottom: 10px; line-height: 1; }
+.tree-subject {
+  font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600;
+  color: var(--sprout); letter-spacing: .04em; text-transform: uppercase;
+  margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tree-stage { font-size: 11px; color: var(--fog); }
+.tree-num {
+  position: absolute; top: 10px; right: 12px;
+  font-size: 10px; font-weight: 700; color: var(--fog); opacity: .5;
+}
+
+/* ── EMPTY STATE ── */
+.forest-empty {
+  text-align: center; padding: 80px 24px;
+  background: rgba(20,14,8,.6); border: 1px dashed rgba(255,255,255,.08);
+  border-radius: 20px; margin-bottom: 48px;
+}
+.forest-empty-icon { font-size: 56px; display: block; margin-bottom: 16px; }
+.forest-empty-title {
+  font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
+  color: var(--cream); margin-bottom: 8px;
+}
+.forest-empty-sub { font-size: 14px; color: var(--fog); line-height: 1.7; max-width: 340px; margin: 0 auto 24px; }
+.forest-empty-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; border-radius: 999px;
+  background: linear-gradient(135deg, var(--leaf), var(--sprout));
+  color: #0E1A08; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px;
+  text-decoration: none; border: none; cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+}
+.forest-empty-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(78,122,52,.4); }
+
+/* ── SUBJECT LEGEND ── */
+.legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 48px; }
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border-radius: 999px;
+  background: rgba(30,20,10,.8); border: 1px solid rgba(255,255,255,.07);
+  font-size: 12px; color: var(--fog);
+}
+.legend-emoji { font-size: 16px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .forest-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+  .ss-nav { padding: 0 16px; }
+  .ss-nav-greeting { display: none; }
+}
+@media (max-width: 420px) {
+  .stats-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
+
+<!-- NAVBAR -->
+<nav class="ss-nav">
+  <a class="ss-nav-logo" href="/"><span>Study</span>Sync</a>
+  <div class="ss-nav-right">
+    <span class="ss-nav-greeting">Hello, <strong>{{ request.user.get_short_name|default:request.user.username }}</strong></span>
+    <a href="/" class="ss-nav-back">← Back to home</a>
+
+    <div class="ss-av-wrap" id="ss-av-wrap">
+      <div class="ss-nav-avatar" id="ss-avatar" role="button" tabindex="0"
+           aria-haspopup="true" aria-expanded="false" style="cursor:pointer;">
+        {{ request.user.username|slice:":1"|upper }}
+      </div>
+      <div class="ss-av-dropdown" id="ss-av-dropdown" role="menu">
+        <div class="ss-av-header">
+          <p class="ss-av-name">{{ request.user.get_full_name|default:request.user.username }}</p>
+          <p class="ss-av-meta" id="ss-av-meta">Loading profile…</p>
+        </div>
+        <div class="ss-av-items">
+          <button class="ss-av-item ss-av-item--edit" id="ss-av-edit" role="menuitem">
+            <span class="ss-av-icon">✏️</span>
+            <span class="ss-av-body">
+              <span class="ss-av-label">Edit profile</span>
+              <span class="ss-av-sub">Change grade &amp; subjects</span>
+            </span>
+          </button>
+          <a href="/forest/" class="ss-av-item ss-av-item--forest" role="menuitem">
+            <span class="ss-av-icon">🌲</span>
+            <span class="ss-av-body">
+              <span class="ss-av-label">My forest</span>
+              <span class="ss-av-sub">View trees &amp; stats</span>
+            </span>
+          </a>
+          <button class="ss-av-item ss-av-item--streak" role="menuitem" style="cursor:default;">
+            <span class="ss-av-icon">🔥</span>
+            <span class="ss-av-body"><span class="ss-av-label">Streak</span></span>
+            <span class="ss-av-streak-pill" id="ss-av-streak">— days</span>
+          </button>
+          <div class="ss-av-divider"></div>
+          <a href="{% url 'logout' %}" class="ss-av-item ss-av-item--logout" role="menuitem">
+            <span class="ss-av-icon">↪</span>
+            <span class="ss-av-body"><span class="ss-av-label">Log out</span></span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<div class="forest-wrap">
+
+  <!-- HEADER -->
+  <div class="forest-header">
+    <div class="forest-eyebrow">Your progress</div>
+    <h1 class="forest-title">Your <em>Forest</em></h1>
+    <p class="forest-sub">Every 5 sessions you complete plants a new tree. Keep studying to grow your forest.</p>
+  </div>
+
+  <!-- STATS ROW -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card">
+      <span class="stat-card-icon">🔥</span>
+      <div class="stat-card-num" id="statStreak">0</div>
+      <div class="stat-card-label">Day streak</div>
+      <div class="stat-card-glow"></div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card-icon">📚</span>
+      <div class="stat-card-num" id="statSessions">0</div>
+      <div class="stat-card-label">Sessions done</div>
+      <div class="stat-card-glow"></div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card-icon">⏱</span>
+      <div class="stat-card-num" id="statHours">0</div>
+      <div class="stat-card-label">Hours studied</div>
+      <div class="stat-card-glow"></div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card-icon">🌲</span>
+      <div class="stat-card-num" id="statTrees">0</div>
+      <div class="stat-card-label">Trees planted</div>
+      <div class="stat-card-glow"></div>
+    </div>
+  </div>
+
+  <!-- PROGRESS TO NEXT TREE -->
+  <div class="next-tree-bar" id="nextTreeBar">
+    <div class="next-tree-left">
+      <div class="next-tree-label">Progress to next tree</div>
+      <div class="next-tree-title" id="nextTreeTitle">Keep going — your forest is waiting</div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="next-tree-sessions" id="nextTreeSessions">
+        <strong>0 / 5</strong> sessions completed
+      </div>
+    </div>
+    <div class="next-tree-emoji" id="nextTreeEmoji">🌱</div>
+  </div>
+
+  <!-- FOREST -->
+  <div id="forestSection">
+    <!-- Populated by JS -->
+  </div>
+
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   TREE TYPE MAP — subject keyword → emoji
+══════════════════════════════════════════ */
+const TREE_MAP = [
+  { keywords: ['math', 'calc', 'algebra', 'geometry', 'statistic', 'number'],  emoji: '🌲', name: 'Pine'     },
+  { keywords: ['bio', 'life', 'ecology', 'genetics', 'anatomy', 'botany'],      emoji: '🌳', name: 'Oak'      },
+  { keywords: ['chem', 'periodic', 'molecule', 'reaction', 'element'],          emoji: '🎋', name: 'Bamboo'   },
+  { keywords: ['phys', 'mechanics', 'force', 'quantum', 'optic', 'wave'],       emoji: '🌴', name: 'Palm'     },
+  { keywords: ['history', 'histor', 'civil', 'war', 'ancient', 'medieval'],     emoji: '🍂', name: 'Maple'    },
+  { keywords: ['english', 'literature', 'writing', 'essay', 'grammar', 'lang'], emoji: '🌿', name: 'Fern'     },
+  { keywords: ['geo', 'earth', 'climate', 'plate', 'volcano', 'ocean'],         emoji: '🌵', name: 'Cactus'   },
+  { keywords: ['art', 'design', 'draw', 'paint', 'creative', 'visual'],         emoji: '🌸', name: 'Blossom'  },
+  { keywords: ['music', 'theory', 'harmony', 'rhythm', 'instrument'],           emoji: '🎍', name: 'Bamboo Grove' },
+  { keywords: ['computer', 'coding', 'program', 'software', 'data', 'cs'],      emoji: '🌐', name: 'Cyber Tree'},
+  { keywords: ['economics', 'econom', 'finance', 'market', 'business'],         emoji: '🍁', name: 'Autumn Oak'},
+  { keywords: ['psychology', 'psych', 'mind', 'behaviour', 'cognitive'],        emoji: '🌺', name: 'Lotus'    },
+];
+
+const DEFAULT_TREE = { emoji: '🌱', name: 'Sprout' };
+
+function getTreeForSubject(subject) {
+  if (!subject) return DEFAULT_TREE;
+  const s = subject.toLowerCase();
+  for (const t of TREE_MAP) {
+    if (t.keywords.some(k => s.includes(k))) return t;
+  }
+  return DEFAULT_TREE;
+}
+
+const STAGE_NAMES = ['Seedling', 'Sapling', 'Young Tree', 'Grown Tree', 'Ancient Tree'];
+
+/* ══════════════════════════════════════════
+   LOAD DATA
+══════════════════════════════════════════ */
+const history    = JSON.parse(localStorage.getItem('studySyncSessionHistory') || '[]');
+const streakData = JSON.parse(localStorage.getItem('studySyncStreak') || '{"count":0}');
+const sessions   = history.length;
+const hours      = history.reduce((s, h) => s + (h.hours || 0), 0);
+const streak     = streakData.count || 0;
+
+// Every 5 completed sessions plants one tree; subject = most common in that group
+const trees = [];
+for (let i = 0; i + 5 <= sessions; i += 5) {
+  const group = history.slice(i, i + 5);
+  const counts = {};
+  group.forEach(h => { if (h.subject) counts[h.subject] = (counts[h.subject] || 0) + 1; });
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  trees.push({ subject: top ? top[0] : 'General', date: group[group.length - 1]?.date || '' });
+}
+const treesCount = trees.length;
+
+/* ── Stats cards ── */
+document.getElementById('statStreak').textContent   = streak;
+document.getElementById('statSessions').textContent = sessions;
+document.getElementById('statHours').textContent    = hours.toFixed(1);
+document.getElementById('statTrees').textContent    = treesCount;
+
+/* ── Progress bar ── */
+const sessionsIntoNextTree = sessions % 5;
+const pct = (sessionsIntoNextTree / 5) * 100;
+document.getElementById('progressFill').style.width = pct + '%';
+document.getElementById('nextTreeSessions').innerHTML =
+  '<strong>' + sessionsIntoNextTree + ' / 5</strong> sessions toward your next tree';
+
+const nextEmojis = ['🌱','🌿','🌳','🌲','🎋'];
+document.getElementById('nextTreeEmoji').textContent = nextEmojis[sessionsIntoNextTree] || '🌱';
+
+const titles = [
+  'Plant your first tree — start a session!',
+  'One session down, four to go 🌱',
+  'Halfway there, keep growing 🌿',
+  'Almost there, one more push 💪',
+  'One session away from a new tree! 🌳',
+];
+document.getElementById('nextTreeTitle').textContent = titles[sessionsIntoNextTree] || titles[0];
+
+/* ── Forest ── */
+const forestSection = document.getElementById('forestSection');
+
+if (trees.length === 0) {
+  forestSection.innerHTML = `
+    <div class="forest-empty">
+      <span class="forest-empty-icon">🌱</span>
+      <div class="forest-empty-title">Your forest is empty</div>
+      <p class="forest-empty-sub">Complete 5 study sessions to plant your first tree. Every subject grows a different kind.</p>
+      <a href="/" class="forest-empty-btn">🌿 Start a session</a>
+    </div>`;
+} else {
+  /* Legend */
+  const subjectsSeen = [...new Set(trees.map(t => t.subject))];
+  const legendHtml = subjectsSeen.map(sub => {
+    const tree = getTreeForSubject(sub);
+    return `<div class="legend-item"><span class="legend-emoji">${tree.emoji}</span>${sub} — ${tree.name}</div>`;
+  }).join('');
+
+  /* Grid */
+  const gridHtml = trees.map((t, i) => {
+    const tree  = getTreeForSubject(t.subject);
+    const stage = STAGE_NAMES[Math.min(Math.floor(i / 5), STAGE_NAMES.length - 1)];
+    return `
+      <div class="tree-card" style="animation-delay:${i * 0.06}s">
+        <span class="tree-num">#${i + 1}</span>
+        <span class="tree-emoji">${tree.emoji}</span>
+        <div class="tree-subject">${t.subject || 'General'}</div>
+        <div class="tree-stage">${stage}</div>
+      </div>`;
+  }).join('');
+
+  forestSection.innerHTML = `
+    <div class="forest-section-title">🌲 Your trees (${trees.length})</div>
+    <div class="legend">${legendHtml}</div>
+    <div class="forest-grid">${gridHtml}</div>`;
+}
+/* ── AVATAR DROPDOWN ── */
+const avWrap = document.getElementById('ss-av-wrap');
+const avBtn  = document.getElementById('ss-avatar');
+const avMenu = document.getElementById('ss-av-dropdown');
+
+function ssAvOpen(open) {
+  avMenu.classList.toggle('open', open);
+  avBtn.setAttribute('aria-expanded', open);
+}
+avBtn.addEventListener('click', e => { e.stopPropagation(); ssAvOpen(!avMenu.classList.contains('open')); });
+avBtn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ssAvOpen(!avMenu.classList.contains('open')); }});
+document.addEventListener('click', e => { if (!avWrap.contains(e.target)) ssAvOpen(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') ssAvOpen(false); });
+
+const prof = JSON.parse(localStorage.getItem('studySyncProfile') || 'null');
+if (prof) {
+  const subjects = Array.isArray(prof.subjects) ? prof.subjects.slice(0,2).join(' & ') : '';
+  document.getElementById('ss-av-meta').textContent =
+    'Grade ' + prof.grade + (subjects ? ' · ' + subjects : '');
+}
+/* streak is already loaded above as `streak` */
+if (streak) {
+  document.getElementById('ss-av-streak').textContent = streak + ' day' + (streak !== 1 ? 's' : '');
+}
+</script>
+
+{% endblock %}

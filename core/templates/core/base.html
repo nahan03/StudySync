@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudySync | {% block title %}{% endblock %}</title>
+
+    {% load static %}
+    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'css/alert.css' %}">
+    <link rel="stylesheet" href="{% static 'css/music_player.css' %}?v=5">
+    {% block extra_css %}{% endblock %}
+    <script>
+    window.ssReady = function ssReady(fn) {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fn);
+      } else {
+        fn();
+      }
+    };
+    </script>
+
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+
+    <div id="ss-content">
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% block scripts %}{% endblock %}
+    </div>
+
+
+    <!-- Global Mini Music Player -->
+    <div id="gmp-bar">
+      <div class="gmp-left">
+        <div class="gmp-eq">
+          <span class="gmp-eq-bar"></span>
+          <span class="gmp-eq-bar"></span>
+          <span class="gmp-eq-bar"></span>
+        </div>
+        <div class="gmp-info">
+          <span id="gmp-name">Study Music</span>
+          <span class="gmp-sub">Choose a playlist</span>
+        </div>
+      </div>
+      <button id="gmp-toggle" aria-label="Open music panel">&#9650;</button>
+    </div>
+
+    <div id="gmp-panel" class="hidden">
+      <div class="gmp-panel-header">
+        <span class="gmp-panel-title">&#127925; Study Music</span>
+        <button id="gmp-close" aria-label="Close">&#10005;</button>
+      </div>
+      <p class="gmp-section-label">Suggested Playlists</p>
+      <div class="gmp-chips">
+        <button class="gmp-chip" data-spotify="37i9dQZF1DX4sWSpwq3LiO" data-name="Peaceful Piano">Peaceful Piano</button>
+        <button class="gmp-chip" data-spotify="37i9dQZF1DWZeKCadgRdKQ" data-name="Deep Focus">Deep Focus</button>
+        <button class="gmp-chip" data-spotify="37i9dQZF1DWXLeA8Omikj7" data-name="Brain Food">Brain Food</button>
+        <button class="gmp-chip" data-spotify="37i9dQZF1DWWQRwui0ExPn" data-name="Lofi Beats">Lofi Beats</button>
+      </div>
+      <p class="gmp-section-label" style="margin-top:14px">Search</p>
+      <div class="gmp-search-row">
+        <input id="gmp-search-input" class="gmp-search-input" placeholder="Search songs, artists&#8230;" autocomplete="off" />
+        <button id="gmp-search-btn" class="gmp-search-btn">&#128269;</button>
+      </div>
+      <div id="gmp-search-results" class="gmp-search-results hidden"></div>
+
+      <details class="gmp-url-details">
+        <summary class="gmp-url-summary">Or paste a URL</summary>
+        <div class="gmp-url-row" style="margin-top:8px">
+          <input id="gmp-url-input" class="gmp-url-input" placeholder="YouTube or Spotify URL&#8230;" autocomplete="off" />
+          <button id="gmp-url-play" class="gmp-url-play">Play</button>
+        </div>
+      </details>
+
+      <div id="gmp-embed-wrap" class="hidden">
+        <div id="gmp-iframe"></div>
+      </div>
+    </div>
+
+    <!-- Global Alert -->
+    <div id="global-toast" class="toast"></div>
+    <script src="{% static 'js/alert.js' %}"></script>
+    <script src="{% static 'js/music_player.js' %}?v=11" defer></script>
+    <script src="{% static 'js/global_ui.js' %}?v=1" defer></script>
+
+    <!-- Exit Fullscreen button — shown only in fullscreen mode -->
+    <button id="fs-exit-btn" title="Exit Full Screen (Esc)">✕ Exit Full Screen</button>
+
+    <!-- Pause motivation — story card -->
+    <div id="sm-pause-quote" aria-live="polite">
+      <!-- Phase 1: "Do you know..." + quote -->
+      <div id="sm-pq-quote-phase">
+        <p class="sm-pq-intro" id="sm-pq-intro"></p>
+        <div class="sm-pq-mark">"</div>
+        <p class="sm-pq-text" id="sm-pq-text"></p>
+        <p class="sm-pq-by"   id="sm-pq-by"></p>
+      </div>
+      <!-- Phase 2: Story + moral (slides in) -->
+      <div id="sm-pq-story">
+        <div class="sm-pq-divider"></div>
+        <p class="sm-pq-story-text" id="sm-pq-story-text"></p>
+        <p class="sm-pq-moral" id="sm-pq-moral"></p>
+      </div>
+      <!-- Phase 3: Closing (replaces above after 2 min) -->
+      <div id="sm-pq-closing">
+        <p class="sm-pq-closing-text" id="sm-pq-closing-text"></p>
+      </div>
+      <!-- Progress bar -->
+      <div class="sm-pq-progress"><div class="sm-pq-bar" id="sm-pq-bar"></div></div>
+      <p class="sm-pq-hint">paused · resume when ready</p>
+    </div>
+
+    <style>
+    #sm-pause-quote {
+      position: fixed;
+      bottom: 110px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      z-index: 500;
+      width: min(460px, calc(100vw - 40px));
+      background: rgba(4, 12, 16, 0.97);
+      border: 1px solid rgba(58,200,184,0.20);
+      border-radius: 22px;
+      padding: 20px 26px 16px;
+      text-align: center;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 28px 72px rgba(0,0,0,0.7), 0 0 0 1px rgba(58,200,184,0.07);
+      opacity: 0; pointer-events: none;
+      transition: opacity .4s ease, transform .4s ease;
+    }
+    #sm-pause-quote.sm-visible {
+      opacity: 1; pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    .sm-pq-intro {
+      font-size: 11.5px; font-weight: 600;
+      color: rgba(58,200,184,0.7);
+      letter-spacing: .02em; margin: 0 0 8px;
+    }
+    .sm-pq-mark {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px; font-weight: 800; line-height: .6;
+      color: rgba(58,200,184,0.18); margin-bottom: 5px;
+    }
+    .sm-pq-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px; font-weight: 700; font-style: italic;
+      color: #dce8e0; line-height: 1.6; margin: 0 0 10px;
+    }
+    .sm-pq-by {
+      font-size: 10.5px; font-weight: 700; letter-spacing: .13em;
+      text-transform: uppercase; color: #3ac8b8; margin: 0;
+    }
+    .sm-pq-divider {
+      height: 1px; background: rgba(58,200,184,0.12);
+      margin: 13px 0;
+    }
+    #sm-pq-story {
+      max-height: 0; overflow: hidden; opacity: 0;
+      transition: max-height 1s ease, opacity 1s ease;
+    }
+    #sm-pq-story.sm-story-open {
+      max-height: 240px; opacity: 1;
+    }
+    .sm-pq-story-text {
+      font-size: 13px; color: rgba(180,220,210,0.82);
+      line-height: 1.68; margin: 0; text-align: left;
+    }
+    .sm-pq-moral {
+      font-size: 12px; font-weight: 600; font-style: italic;
+      color: #3ac8b8;
+      margin: 11px 0 0;
+      padding-top: 10px;
+      border-top: 1px solid rgba(58,200,184,0.10);
+      text-align: left;
+    }
+    .sm-pq-moral::before { content: 'Moral — '; opacity: .5; font-style: normal; font-weight: 700; letter-spacing: .04em; }
+    #sm-pq-closing {
+      display: none; opacity: 0;
+      transition: opacity .6s ease;
+    }
+    #sm-pq-closing.sm-closing-open { display: block; }
+    #sm-pq-closing.sm-closing-fade { opacity: 1; }
+    .sm-pq-closing-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px; font-weight: 700;
+      color: #3ac8b8; line-height: 1.6; margin: 0;
+      font-style: italic;
+    }
+    .sm-pq-progress {
+      height: 2px; background: rgba(58,200,184,0.08);
+      border-radius: 2px; margin: 14px 0 8px; overflow: hidden;
+    }
+    .sm-pq-bar {
+      height: 100%; width: 0%; background: rgba(58,200,184,0.45);
+      border-radius: 2px;
+      transition: width .8s linear;
+    }
+    .sm-pq-hint {
+      font-size: 10px; color: rgba(58,200,184,0.28);
+      letter-spacing: .08em; text-transform: uppercase; margin: 0;
+      transition: color .3s;
+    }
+    #sm-pause-quote { cursor: pointer; }
+    </style>
+
+    <script>
+    (function () {
+      const QUOTES = [
+        {
+          intro: "Do you know Mark Twain was $100,000 in debt at age 58?",
+          text: "The secret of getting ahead is getting started.",
+          by: "Mark Twain",
+          story: "He owed a fortune after failed business ventures. He didn't legally have to pay any of it back — but he spent years touring the world giving lectures, night after night, until every single creditor was paid in full. Not for his reputation. Just because he believed in starting.",
+          moral: "Starting — even from rock bottom, even in debt — is still starting."
+        },
+        {
+          intro: "Do you know Nelson Mandela spent 27 years in a prison cell?",
+          text: "It always seems impossible until it's done.",
+          by: "Nelson Mandela",
+          story: "He could have spent those years in bitterness. Instead, he read, studied law, and kept his vision alive — one careful day at a time. When he finally walked out, he didn't look back in anger. He looked forward, with impossible calm, and led a nation.",
+          moral: "Impossible is just a word used by those who haven't decided yet."
+        },
+        {
+          intro: "Do you know Benjamin Franklin had only 2 years of formal schooling?",
+          text: "An investment in knowledge pays the best interest.",
+          by: "Benjamin Franklin",
+          story: "Everything Franklin became — scientist, inventor, diplomat, writer — he taught himself. He once said the only way he got smarter was by deliberately reading things that scared him with how much he didn't know. He chased the feeling of being lost in a subject.",
+          moral: "What you teach yourself will outlast anything anyone else teaches you."
+        },
+        {
+          intro: "Do you know Bruce Lee was rejected by Hollywood for being 'too Chinese'?",
+          text: "Absorb what is useful, discard what is not, add what is uniquely your own.",
+          by: "Bruce Lee",
+          story: "Rather than fight the label, Lee ignored it completely. He studied boxing, fencing, wrestling, and philosophy — then filtered everything through who he truly was. The result was Jeet Kune Do, entirely his own. They wouldn't give him a category, so he built one.",
+          moral: "When the world won't give you a place, you get to build your own."
+        },
+        {
+          intro: "Do you know this idea about learning is nearly 2,000 years old?",
+          text: "The mind is not a vessel to be filled but a fire to be kindled.",
+          by: "Plutarch",
+          story: "Plutarch was comparing two types of teachers: those who pour facts into students like filling a jar, and those who strike something alive in them. He noticed the second kind's students carried their learning differently — it showed up in how they moved through life, not just exams.",
+          moral: "The best learning you'll ever do is the kind that catches fire inside you."
+        },
+        {
+          intro: "Do you know Napoleon Hill's son was born without ears?",
+          text: "Effort only fully releases its reward after a person refuses to quit.",
+          by: "Napoleon Hill",
+          story: "Doctors told Hill his son would never hear. Hill refused to accept it. For years he read aloud to the boy, stimulated his curiosity, and never once treated him as limited. His son eventually developed enough hearing nerve function to hear. He said: my father never let me believe I couldn't.",
+          moral: "Sometimes believing in someone else is what gives them the power to believe in themselves."
+        },
+        {
+          intro: "Do you know Gandhi taught himself almost everything he used in his life?",
+          text: "Live as if you were to die tomorrow. Learn as if you were to live forever.",
+          by: "Mahatma Gandhi",
+          story: "Gandhi learned law, nonviolent resistance, farming, and spinning cotton — all through books and direct practice. He once said the most valuable thing he ever did was sit quietly and think. He held urgency and patience at the same time, every single day.",
+          moral: "Urgency and patience aren't opposites — the greatest people hold both at once."
+        },
+        {
+          intro: "Do you know B.B. King taught himself guitar by watching strangers in doorways?",
+          text: "The beautiful thing about learning is that no one can take it away from you.",
+          by: "B.B. King",
+          story: "King grew up picking cotton in Mississippi with no money, no instrument of his own, and no teachers. He'd stand outside wherever music was playing and absorb everything he could. From doorways to street corners to concert halls — built entirely on what he'd quietly, privately learned.",
+          moral: "What you learn in secret becomes the power no one saw coming."
+        },
+        {
+          intro: "Do you know Edison ran over 10,000 experiments before the light bulb worked?",
+          text: "Genius is 1% inspiration and 99% perspiration.",
+          by: "Thomas Edison",
+          story: "When a reporter called this trail of experiments 'failure,' Edison calmly corrected him: 'I haven't failed. I've just found 10,000 ways that won't work.' He genuinely meant it — not as bravado, but as a method. Every wrong attempt told him something the right answer never could.",
+          moral: "Failure is only failure if you stop. Otherwise, it's just research."
+        },
+        {
+          intro: "Do you know da Vinci filled 13,000 pages of notebooks — most never shared?",
+          text: "Knowing is not enough; we must apply. Being willing is not enough; we must do.",
+          by: "Leonardo da Vinci",
+          story: "He studied anatomy, light, water, birds, and mathematics — not to publish, not to impress, but purely because he needed to understand. Most of it he never showed anyone. And in doing that quiet, obsessive work, he became the mind we still talk about 500 years later.",
+          moral: "Your quiet, unseen work is still building something real."
+        },
+        {
+          intro: "Do you know Beverly Sills practiced for 25 years before reaching the Met Opera?",
+          text: "There are no shortcuts to any place worth going.",
+          by: "Beverly Sills",
+          story: "She gave her first public performance at age 3. The Met didn't come until she was 34. Twenty-five years of practice, small stages, and unglamorous work. When she finally stood on that stage, she said she wasn't nervous — she said every one of those years was standing next to her.",
+          moral: "The years that feel like waiting are the years that make the arrival possible."
+        },
+        {
+          intro: "Do you know one writer changed his career by improving just one page a day?",
+          text: "Success is the sum of small efforts repeated day in and day out.",
+          by: "Robert Collier",
+          story: "After years of mediocre work going nowhere, Collier made a single commitment: one better page, every day. Not a chapter. Not a book. One page. Two years later, he had his most celebrated work — read by millions. He never changed his process. He just stopped waiting to feel ready.",
+          moral: "Don't aim for the breakthrough. Aim for one better thing today."
+        },
+        {
+          intro: "Do you know Voltaire was jailed twice and exiled, but never stopped writing?",
+          text: "The more I read, the more I acquire, the more certain I am that I know nothing.",
+          by: "Voltaire",
+          story: "He was imprisoned in the Bastille, banned from Paris, and exiled from France — all for writing what he believed to be true. He never stopped. In his lifetime he produced over 20,000 letters and 2,000 books. Every punishment just gave him more to think about.",
+          moral: "The smarter you get, the more you realize how much is left. That's not discouraging — that's the adventure."
+        },
+        {
+          intro: "Do you know Helen Hayes had a brutal debut at age 9 — and performed for 60 more years?",
+          text: "The expert in anything was once a beginner.",
+          by: "Helen Hayes",
+          story: "The reviews of her first Broadway performance were harsh. She was nine years old. She went home, read every word, and came back. She performed through two World Wars, through the death of her daughter, and through decades of change — and earned 'First Lady of American Theatre' by never letting a review be the last word.",
+          moral: "Your worst day in the work is never your last — unless you decide it is."
+        }
+      ];
+
+      const CLOSINGS = [
+        "You've been sitting with great company. Whenever you're ready — the work is still there, waiting for you.",
+        "Don't worry. Every second you paused here still counts. You're already further than you think.",
+        "Hope you reach every goal you've set for yourself. You clearly care — and that matters more than most people know.",
+        "The tide always comes back. So will your focus. Go when you're ready — you've got this.",
+        "One cycle at a time. One breath at a time. That's always been enough. Now go show that exam.",
+        "Best of luck with everything ahead. Taking a break when you needed one — that's not weakness, that's wisdom.",
+        "You paused. You reflected. Now it's time to rise — in your own time, at your own pace.",
+      ];
+
+      let _used = [], _phase = 0;
+      let _storyTimer = null, _closingTimer = null, _closingFadeTimer = null;
+
+      function _next() {
+        if (_used.length >= QUOTES.length) _used = [];
+        const pool = QUOTES.filter((_, i) => !_used.includes(i));
+        const pick = Math.floor(Math.random() * pool.length);
+        const gi   = QUOTES.indexOf(pool[pick]);
+        _used.push(gi); return pool[pick];
+      }
+
+      function _clearAll() {
+        clearTimeout(_storyTimer);
+        clearTimeout(_closingTimer);
+        clearTimeout(_closingFadeTimer);
+      }
+
+      function _updateHint() {
+        const hint = document.querySelector('#sm-pause-quote .sm-pq-hint');
+        if (!hint) return;
+        if (_phase === 0) hint.textContent = 'tap to read the story →';
+        else if (_phase === 1) hint.textContent = 'tap for closing thoughts →';
+        else hint.textContent = 'tap to close';
+      }
+
+      function _advanceToClosing() {
+        clearTimeout(_closingTimer);
+        clearTimeout(_closingFadeTimer);
+        const qph      = document.getElementById('sm-pq-quote-phase');
+        const storyEl  = document.getElementById('sm-pq-story');
+        const closingEl  = document.getElementById('sm-pq-closing');
+        const closingTxt = document.getElementById('sm-pq-closing-text');
+        if (qph)     qph.style.opacity     = '0';
+        if (storyEl) storyEl.style.opacity = '0';
+        _closingFadeTimer = setTimeout(() => {
+          if (qph)     qph.style.display = 'none';
+          if (storyEl) { storyEl.classList.remove('sm-story-open'); storyEl.style.opacity = ''; }
+          const cl = CLOSINGS[Math.floor(Math.random() * CLOSINGS.length)];
+          if (closingTxt) closingTxt.textContent = cl;
+          if (closingEl) {
+            closingEl.style.display = 'block';
+            closingEl.classList.add('sm-closing-open');
+            requestAnimationFrame(() => requestAnimationFrame(() => closingEl.classList.add('sm-closing-fade')));
+          }
+          _phase = 2;
+          _updateHint();
+        }, 500);
+      }
+
+      // Click-to-advance handler (registered once)
+      const _card = document.getElementById('sm-pause-quote');
+      if (_card) {
+        _card.addEventListener('click', function () {
+          if (_phase === 0) {
+            clearTimeout(_storyTimer);
+            const stEl = document.getElementById('sm-pq-story');
+            stEl && stEl.classList.add('sm-story-open');
+            _phase = 1;
+            _updateHint();
+          } else if (_phase === 1) {
+            _advanceToClosing();
+          } else {
+            window.StudyMotivation.hide();
+          }
+        });
+      }
+
+      window.StudyMotivation = {
+        show() {
+          _clearAll();
+          _phase = 0;
+          const el         = document.getElementById('sm-pause-quote');
+          const introEl    = document.getElementById('sm-pq-intro');
+          const textEl     = document.getElementById('sm-pq-text');
+          const byEl       = document.getElementById('sm-pq-by');
+          const storyEl    = document.getElementById('sm-pq-story');
+          const storyTxt   = document.getElementById('sm-pq-story-text');
+          const moralEl    = document.getElementById('sm-pq-moral');
+          const closingEl  = document.getElementById('sm-pq-closing');
+          const closingTxt = document.getElementById('sm-pq-closing-text');
+          const bar        = document.getElementById('sm-pq-bar');
+          const qph        = document.getElementById('sm-pq-quote-phase');
+          if (!el) return;
+
+          const q = _next();
+          if (introEl)  introEl.textContent  = q.intro;
+          if (textEl)   textEl.textContent   = q.text;
+          if (byEl)     byEl.textContent     = '— ' + q.by;
+          if (storyTxt) storyTxt.textContent = q.story;
+          if (moralEl)  moralEl.textContent  = q.moral;
+
+          storyEl && storyEl.classList.remove('sm-story-open');
+          if (storyEl) storyEl.style.opacity = '';
+          closingEl && closingEl.classList.remove('sm-closing-open','sm-closing-fade');
+          if (closingEl) closingEl.style.display = 'none';
+          if (qph) { qph.style.display = ''; qph.style.opacity = ''; }
+          if (bar) { bar.style.transition = 'none'; bar.style.width = '0%'; }
+
+          el.classList.add('sm-visible');
+          _updateHint();
+
+          // Story slides in after 8s (or user taps)
+          _storyTimer = setTimeout(() => {
+            storyEl && storyEl.classList.add('sm-story-open');
+            _phase = 1;
+            _updateHint();
+          }, 8000);
+
+          // Progress bar fills over 120s
+          setTimeout(() => {
+            if (bar) { bar.style.transition = 'width 120s linear'; bar.style.width = '100%'; }
+          }, 300);
+
+          // Closing at 120s (or user taps)
+          _closingTimer = setTimeout(() => _advanceToClosing(), 120000);
+        },
+
+        hide() {
+          _clearAll();
+          const el = document.getElementById('sm-pause-quote');
+          if (el) el.classList.remove('sm-visible');
+          setTimeout(() => {
+            const bar = document.getElementById('sm-pq-bar');
+            if (bar) { bar.style.transition = 'none'; bar.style.width = '0%'; }
+            const qph = document.getElementById('sm-pq-quote-phase');
+            if (qph) { qph.style.display = ''; qph.style.opacity = ''; }
+            const stEl = document.getElementById('sm-pq-story');
+            if (stEl) { stEl.style.opacity = ''; stEl.classList.remove('sm-story-open'); }
+          }, 450);
+        }
+      };
+    })();
+    </script>
+    <script>
+    /* ── PJAX navigation — swap main content without full page reload ── */
+    (function(){
+      var ssContent = document.getElementById('ss-content');
+      if (!ssContent) return;
+
+      function navigateTo(url) {
+        if (!url || url === location.href || url.startsWith('javascript:')) return;
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+          .then(function(r) {
+            if (!r.ok) { window.location.href = url; return null; }
+            return r.text();
+          })
+          .then(function(html) {
+            if (!html) return;
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, 'text/html');
+            var newContent = doc.getElementById('ss-content');
+            if (!newContent) { window.location.href = url; return; }
+
+            var newTitle = doc.title;
+            var newBodyClass = doc.body.className;
+
+            /* replace the content area */
+            var contentEl = document.getElementById('ss-content');
+            contentEl.innerHTML = newContent.innerHTML;
+
+            /* re-create <script> tags so they actually execute */
+            var scripts = contentEl.querySelectorAll('script');
+            var scriptQueue = [];
+            scripts.forEach(function(oldScript) {
+              var s = document.createElement('script');
+              /* copy all attributes except defer/async (meaningless for dynamic scripts) */
+              for (var i = 0; i < oldScript.attributes.length; i++) {
+                var name = oldScript.attributes[i].name;
+                if (name !== 'defer' && name !== 'async') {
+                  s.setAttribute(name, oldScript.attributes[i].value);
+                }
+              }
+              s.textContent = oldScript.textContent;
+              scriptQueue.push({ old: oldScript, new: s });
+            });
+            /* replace in order — inline scripts execute synchronously, external load async */
+            scriptQueue.forEach(function(item) {
+              item.old.parentNode.replaceChild(item.new, item.old);
+            });
+
+            document.title = newTitle;
+            /* preserve is-fullscreen class across navigations */
+            document.body.className = (document.body.className.match(/(^|\s)is-fullscreen(\s|$)/) ? 'is-fullscreen ' : '') + newBodyClass;
+            history.pushState({ url: url }, '', url);
+          })
+          .catch(function() { window.location.href = url; });
+      }
+
+      /* intercept internal link clicks */
+      document.addEventListener('click', function(e) {
+        var link = e.target.closest('a[href]');
+        if (!link) return;
+        var href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('javascript:') || link.hasAttribute('download') || link.hasAttribute('target')) return;
+        if (href.startsWith('http') && href.indexOf(location.origin) !== 0) return;
+        if (href.indexOf('logout') !== -1 || href.indexOf('login') !== -1 || href.indexOf('signup') !== -1) return;
+        e.preventDefault();
+        navigateTo(href);
+      });
+
+      /* handle browser back / forward */
+      window.addEventListener('popstate', function(e) {
+        if (e.state && e.state.url) navigateTo(e.state.url);
+      });
+    })();
+    </script>
+
+    <style>
+    /* ── Breathing animation for fullscreen timer text ── */
+    @keyframes fs-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.92; transform: scale(1.012); }
+    }
+
+    /* ── Glass vignette behind timer in fullscreen for readability ── */
+    .is-fullscreen::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: radial-gradient(ellipse at center, rgba(4,12,16,0.30) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── Global Fullscreen Focus Mode styles ─────────── */
+    #fs-exit-btn {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9999;
+      display: block;
+      padding: 8px 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(58,200,184,0.35);
+      background: rgba(4,12,16,0.85);
+      backdrop-filter: blur(12px);
+      color: #c8e0d8;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: background 0.2s, border-color 0.2s, opacity 0.5s ease;
+      font-family: 'Poppins', sans-serif;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #fs-exit-btn:hover {
+      background: rgba(180,60,50,0.70);
+      border-color: rgba(220,80,70,0.50);
+    }
+    /* Exit button visible when controls are shown OR always visible on non-timer pages */
+    body.fs-controls-visible #fs-exit-btn,
+    .is-fullscreen:not(.exam-page):not(.daily-mode-page):not(.custom-page) #fs-exit-btn {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
+    /* Keep music bar accessible in fullscreen */
+    .is-fullscreen #gmp-bar {
+      z-index: 9998;
+    }
+    .is-fullscreen #gmp-bar .gmp-info span,
+    .is-fullscreen #gmp-bar .gmp-sub {
+      color: #d0e8e0;
+    }
+
+    /* Hide study tree & overlays in fullscreen (catch elements appended to body) */
+    .is-fullscreen .st-panel,
+    .is-fullscreen .st-toggle,
+    .is-fullscreen .cp-overlay,
+    .is-fullscreen .tree-growth-overlay {
+      display: none !important;
+    }
+
+    /* Prevent body scroll in fullscreen */
+    .is-fullscreen {
+      overflow: hidden !important;
+    }
+    </style>
+
+</body>
+</html>
+
