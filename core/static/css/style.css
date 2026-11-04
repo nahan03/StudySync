@@ -275,3 +275,140 @@ img {
     padding: 3.5rem 18px 2.5rem;
   }
 }
+/* ==============================
+   Auth pages (login / signup)
+============================== */
+.top-navbar .nav-left,
+.top-navbar .nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+}
+
+.top-navbar .brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #e8c79c;
+}
+
+.top-navbar .nav-link {
+  color: #e5d2c2;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.top-navbar .nav-link:hover {
+  color: #fff;
+}
+
+.auth-container {
+  width: min(92vw, 420px);
+  margin: 5rem auto 3rem;
+  padding: 2.4rem 2.2rem;
+  background: rgba(26, 16, 10, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 22px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.auth-container h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 1.6rem;
+}
+
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-container label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f3dec8;
+  margin: 0.9rem 0 0.4rem;
+}
+
+.auth-container input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  color: #f6efe8;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.auth-container input::placeholder {
+  color: rgba(246, 239, 232, 0.4);
+}
+
+.auth-container input:focus {
+  border-color: #e0b27d;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-btn {
+  margin-top: 1.6rem;
+  padding: 0.95rem;
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #22180f;
+  background: linear-gradient(135deg, #b78555, #e0b27d);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(224, 178, 125, 0.3);
+}
+
+.auth-container > p {
+  margin-top: 1.4rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #e5d2c2;
+}
+
+.auth-container > p a {
+  color: #e8c79c;
+  font-weight: 600;
+}
+
+.auth-container > p a:hover {
+  text-decoration: underline;
+}
+
+.auth-container .alert {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.4rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.auth-container .alert.error {
+  background: rgba(190, 60, 50, 0.2);
+  border-color: rgba(220, 90, 80, 0.5);
+  color: #ffd2cc;
+}
+
+.auth-container .alert.success {
+  background: rgba(90, 160, 90, 0.2);
+  border-color: rgba(120, 190, 120, 0.5);
+  color: #d4f2d4;
+}
+
+/* No music player when logged out */
+body.login-page #gmp-bar,
+body.login-page #gmp-panel,
+body.signup-page #gmp-bar,
+body.signup-page #gmp-panel {
+  display: none !important;
+}

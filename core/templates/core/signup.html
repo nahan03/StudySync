@@ -19,6 +19,9 @@
 
 <div class="auth-container">
     <h2 class="auth-title">Create Your Account</h2>
+    {% for message in messages %}
+        <div class="alert {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
 
     <form method="POST" class="auth-form">
         {% csrf_token %}
@@ -33,5 +36,6 @@
 
         <button type="submit" class="auth-btn">Sign Up</button>
     </form>
+    <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
 </div>
 {% endblock %}

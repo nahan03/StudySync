@@ -144,7 +144,9 @@ body.schedule-page {
   cursor: pointer; color: rgba(255,255,255,0.85); background: rgba(0,0,0,0.35);
   border-radius: 3px; padding: 1px 4px; border: none; transition: opacity .15s;
 }
-.planner-block:hover .planner-block-del { opacity: 1; }
+.planner-block:hover .planner-block-del,
+.planner-block-del:focus-visible { opacity: 1; }
+@media (hover: none) { .planner-block-del { opacity: 0.85; } }
 .planner-block-time { font-size: 10px; opacity: .7; }
 .planner-add-btn {
   display: flex; align-items: center; justify-content: center;
@@ -406,12 +408,20 @@ body.schedule-page {
     const subj = document.getElementById('planner-subj').value.trim();
     if (!subj) { document.getElementById('planner-subj').focus(); return; }
     const time = document.getElementById('planner-time').value;
+    if (!time) { document.getElementById('planner-time').focus(); return; }
     const dur  = parseInt(document.getElementById('planner-dur').value, 10);
     if (!planner[addingDay]) planner[addingDay] = [];
     planner[addingDay].push({ subject: subj, time, dur, color: selectedColor, id: Date.now() });
     planner[addingDay].sort((a, b) => a.time.localeCompare(b.time));
     savePlanner(); renderPlanner();
     document.getElementById('planner-add-modal').classList.add('hidden');
+  });
+
+  const addModal = document.getElementById('planner-add-modal');
+  addModal.addEventListener('click', e => { if (e.target === addModal) addModal.classList.add('hidden'); });
+  addModal.addEventListener('keydown', e => {
+    if (e.key === 'Escape') addModal.classList.add('hidden');
+    if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') document.getElementById('planner-save-btn').click();
   });
 
   document.querySelectorAll('.planner-swatch').forEach(sw => {
@@ -423,30 +433,42 @@ body.schedule-page {
   });
 
   document.getElementById('planner-clear-btn').addEventListener('click', () => {
-    if (confirm('Clear all sessions this week?')) {
+    if (confirm('Clear all planned sessions?')) {
       planner = {}; savePlanner(); renderPlanner();
     }
   });
 
-  // Notifications
+  renderPlanner();
+
+  // Notifications (Notification API is missing on some browsers, e.g. iOS Safari)
   const notifBtn = document.getElementById('planner-notif-btn');
+  const notifSupported = 'Notification' in window;
   function updateNotifBtn() {
-    const granted = Notification.permission === 'granted';
-    notifBtn.classList.toggle('enabled', granted);
-    notifBtn.textContent = granted ? '🔔 Notifications On' : '🔔 Enable Notifications';
+    if (!notifSupported) {
+      notifBtn.disabled = true;
+      notifBtn.textContent = '🔕 Notifications not supported';
+      return;
+    }
+    const perm = Notification.permission;
+    notifBtn.classList.toggle('enabled', perm === 'granted');
+    notifBtn.textContent = perm === 'granted' ? '🔔 Notifications On'
+      : perm === 'denied' ? '🔕 Blocked in browser settings'
+      : '🔔 Enable Notifications';
   }
   updateNotifBtn();
   notifBtn.addEventListener('click', () => {
-    if (Notification.permission === 'granted') return;
-    Notification.requestPermission().then(() => updateNotifBtn());
+    if (!notifSupported || Notification.permission !== 'default') return;
+    Notification.requestPermission().then(updateNotifBtn);
   });
 
-  const notified = new Set(JSON.parse(sessionStorage.getItem('plannedNotified') || '[]'));
   function checkNotifications() {
-    if (Notification.permission !== 'granted') return;
+    if (!notifSupported || Notification.permission !== 'granted') return;
+    const stored = JSON.parse(localStorage.getItem(PLANNER_KEY) || '{}');
+    const notified = new Set(JSON.parse(sessionStorage.getItem('plannedNotified') || '[]'));
     const n = new Date();
     const dayKey = DAYS[n.getDay()];
-    (planner[dayKey] || []).forEach(b => {
+    (stored[dayKey] || []).forEach(b => {
+      if (!b.time) return;
       const [h, m] = b.time.split(':').map(Number);
       const blockTime = new Date(n); blockTime.setHours(h, m, 0, 0);
       const diff = blockTime - n;
@@ -461,10 +483,10 @@ body.schedule-page {
       }
     });
   }
+  // Pages are swapped without a reload, so keep a single shared timer.
+  clearInterval(window.__plannerNotifTimer);
   checkNotifications();
-  setInterval(checkNotifications, 60000);
-
-  renderPlanner();
+  window.__plannerNotifTimer = setInterval(checkNotifications, 60000);
 })();
 </script>
 {% endblock %}

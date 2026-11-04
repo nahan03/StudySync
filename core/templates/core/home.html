@@ -1132,24 +1132,27 @@ body.home-page {
   // Notifications
   const notifBtn = document.getElementById('planner-notif-btn');
   function updateNotifBtn() {
+    if (!('Notification' in window)) { notifBtn.disabled = true; notifBtn.textContent = '🔕 Notifications not supported'; return; }
     const perm = Notification.permission;
     notifBtn.classList.toggle('enabled', perm === 'granted');
     notifBtn.textContent = perm === 'granted' ? '🔔 Notifications On' : '🔔 Enable Notifications';
   }
   updateNotifBtn();
   notifBtn.addEventListener('click', () => {
-    if (Notification.permission === 'granted') return;
+    if (!('Notification' in window) || Notification.permission === 'granted') return;
     Notification.requestPermission().then(p => { updateNotifBtn(); });
   });
 
   // Check every 60s if a session is about to start (within 10 minutes)
-  const notifiedSessions = new Set(JSON.parse(sessionStorage.getItem('plannedNotified') || '[]'));
   function checkNotifications() {
-    if (Notification.permission !== 'granted') return;
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const notifiedSessions = new Set(JSON.parse(sessionStorage.getItem('plannedNotified') || '[]'));
+    const stored = JSON.parse(localStorage.getItem(PLANNER_KEY) || '{}');
     const n = new Date();
     const dayKey = DAYS[n.getDay()];
-    const blocks = planner[dayKey] || [];
+    const blocks = stored[dayKey] || [];
     blocks.forEach(b => {
+      if (!b.time) return;
       const [h, m] = b.time.split(':').map(Number);
       const blockTime = new Date(n); blockTime.setHours(h, m, 0, 0);
       const diff = blockTime - n;
@@ -1164,8 +1167,9 @@ body.home-page {
       }
     });
   }
+  clearInterval(window.__plannerNotifTimer);
   checkNotifications();
-  setInterval(checkNotifications, 60000);
+  window.__plannerNotifTimer = setInterval(checkNotifications, 60000);
 
   renderPlanner();
 })();
