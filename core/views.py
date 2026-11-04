@@ -7,6 +7,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from datetime import date as _date
+from .models import StudySession
 
 GROQ_MODEL = 'llama-3.3-70b-versatile'
 
@@ -114,6 +117,45 @@ def test_api(request):
         return JsonResponse({'status': 'ok', 'response': r.choices[0].message.content.strip()})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+def _clean_session(item):
+    """Validate one session dict from the client. Returns StudySession kwargs or None."""
+    if not isinstance(item, dict):
+        return None
+    try:
+        day = _date.fromisoformat(str(item.get('date', ''))[:10])
+        hours = float(item.get('hours', 0))
+    except (ValueError, TypeError):
+        return None
+    if not (0 <= hours <= 24):
+        return None
+    mode = item.get('mode', 'daily')
+    if mode not in dict(StudySession.MODE_CHOICES):
+        mode = 'daily'
+    subject = str(item.get('subject') or 'Study')[:120]
+    return {'date': day, 'subject': subject, 'hours': hours, 'mode': mode}
+
+
+@login_required
+@require_POST
+def record_sessions(request):
+    """Save one session ({...}) or a batch ({"sessions": [...]}) for the current user."""
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    items = body.get('sessions') if isinstance(body, dict) and 'sessions' in body else [body]
+    if not isinstance(items, list) or len(items) > 1000:
+        return JsonResponse({'error': 'Invalid payload'}, status=400)
+    rows = [StudySession(user=request.user, **c) for c in map(_clean_session, items) if c]
+    StudySession.objects.bulk_create(rows)
+    return JsonResponse({'saved': len(rows)})
+
+
+@login_required
+def list_sessions(request):
+    return JsonResponse({'sessions': [s.as_dict() for s in StudySession.objects.filter(user=request.user)]})
 
 
 @login_required

@@ -372,7 +372,9 @@ ${face(100,146,'#3E2000')}`;
   function recordSessionHistory() {
     const hist = JSON.parse(localStorage.getItem('studySyncSessionHistory') || '[]');
     const today = new Date().toISOString().split('T')[0];
-    hist.push({ date: today, subject: planSubject, hours: planHours / 5, mode: 'daily' });
+    const entry = { date: today, subject: planSubject, hours: planHours / 5, mode: 'daily' };
+    hist.push(entry);
+    window.StudySyncAPI && window.StudySyncAPI.recordSession(entry);
     localStorage.setItem('studySyncSessionHistory', JSON.stringify(hist));
   }
 

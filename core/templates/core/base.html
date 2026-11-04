@@ -87,6 +87,8 @@
 
     <!-- Global Alert -->
     <div id="global-toast" class="toast"></div>
+    {% if sync_payload %}{{ sync_payload|json_script:"server-session-history" }}{% endif %}
+    <script src="{% static 'js/sync.js' %}?v=1"></script>
     <script src="{% static 'js/alert.js' %}"></script>
     <script src="{% static 'js/music_player.js' %}?v=11" defer></script>
     <script src="{% static 'js/global_ui.js' %}?v=1" defer></script>

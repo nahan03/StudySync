@@ -156,7 +156,9 @@ ssReady(() => {
     if (window.StudyTree) window.StudyTree.update(sessionsDone, plan.subject || 'Study');
     $('prog-tree').textContent = sessionsDone + '/5';
     const hist = JSON.parse(localStorage.getItem('studySyncSessionHistory') || '[]');
-    hist.push({ date: new Date().toISOString().split('T')[0], subject: plan.subject || 'Study', hours: totalSecs / 3600, mode: 'custom' });
+    const entry = { date: new Date().toISOString().split('T')[0], subject: plan.subject || 'Study', hours: totalSecs / 3600, mode: 'custom' };
+    hist.push(entry);
+    window.StudySyncAPI && window.StudySyncAPI.recordSession(entry);
     localStorage.setItem('studySyncSessionHistory', JSON.stringify(hist));
     timeLeft = totalSecs; elapsed = 0;
     renderRing();

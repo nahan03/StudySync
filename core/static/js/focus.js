@@ -529,7 +529,9 @@ ssReady(() => {
       window.StudyTree.update(examSessions, plan.subject || 'Study');
     }
     const hist = JSON.parse(localStorage.getItem('studySyncSessionHistory') || '[]');
-    hist.push({ date: new Date().toISOString().split('T')[0], subject: plan.subject || 'Study', hours: FOCUS_SECS / 3600, mode: 'exam' });
+    const entry = { date: new Date().toISOString().split('T')[0], subject: plan.subject || 'Study', hours: FOCUS_SECS / 3600, mode: 'exam' };
+    hist.push(entry);
+    window.StudySyncAPI && window.StudySyncAPI.recordSession(entry);
     localStorage.setItem('studySyncSessionHistory', JSON.stringify(hist));
     setTimeout(() => showTreeGrowthOverlay(hist.length), 600);
   }
