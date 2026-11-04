@@ -30,6 +30,19 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dev-only-chang
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = [h for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if h]
+CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',') if o]
+
+if not DEBUG:
+    if SECRET_KEY.startswith('django-insecure') or SECRET_KEY == 'change-me':
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured('Set a strong DJANGO_SECRET_KEY when DJANGO_DEBUG is False.')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # Set DJANGO_SSL_REDIRECT=False if TLS is not terminated in front of the app.
+    SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SSL_REDIRECT', 'True').lower() == 'true'
+    SECURE_HSTS_SECONDS = int(os.environ.get('DJANGO_HSTS_SECONDS', '3600'))
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 
 # Application definition

@@ -58,3 +58,6 @@ opencode/
 package.json
 package-lock.json
 core/static/images/img1.png
+
+# Local docs
+StudySync_Technology_Architecture_Processes.pdf

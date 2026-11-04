@@ -13,14 +13,24 @@ from .models import StudySession
 
 GROQ_MODEL = 'llama-3.3-70b-versatile'
 
+class AIUnavailable(Exception):
+    """Raised when the AI backend is not configured on this server."""
+
+
 def _groq_client():
     api_key = os.environ.get('GROQ_API_KEY', '')
     if not api_key:
-        raise ValueError('GROQ_API_KEY not configured on server')
+        raise AIUnavailable('AI features are not configured on this server (missing GROQ_API_KEY).')
     from groq import Groq
     return Groq(api_key=api_key)
 
 def _groq_error(e):
+    if isinstance(e, AIUnavailable):
+        return JsonResponse({'error': str(e)}, status=503)
+    if isinstance(e, json.JSONDecodeError):
+        return JsonResponse(
+            {'error': 'The AI returned an unreadable response — please try again.'}, status=502
+        )
     msg = str(e)
     if '429' in msg or 'rate_limit' in msg.lower():
         if 'per_day' in msg.lower() or 'daily' in msg.lower():
@@ -28,7 +38,9 @@ def _groq_error(e):
         else:
             detail = 'Too many requests — wait a few seconds and try again.'
         return JsonResponse({'error': detail}, status=429)
-    return JsonResponse({'error': msg}, status=500)
+    return JsonResponse({'error': 'AI request failed. Please try again.'}, status=500)
+
+
 @login_required(login_url='login')
 def home(request):
     return render(request, 'core/home.html')
@@ -115,6 +127,8 @@ def test_api(request):
         client = _groq_client()
         r = client.chat.completions.create(model=GROQ_MODEL, messages=[{"role": "user", "content": 'Say ok'}])
         return JsonResponse({'status': 'ok', 'response': r.choices[0].message.content.strip()})
+    except AIUnavailable as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=503)
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
 
@@ -213,8 +227,13 @@ def generate_questions(request):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     context_text  = body.get('context', '').strip()
-    num_questions = min(int(body.get('num_questions', 10)), 50)
+    try:
+        num_questions = max(1, min(int(body.get('num_questions', 10)), 50))
+    except (TypeError, ValueError):
+        return JsonResponse({'error': 'num_questions must be a number'}, status=400)
     types         = body.get('types', ['mcq'])
+    if not isinstance(types, list):
+        return JsonResponse({'error': 'types must be a list'}, status=400)
 
     if not context_text:
         return JsonResponse({'error': 'No content provided'}, status=400)
@@ -345,6 +364,7 @@ def study_coach(request):
         return _groq_error(e)
 
 
+@login_required
 @csrf_exempt
 def pdf_chat(request):
     if request.method != 'POST':
@@ -368,6 +388,7 @@ def pdf_chat(request):
         return _groq_error(e)
 
 
+@login_required
 @csrf_exempt
 def pdf_summary(request):
     if request.method != 'POST':
