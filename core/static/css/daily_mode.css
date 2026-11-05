@@ -4531,3 +4531,11 @@ body.dm-day .dm-sun-rays {
   .dm-sidebar { padding: 12px; }
   .dm-timer-card { flex-wrap: wrap; justify-content: center; }
 }
+
+/* Study-tree pill: icon-only on phones so it stops covering the timeline */
+@media (max-width: 560px) {
+  body .st-widget { bottom: 72px; right: 12px; }
+  .st-widget .st-pill { padding: 5px; gap: 0; }
+  .st-widget .st-pill-label,
+  .st-widget .st-pill-chevron { display: none; }
+}

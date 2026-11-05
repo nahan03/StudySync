@@ -412,3 +412,15 @@ body.signup-page #gmp-bar,
 body.signup-page #gmp-panel {
   display: none !important;
 }
+
+/* Account page */
+.account-container { width: min(92vw, 480px); }
+.account-user { text-align: center; color: #e5d2c2; margin: -0.8rem 0 1rem; }
+.account-h { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin: 2rem 0 0.6rem; }
+.account-h:first-of-type { margin-top: 1rem; }
+.account-note { font-size: 0.9rem; color: #e5d2c2; line-height: 1.5; }
+.account-link-btn { display: block; text-align: center; margin-top: 1rem; }
+.account-danger { color: #ffb4aa; }
+.account-delete-btn { background: linear-gradient(135deg, #a8392f, #d2584b); color: #fff; }
+.account-delete-btn:hover { box-shadow: 0 10px 24px rgba(210, 88, 75, 0.35); }
+body.account-page #gmp-bar, body.account-page #gmp-panel { display: none !important; }

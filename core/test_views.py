@@ -7,6 +7,7 @@ import sys
 from unittest import mock
 
 from django.conf import settings
+from django.core.cache import cache
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -32,6 +33,7 @@ AI_ENDPOINTS = ('generate_flashcards', 'generate_questions', 'study_coach', 'pdf
 @override_settings(STORAGES=STATIC_OVERRIDE)
 class AIEndpointTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user('alice', password='pw12345!')
 
     def post(self, name, payload):

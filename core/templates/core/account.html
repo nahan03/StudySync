@@ -1,0 +1,49 @@
+{% extends 'core/base.html' %}
+{% block body_class %}login-page account-page{% endblock %}
+{% block title %}Account{% endblock %}
+
+{% block content %}
+<nav class="top-navbar">
+    <div class="nav-left"><a href="{% url 'home' %}" class="brand">StudySync</a></div>
+    <div class="nav-right">
+        <a href="{% url 'home' %}" class="nav-link">&larr; Home</a>
+        <a href="{% url 'logout' %}" class="nav-link">Log out</a>
+    </div>
+</nav>
+
+<div class="auth-container account-container">
+    <h2>Account</h2>
+    <p class="account-user">Signed in as <strong>{{ request.user.username }}</strong></p>
+
+    {% for message in messages %}
+        <div class="alert {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+
+    <h3 class="account-h">Change password</h3>
+    <form method="POST" action="{% url 'account' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="password">
+        <label for="id_old_password">Current password</label>
+        <input type="password" name="old_password" id="id_old_password" autocomplete="current-password" required>
+        <label for="id_new_password1">New password</label>
+        <input type="password" name="new_password1" id="id_new_password1" autocomplete="new-password" required>
+        <label for="id_new_password2">Confirm new password</label>
+        <input type="password" name="new_password2" id="id_new_password2" autocomplete="new-password" required>
+        {% for field in form %}{% for error in field.errors %}<div class="alert error">{{ error }}</div>{% endfor %}{% endfor %}
+        <button type="submit" class="auth-btn">Update password</button>
+    </form>
+
+    <h3 class="account-h">Your data</h3>
+    <p class="account-note">Download your study sessions, schedule, flashcards and other saved data as JSON.</p>
+    <a href="{% url 'export_data' %}" class="auth-btn account-link-btn">Download my data</a>
+
+    <h3 class="account-h account-danger">Delete account</h3>
+    <p class="account-note">Permanently deletes your account and all synced data. This cannot be undone.</p>
+    <form method="POST" action="{% url 'delete_account' %}" onsubmit="return confirm('Delete your account and all data? This cannot be undone.');">
+        {% csrf_token %}
+        <label for="del_password">Confirm with your password</label>
+        <input type="password" name="password" id="del_password" autocomplete="current-password" required>
+        <button type="submit" class="auth-btn account-delete-btn">Delete my account</button>
+    </form>
+</div>
+{% endblock %}

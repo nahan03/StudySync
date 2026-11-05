@@ -1,11 +1,14 @@
 import json
 import os
+from functools import wraps
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.core.cache import cache
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from datetime import date as _date
 from django.contrib.auth.password_validation import validate_password
@@ -14,6 +17,37 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from .models import StudySession, UserState
 
 GROQ_MODEL = 'llama-3.3-70b-versatile'
+
+
+def ai_rate_limit(view):
+    """Per-user cap on AI POST requests so one account can't burn the shared Groq quota.
+
+    Configure with AI_RATE_LIMIT (requests) and AI_RATE_WINDOW (seconds). The counter
+    lives in Django's cache, which is per-process with the default local-memory cache;
+    configure a shared cache (Redis/Memcached) for an exact cap across workers.
+    """
+    @wraps(view)
+    def wrapper(request, *args, **kwargs):
+        if request.method == 'POST':
+            limit = int(os.environ.get('AI_RATE_LIMIT', '30'))
+            window = int(os.environ.get('AI_RATE_WINDOW', '600'))
+            key = f'ai-rate:{request.user.pk}'
+            cache.add(key, 0, window)
+            try:
+                count = cache.incr(key)
+            except ValueError:  # expired between add and incr
+                cache.set(key, 1, window)
+                count = 1
+            if count > limit:
+                resp = JsonResponse(
+                    {'error': 'You have made a lot of AI requests recently. Please wait a few minutes.'},
+                    status=429,
+                )
+                resp['Retry-After'] = str(window)
+                return resp
+        return view(request, *args, **kwargs)
+    return wrapper
+
 
 class AIUnavailable(Exception):
     """Raised when the AI backend is not configured on this server."""
@@ -210,6 +244,7 @@ def list_sessions(request):
 
 
 @login_required
+@ai_rate_limit
 def generate_flashcards(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -252,6 +287,7 @@ Remember: output ONLY the JSON array. Start with [ and end with ]."""
 
 
 @login_required
+@ai_rate_limit
 def generate_questions(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -370,6 +406,7 @@ def music_search(request):
 
 
 @login_required
+@ai_rate_limit
 def study_coach(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -399,6 +436,7 @@ def study_coach(request):
 
 
 @login_required
+@ai_rate_limit
 def pdf_chat(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -422,6 +460,7 @@ def pdf_chat(request):
 
 
 @login_required
+@ai_rate_limit
 def pdf_summary(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -514,3 +553,40 @@ Remember: output ONLY the JSON array. Start your response with [ and end with ].
 """
 
 
+@login_required
+def account(request):
+    """Change password, export data, delete account."""
+    form = PasswordChangeForm(request.user)
+    if request.method == 'POST' and request.POST.get('action') == 'password':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # keep the user logged in
+            messages.success(request, 'Password updated')
+            return redirect('account')
+    return render(request, 'core/account.html', {'form': form})
+
+
+@login_required
+def export_data(request):
+    data = {
+        'username': request.user.get_username(),
+        'sessions': [s.as_dict() for s in StudySession.objects.filter(user=request.user)],
+        'state': dict(UserState.objects.filter(user=request.user).values_list('key', 'value')),
+    }
+    resp = HttpResponse(json.dumps(data, indent=2), content_type='application/json')
+    resp['Content-Disposition'] = 'attachment; filename="studysync-data.json"'
+    return resp
+
+
+@login_required
+@require_POST
+def delete_account(request):
+    if not request.user.check_password(request.POST.get('password', '')):
+        messages.error(request, 'Incorrect password. Your account was not deleted.')
+        return redirect('account')
+    user = request.user
+    logout(request)
+    user.delete()  # sessions and synced data cascade
+    messages.success(request, 'Your account and data were deleted')
+    return redirect('login')

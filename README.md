@@ -42,16 +42,20 @@ Set these in `.env`:
 | `DJANGO_HSTS_SECONDS` | HSTS max-age in production (default `3600`; raise it once HTTPS is confirmed). |
 | `GROQ_API_KEY` | Powers the AI features. Get one at https://console.groq.com. |
 | `YOUTUBE_API_KEY` | Powers music search. |
+| `DATABASE_URL` | Production database, for example `postgres://user:pass@host:5432/dbname`. Falls back to local SQLite when unset. |
+| `AI_RATE_LIMIT` / `AI_RATE_WINDOW` | Max AI requests per user (default `30`) per window in seconds (default `600`). |
 
 ## Deployment
 
-Static files are served with WhiteNoise. Before deploying, run:
+The repo includes a `Procfile` (`gunicorn` web process plus a `migrate` release step) that works on Heroku-style hosts such as Render, Railway or Fly. On a plain VPS, run `gunicorn StudySync.wsgi` behind a reverse proxy that terminates HTTPS.
 
-```bash
-python manage.py collectstatic --noinput
-```
+1. Set `DJANGO_DEBUG=False`, a strong `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_CSRF_TRUSTED_ORIGINS`, `DATABASE_URL`, `GROQ_API_KEY` and `YOUTUBE_API_KEY`.
+2. Build step: `pip install -r requirements.txt && python manage.py collectstatic --noinput`.
+3. Release step: `python manage.py migrate --noinput`.
 
-and set `DJANGO_DEBUG=False`, a strong `DJANGO_SECRET_KEY`, and `DJANGO_ALLOWED_HOSTS`.
+Static files are served with WhiteNoise. Use a persistent database (Postgres) in production, because SQLite files are lost on hosts with ephemeral disks. The AI rate limit uses Django's cache, which is per-process by default; configure a shared cache if you run several workers and need an exact cap.
+
+Users can change their password, download their data, and delete their account from `/account/`.
 
 ## Data and sync
 
