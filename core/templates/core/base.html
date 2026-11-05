@@ -5,6 +5,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>StudySync | {% block title %}{% endblock %}</title>
 
     {% load static %}
@@ -22,6 +23,8 @@
       }
     };
     </script>
+    {% if sync_payload %}{{ sync_payload|json_script:"server-session-history" }}{% endif %}
+    <script src="{% static 'js/sync.js' %}?v=3"></script>
 
 </head>
 
@@ -87,8 +90,6 @@
 
     <!-- Global Alert -->
     <div id="global-toast" class="toast"></div>
-    {% if sync_payload %}{{ sync_payload|json_script:"server-session-history" }}{% endif %}
-    <script src="{% static 'js/sync.js' %}?v=1"></script>
     <script src="{% static 'js/alert.js' %}"></script>
     <script src="{% static 'js/music_player.js' %}?v=11" defer></script>
     <script src="{% static 'js/global_ui.js' %}?v=1" defer></script>

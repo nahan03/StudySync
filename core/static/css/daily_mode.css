@@ -4491,3 +4491,43 @@ body.dm-day .dm-sun-rays {
 }
 
 
+
+/* ── Saved flashcard decks (Exam mode) ── */
+.dm-fc-decks {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  margin: 0 0 14px;
+}
+.dm-fc-decks select {
+  flex: 1 1 180px; min-width: 0; max-width: 320px;
+  padding: 8px 12px; border-radius: 10px; font: inherit; font-size: 13px;
+  color: var(--cream, #f6edd8); background: rgba(30,20,10,0.9); border: 1px solid rgba(255,255,255,0.14);
+  color-scheme: dark;
+}
+.dm-fc-decks .dm-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ── Daily mode: phone/tablet fixes ── */
+@media (max-width: 900px) {
+  .dm-sidebar > * { flex: 1 1 280px; min-width: 0; }
+  .dm-main, .dm-layout > * { min-width: 0; }
+}
+
+@media (max-width: 560px) {
+  /* top bar wraps instead of pushing buttons off-screen */
+  .dm-topbar {
+    height: auto;
+    min-height: 52px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    gap: 6px 10px;
+  }
+  .dm-topbar-left { flex: 1 1 100%; }
+  .dm-topbar-right {
+    flex: 1 1 100%;
+    flex-shrink: 1;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .dm-topbar-btn { padding: 5px 11px; }
+  .dm-sidebar { padding: 12px; }
+  .dm-timer-card { flex-wrap: wrap; justify-content: center; }
+}

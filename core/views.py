@@ -6,10 +6,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from datetime import date as _date
-from .models import StudySession
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.utils.http import url_has_allowed_host_and_scheme
+from .models import StudySession, UserState
 
 GROQ_MODEL = 'llama-3.3-70b-versatile'
 
@@ -47,35 +49,30 @@ def home(request):
 
 
 
-# def signup_view(request):
-#     if request.method == "POST":
-#         username = request.POST.get("username")
-#         password = request.POST.get("password")
-
-#         User.objects.create_user(username=username, password=password)
-#         messages.success(request, "Account created successfully!")
-#         return redirect('login')
-
-#     return render(request, 'core/signup.html')
 def signup_view(request):
     if request.method == 'POST':
-        print(request.POST)
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
         password2 = request.POST.get('password2', '')
 
-        if password == password2:
-            if User.objects.filter(username=username).exists():
-                messages.error(request, 'Username already taken')
-                return redirect('signup')
-            else:
-                user = User.objects.create_user(username=username, password=password)
-                user.save()
-                messages.success(request, 'Account created successfully')
-                return redirect('login')
-        else:
+        if not username:
+            messages.error(request, 'Username is required')
+            return redirect('signup')
+        if password != password2:
             messages.error(request, 'Passwords do not match')
             return redirect('signup')
+        if User.objects.filter(username__iexact=username).exists():
+            messages.error(request, 'Username already taken')
+            return redirect('signup')
+        try:
+            validate_password(password, User(username=username))
+        except ValidationError as e:
+            for msg in e.messages:
+                messages.error(request, msg)
+            return redirect('signup')
+        User.objects.create_user(username=username, password=password)
+        messages.success(request, 'Account created successfully')
+        return redirect('login')
     return render(request, 'core/signup.html')
 
 
@@ -87,11 +84,15 @@ def login_view(request):
         if user is not None:
             login(request, user)
             # redirect to 'next' page if present, else home
-            next_page = request.GET.get('next', 'home')
-            return redirect(next_page)
+            next_page = request.GET.get('next', '')
+            if next_page and url_has_allowed_host_and_scheme(
+                next_page, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+            ):
+                return redirect(next_page)
+            return redirect('home')
         else:
             messages.error(request, "Invalid credentials")
-            return redirect('login')
+            return redirect(request.get_full_path())
     return render(request, 'core/login.html')
 
 def logout_view(request):
@@ -99,12 +100,15 @@ def logout_view(request):
     messages.success(request, 'Logged out successfully')
     return redirect('login')
 
+@login_required
 def daily_mode(request):
     return render(request, 'core/daily_mode.html')
 
+@login_required
 def exam_mode(request):
     return render(request, 'core/exam_mode.html')
 
+@login_required
 def custom_mode(request):
     return render(request, 'core/custom_mode.html')
 
@@ -168,12 +172,44 @@ def record_sessions(request):
 
 
 @login_required
+@require_POST
+def save_state(request):
+    """Upsert synced browser data: {"changes": {key: string | null}}. null deletes the key."""
+    try:
+        changes = json.loads(request.body).get('changes')
+    except (json.JSONDecodeError, AttributeError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    if not isinstance(changes, dict):
+        return JsonResponse({'error': 'Invalid payload'}, status=400)
+    saved = 0
+    for key, value in changes.items():
+        if key not in UserState.SYNCED_KEYS:
+            continue
+        if value is None:
+            UserState.objects.filter(user=request.user, key=key).delete()
+        elif isinstance(value, str) and len(value) <= UserState.MAX_VALUE_CHARS:
+            UserState.objects.update_or_create(
+                user=request.user, key=key, defaults={'value': value}
+            )
+        else:
+            continue
+        saved += 1
+    return JsonResponse({'saved': saved})
+
+
+@login_required
+def get_state(request):
+    return JsonResponse({'state': dict(
+        UserState.objects.filter(user=request.user).values_list('key', 'value')
+    )})
+
+
+@login_required
 def list_sessions(request):
     return JsonResponse({'sessions': [s.as_dict() for s in StudySession.objects.filter(user=request.user)]})
 
 
 @login_required
-@csrf_exempt
 def generate_flashcards(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -216,7 +252,6 @@ Remember: output ONLY the JSON array. Start with [ and end with ]."""
 
 
 @login_required
-@csrf_exempt
 def generate_questions(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -335,7 +370,6 @@ def music_search(request):
 
 
 @login_required
-@csrf_exempt
 def study_coach(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -365,7 +399,6 @@ def study_coach(request):
 
 
 @login_required
-@csrf_exempt
 def pdf_chat(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -389,7 +422,6 @@ def pdf_chat(request):
 
 
 @login_required
-@csrf_exempt
 def pdf_summary(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)

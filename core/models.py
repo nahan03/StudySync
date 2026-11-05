@@ -34,3 +34,42 @@ class StudySession(models.Model):
             'hours': self.hours,
             'mode': self.mode,
         }
+
+
+class UserState(models.Model):
+    """Per-user copy of a browser-side data blob (schedule, flashcards, streak, ...).
+
+    `value` holds the exact string the front-end keeps in localStorage.
+    Only keys in SYNCED_KEYS are accepted; transient per-device state
+    (running timers, music player) is deliberately excluded.
+    """
+
+    SYNCED_KEYS = frozenset({
+        'studySyncPlanner',          # weekly schedule
+        'studySyncFlashcards',       # flashcards
+        'studySyncDecks',            # saved flashcard decks
+        'studySyncFcStats',          # flashcard study stats
+        'studySyncStreak',           # study streak
+        'studySyncProfile',          # onboarding profile
+        'studySyncGoals',
+        'studySyncSubjectSessions',
+        'studySyncDailyRefs',
+        'studySyncCustomNotes',
+        'studySyncTree_daily',       # forest / tree progress
+        'studySyncTree_custom',
+        'studySyncTree_exam',
+    })
+    MAX_VALUE_CHARS = 1_000_000
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='states'
+    )
+    key = models.CharField(max_length=64)
+    value = models.TextField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['user', 'key'], name='uniq_user_state_key')]
+
+    def __str__(self):
+        return f'{self.user}:{self.key}'

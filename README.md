@@ -37,6 +37,9 @@ Set these in `.env`:
 | `DJANGO_SECRET_KEY` | Django secret key. Required in production. |
 | `DJANGO_DEBUG` | `True` for development, `False` in production. |
 | `DJANGO_ALLOWED_HOSTS` | Comma-separated hostnames, for example `example.com,www.example.com`. |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | Comma-separated origins with scheme, for example `https://example.com`. |
+| `DJANGO_SSL_REDIRECT` | Defaults to `True` when `DJANGO_DEBUG=False`. Set `False` if TLS is not terminated in front of the app. |
+| `DJANGO_HSTS_SECONDS` | HSTS max-age in production (default `3600`; raise it once HTTPS is confirmed). |
 | `GROQ_API_KEY` | Powers the AI features. Get one at https://console.groq.com. |
 | `YOUTUBE_API_KEY` | Powers music search. |
 
@@ -49,3 +52,15 @@ python manage.py collectstatic --noinput
 ```
 
 and set `DJANGO_DEBUG=False`, a strong `DJANGO_SECRET_KEY`, and `DJANGO_ALLOWED_HOSTS`.
+
+## Data and sync
+
+Study sessions are stored in the database (`StudySession`). The schedule, flashcards, saved decks, streak, profile, goals and tree progress are stored per user in `UserState`. The pages keep using localStorage as a working copy: `core/static/js/sync.js` loads the server copy on page load and pushes later changes back. Running timers and music-player state stay per device. Only keys listed in `UserState.SYNCED_KEYS` are accepted.
+
+## Tests
+
+```bash
+python manage.py test
+```
+
+The AI and music-search tests mock Groq, iTunes and YouTube, so they need no API keys or network.

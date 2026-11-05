@@ -21,7 +21,7 @@
             <div class="alert {{ message.tags }}">{{ message }}</div>
         {% endfor %}
     {% endif %}
-    <form method="POST" action="{% url 'login' %}">
+    <form method="POST" action="">
         {% csrf_token %}
         <label for="username">Username</label>
         <input type="text" name="username" id="username" required>

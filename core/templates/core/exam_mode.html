@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/focus.css' %}?v=19">
-<link rel="stylesheet" href="{% static 'css/daily_mode.css' %}?v=24">
+<link rel="stylesheet" href="{% static 'css/daily_mode.css' %}?v=26">
 <style>
 .em-sea   { display: none !important; }
 .em-waves { display: none !important; }
@@ -259,6 +259,13 @@
         <p>Extracting key terms with AI…</p>
       </div>
 
+      <div class="dm-fc-decks" id="fc-decks-bar">
+        <select id="fc-deck-select" aria-label="Saved decks"><option value="">Saved decks…</option></select>
+        <button class="dm-btn dm-btn-ghost dm-btn-sm" id="fc-deck-load" disabled>Load</button>
+        <button class="dm-btn dm-btn-ghost dm-btn-sm" id="fc-deck-delete" disabled>Delete</button>
+        <button class="dm-btn dm-btn-ghost dm-btn-sm" id="fc-deck-save">💾 Save as deck</button>
+      </div>
+
       <div id="fc-deck-section">
         <div class="dm-fc-empty hidden" id="fc-empty">
           <span class="dm-empty-icon">🃏</span>
@@ -438,6 +445,7 @@
 <script src="{% static 'js/tree_widget.js' %}?v=11" defer></script>
 <script src="{% static 'js/focus.js' %}?v=27" defer></script>
 <script src="{% static 'js/exam_features.js' %}?v=5" defer></script>
+<script src="{% static 'js/exam_decks.js' %}?v=1" defer></script>
 <script>
 // ── Forest River scene ────────────────────────────────────
 (function () {
