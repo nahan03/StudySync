@@ -13,7 +13,9 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4">
     <link rel="stylesheet" href="{% static 'css/alert.css' %}">
     <link rel="stylesheet" href="{% static 'css/music_player.css' %}?v=5">
+    <meta name="ss-page-css-start">
     {% block extra_css %}{% endblock %}
+    <meta name="ss-page-css-end">
     <script>
     window.ssReady = function ssReady(fn) {
       if (document.readyState === 'loading') {
@@ -466,6 +468,37 @@
       var ssContent = document.getElementById('ss-content');
       if (!ssContent) return;
 
+      /* Each page keeps its own CSS in <head> between two marker <meta> tags.
+         Swap that range when navigating, otherwise the new page renders unstyled.
+         New styles are added first and awaited, so the old page never flashes unstyled. */
+      function swapPageCss(doc) {
+        function markers(head) {
+          return {
+            s: head.querySelector('meta[name="ss-page-css-start"]'),
+            e: head.querySelector('meta[name="ss-page-css-end"]')
+          };
+        }
+        var cur = markers(document.head), nxt = markers(doc.head);
+        if (!cur.s || !cur.e || !nxt.s || !nxt.e) return Promise.resolve();
+
+        var oldNodes = [];
+        for (var n = cur.s.nextSibling; n && n !== cur.e; n = n.nextSibling) oldNodes.push(n);
+
+        var loads = [];
+        for (var m = nxt.s.nextSibling; m && m !== nxt.e; m = m.nextSibling) {
+          if (m.nodeType !== 1) continue;
+          var copy = document.importNode(m, true);
+          if (copy.tagName === 'LINK' && (copy.getAttribute('rel') || '').toLowerCase() === 'stylesheet') {
+            loads.push(new Promise(function(resolve) { copy.onload = copy.onerror = resolve; }));
+          }
+          cur.e.parentNode.insertBefore(copy, cur.e);
+        }
+        var timeout = new Promise(function(resolve) { setTimeout(resolve, 3000); });
+        return Promise.race([Promise.all(loads), timeout]).then(function() {
+          oldNodes.forEach(function(node) { if (node.parentNode) node.parentNode.removeChild(node); });
+        });
+      }
+
       function navigateTo(url) {
         if (!url || url === location.href || url.startsWith('javascript:')) return;
         fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
@@ -480,6 +513,7 @@
             var newContent = doc.getElementById('ss-content');
             if (!newContent) { window.location.href = url; return; }
 
+            return swapPageCss(doc).then(function() {
             var newTitle = doc.title;
             var newBodyClass = doc.body.className;
 
@@ -511,6 +545,7 @@
             /* preserve is-fullscreen class across navigations */
             document.body.className = (document.body.className.match(/(^|\s)is-fullscreen(\s|$)/) ? 'is-fullscreen ' : '') + newBodyClass;
             history.pushState({ url: url }, '', url);
+            });
           })
           .catch(function() { window.location.href = url; });
       }
