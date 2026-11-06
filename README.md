@@ -71,4 +71,4 @@ The AI and music-search tests mock Groq, iTunes and YouTube, so they need no API
 
 ## Wallpapers
 
-The Study page has eight animated wallpapers (drawn live on a canvas, see `core/static/js/live_bg.js`) and supports real footage. Drop looping `.mp4`/`.webm` clips into `core/static/wallpapers/` (see the README there) and they appear in Appearance -> Real footage; users can also play a clip from their own device with **My video**. Only use footage you have the rights to.
+The Study page has seven animated wallpapers (drawn live on a canvas, see `core/static/js/live_bg.js`) and supports real footage. Drop looping `.mp4`/`.webm` clips into `core/static/wallpapers/` (see the README there) and they appear in Appearance -> Real footage; users can also play a clip from their own device with **My video**. Only use footage you have the rights to.

@@ -261,7 +261,6 @@ body.study-page #gmp-bar { z-index: 40; }
 }
 .st-root[data-bg="plain"] .bgl-base { background: var(--bg1); }
 .st-root[data-bg="forest"] .bg-canvas,
-.st-root[data-bg="rain"] .bg-canvas,
 .st-root[data-bg="stars"] .bg-canvas,
 .st-root[data-bg="aurora"] .bg-canvas,
 .st-root[data-bg="ocean"] .bg-canvas,
@@ -271,7 +270,6 @@ body.study-page #gmp-bar { z-index: 40; }
 .st-root[data-bg="image"] .bgl-image { display: block; }
 .bgl-dim { display: none; background: #000; opacity: var(--dim, .15); }
 .st-root[data-bg="forest"] .bgl-dim,
-.st-root[data-bg="rain"] .bgl-dim,
 .st-root[data-bg="stars"] .bgl-dim,
 .st-root[data-bg="aurora"] .bgl-dim,
 .st-root[data-bg="ocean"] .bgl-dim,
@@ -354,7 +352,6 @@ body.study-page #gmp-bar { z-index: 40; }
 
 /* the light theme over a dark live wallpaper: keep text readable by borrowing the dark palette */
 .st-root[data-theme="paper"][data-bg="forest"],
-.st-root[data-theme="paper"][data-bg="rain"],
 .st-root[data-theme="paper"][data-bg="stars"],
 .st-root[data-theme="paper"][data-bg="aurora"],
 .st-root[data-theme="paper"][data-bg="ocean"],
@@ -367,8 +364,6 @@ body.study-page #gmp-bar { z-index: 40; }
 }
 .st-root[data-theme="paper"][data-bg="forest"] .st-card,
 .st-root[data-theme="paper"][data-bg="forest"] .st-tree-card,
-.st-root[data-theme="paper"][data-bg="rain"] .st-card,
-.st-root[data-theme="paper"][data-bg="rain"] .st-tree-card,
 .st-root[data-theme="paper"][data-bg="stars"] .st-card,
 .st-root[data-theme="paper"][data-bg="stars"] .st-tree-card,
 .st-root[data-theme="paper"][data-bg="aurora"] .st-card,

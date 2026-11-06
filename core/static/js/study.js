@@ -542,17 +542,16 @@
   const BGS = [
     { id: 'theme',    name: 'Gradient',        prev: 'linear-gradient(180deg,#14301a,#050a04)' },
     { id: 'forest',   name: 'Enchanted forest', prev: 'radial-gradient(circle at 74% 14%,rgba(255,230,160,.55),transparent 42%),linear-gradient(180deg,#0d1c2e 0%,#1e3a34 55%,#0a1c10 56%,#050d08 100%)' },
-    { id: 'rain',     name: 'Rainy cabin window', prev: 'radial-gradient(ellipse at 78% 92%,rgba(255,170,90,.6),transparent 42%),repeating-linear-gradient(105deg,transparent 0 6px,rgba(190,210,235,.22) 6px 7px),linear-gradient(180deg,#0a101a,#1e2e3e)' },
     { id: 'stars',    name: 'Starry night',    prev: 'radial-gradient(circle at 80% 20%,#E9EFFA 0 7px,rgba(200,215,255,.3) 8px,transparent 30px),linear-gradient(180deg,#02040e,#0b1636 60%,#1a2a55)' },
     { id: 'aurora',   name: 'Aurora lake',     prev: 'radial-gradient(ellipse at 30% 40%,#2fe0a0,transparent 55%),radial-gradient(ellipse at 75% 55%,#9a5cf0,transparent 55%),linear-gradient(180deg,#02050e,#0a1c30 75%,#04101c 76%)' },
     { id: 'ocean',    name: 'Sunset ocean',    prev: 'linear-gradient(180deg,#1a2260,#a85a8a 38%,#f08a6a 54%,#f6c47c 55%,#4a5a96 58%,#08224a)' },
     { id: 'campfire', name: 'Campfire',        prev: 'radial-gradient(circle at 50% 82%,#ffcf6a,#e8641e 14%,rgba(232,80,20,.35) 30%,transparent 55%),linear-gradient(180deg,#03050e,#14122a)' },
-    { id: 'snow',     name: 'Cabin fireside',  prev: 'radial-gradient(circle at 86% 78%,#ffb060,rgba(255,140,60,.4) 18%,transparent 40%),linear-gradient(180deg,#0e1c40,#6a7eb4 55%,#dfe8fa)' },
+    { id: 'snow',     name: 'Cabin fireside',  prev: 'radial-gradient(circle at 70% 78%,#ffb060,rgba(255,140,60,.5) 14%,transparent 34%),linear-gradient(112deg,#8ea4a6 0,#6f8688 46%,#141a18 47%,#0c100f 100%)' },
     { id: 'sakura',   name: 'Cherry blossom',  prev: 'radial-gradient(circle at 85% 8%,#f6a8c0,transparent 30%),linear-gradient(180deg,#1e1a46,#a8689a 55%,#f6b8c4)' },
     { id: 'plain',    name: 'Plain',           prev: '#0b0f0a' },
     { id: 'image',    name: 'My picture',      prev: 'linear-gradient(135deg,#444,#888)' },
   ];
-  const SCENES = ['forest', 'rain', 'stars', 'aurora', 'ocean', 'campfire', 'snow', 'sakura'];
+  const SCENES = ['forest', 'stars', 'aurora', 'ocean', 'campfire', 'snow', 'sakura'];
   let footage = [];            // clips found in core/static/wallpapers
   let localVideoUrl = '';      // object URL of the clip this device stored (My video)
   const VDB = 'studySyncWallpapers', VSTORE = 'clips';
