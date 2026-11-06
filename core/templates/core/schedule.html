@@ -94,6 +94,10 @@ body.schedule-page {
 }
 .sch-notif-btn:hover { background: rgba(var(--accent-dark-rgb),0.25); }
 .sch-notif-btn.enabled { color: var(--lime); border-color: var(--lime); }
+.sch-notif-opts { display: flex; gap: 14px 22px; align-items: center; flex-wrap: wrap; margin-top: 16px; color: var(--fog); font-size: 13px; }
+.sch-opt { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.sch-opt select { background: rgba(255,255,255,0.06); color: var(--cream); border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; padding: 6px 10px; font: inherit; }
+.sch-opt select option { color: #222; }
 .sch-clear-btn {
   padding: 9px 16px; background: transparent;
   border: 1px solid rgba(255,255,255,0.1); border-radius: 999px;
@@ -244,10 +248,21 @@ body.schedule-page {
   <header class="sch-header">
     <div class="sch-eyebrow">Weekly Schedule</div>
     <h1 class="sch-title">Plan your week.<br><em>Study smarter.</em></h1>
-    <p class="sch-sub">Click any day to add a study session. Get browser notifications 10 minutes before each block.</p>
+    <p class="sch-sub">Click any day to add a study session. Get a browser reminder before each block, and choose how early (up to 10 minutes before).</p>
     <div class="sch-actions">
       <button class="sch-notif-btn" id="planner-notif-btn">🔔 Enable Notifications</button>
       <button class="sch-clear-btn" id="planner-clear-btn">Clear All</button>
+    </div>
+    <div class="sch-notif-opts" id="sch-notif-opts">
+      <label class="sch-opt"><input type="checkbox" id="nf-on" checked> Remind me</label>
+      <label class="sch-opt">Remind me
+        <select id="nf-lead">
+          <option value="0">when it starts</option><option value="1">1 min before</option>
+          <option value="2">2 min before</option><option value="3">3 min before</option>
+          <option value="5">5 min before</option><option value="10">10 min before</option>
+          </select></label>
+      <label class="sch-opt"><input type="checkbox" id="nf-sound" checked> Play a sound</label>
+      <button type="button" class="sch-clear-btn" id="nf-test">Send a test</button>
     </div>
   </header>
 
@@ -461,8 +476,40 @@ body.schedule-page {
     Notification.requestPermission().then(updateNotifBtn);
   });
 
+  // reminder preferences (saved on this device and synced with the account)
+  const NF_KEY = 'studySyncNotifyPrefs';
+  const nfOn = document.getElementById('nf-on'), nfLead = document.getElementById('nf-lead'), nfSound = document.getElementById('nf-sound');
+  function nfPrefs() {
+    let p = {}; try { p = JSON.parse(localStorage.getItem(NF_KEY) || '{}') || {}; } catch (e) {}
+    return { on: p.on !== false, lead: [0, 1, 2, 3, 5, 10].includes(Number(p.lead)) ? Number(p.lead) : 10, sound: p.sound !== false };
+  }
+  function nfSave() {
+    try { localStorage.setItem(NF_KEY, JSON.stringify({ on: nfOn.checked, lead: Number(nfLead.value), sound: nfSound.checked })); } catch (e) {}
+  }
+  (function () { const p = nfPrefs(); nfOn.checked = p.on; nfLead.value = String(p.lead); nfSound.checked = p.sound; })();
+  [nfOn, nfLead, nfSound].forEach(el => el.addEventListener('change', nfSave));
+  function nfBeep() {
+    try {
+      const A = window.AudioContext || window.webkitAudioContext, c = new A(), o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine'; o.frequency.value = 880; g.gain.setValueAtTime(0.0001, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.25, c.currentTime + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.7);
+      o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime + 0.75); setTimeout(() => c.close(), 1000);
+    } catch (e) {}
+  }
+  function nfShow(title, body) {
+    try { new Notification(title, { body, icon: '/static/images/favicon.ico' }); } catch (e) {}
+    if (nfPrefs().sound) nfBeep();
+  }
+  document.getElementById('nf-test').addEventListener('click', () => {
+    if (!notifSupported) { alert('This browser does not support notifications.'); return; }
+    if (Notification.permission === 'granted') nfShow('📚 Upcoming session', 'This is how your reminders will look.');
+    else if (Notification.permission === 'default') Notification.requestPermission().then(updateNotifBtn);
+    else alert('Notifications are blocked. Allow them for this site in your browser settings.');
+  });
+
   function checkNotifications() {
-    if (!notifSupported || Notification.permission !== 'granted') return;
+    const pref = nfPrefs();
+    if (!pref.on || !notifSupported || Notification.permission !== 'granted') return;
     const stored = JSON.parse(localStorage.getItem(PLANNER_KEY) || '{}');
     const notified = new Set(JSON.parse(sessionStorage.getItem('plannedNotified') || '[]'));
     const n = new Date();
@@ -473,13 +520,11 @@ body.schedule-page {
       const blockTime = new Date(n); blockTime.setHours(h, m, 0, 0);
       const diff = blockTime - n;
       const key = dayKey + '_' + b.time + '_' + b.subject;
-      if (diff > 0 && diff <= 10 * 60 * 1000 && !notified.has(key)) {
+      if (diff > -60000 && diff <= Math.max(pref.lead, 1) * 60 * 1000 && !notified.has(key)) {
         notified.add(key);
         sessionStorage.setItem('plannedNotified', JSON.stringify([...notified]));
-        new Notification('📚 Upcoming session', {
-          body: `${b.subject} starts in ${Math.ceil(diff / 60000)} min — time to prepare!`,
-          icon: '/static/images/favicon.ico',
-        });
+        const mins = Math.ceil(diff / 60000);
+        nfShow('📚 Upcoming session', mins > 0 ? `${b.subject} starts in ${mins} min — time to prepare!` : `${b.subject} is starting now.`);
       }
     });
   }

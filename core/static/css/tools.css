@@ -53,3 +53,17 @@ body.tool-page { background: #050a04; padding-bottom: 72px; }
 .tool-root .dm-check-feedback.memorising { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .tool-root .dm-hide-now { padding: 7px 14px; border-radius: 999px; cursor: pointer; font: 600 12.5px 'DM Sans', sans-serif; color: var(--on-accent); background: linear-gradient(135deg, var(--leaf), var(--sprout)); border: 0; }
 .tool-root .dm-hide-now:hover { filter: brightness(1.1); }
+
+/* a roomier study-coach chat */
+.coach-sidebar { width: min(560px, 100vw); bottom: 0; }
+.coach-header { padding: 18px 22px 14px; }
+.coach-title { font-size: 16px; }
+.coach-quick-chips { padding: 12px 20px 8px; }
+.coach-chip { padding: 6px 14px; font-size: 13px; }
+.coach-messages { padding: 16px 20px; gap: 14px; }
+.coach-bubble { max-width: 92%; padding: 11px 16px; font-size: 15px; line-height: 1.6; }
+.coach-bubble-ai code { font-size: 13px; }
+.coach-input-row { padding: 14px 20px 20px; gap: 10px; }
+.coach-input { font-size: 15px; padding: 12px 15px; border-radius: 10px; }
+.coach-send-btn { width: 46px; height: 46px; font-size: 19px; border-radius: 10px; }
+@media (max-width: 640px) { .coach-sidebar { width: 100%; } }

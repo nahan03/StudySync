@@ -55,6 +55,7 @@ class UserState(models.Model):
 
     SYNCED_KEYS = frozenset({
         'studySyncPlanner',          # weekly schedule
+        'studySyncNotifyPrefs',      # schedule reminder settings
         'studySyncFlashcards',       # flashcards
         'studySyncDecks',            # saved flashcard decks
         'studySyncFcStats',          # flashcard study stats
