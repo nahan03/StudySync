@@ -1033,7 +1033,7 @@
 
   /* ---------- cherry blossoms: a wooden veranda looking into a big tree in full bloom, with a tiled roof beyond ---------- */
   scenes.sakura = {
-    post: { bloom: 0.34, grade: 'rgb(255,214,226)', gradeA: 0.05, vignette: 0.22, grain: 0.035, halo: 0.08, haloColor: 'rgb(255,170,190)' },
+    post: { bloom: 0.2, grade: 'rgb(150,110,130)', gradeA: 0.1, vignette: 0.4, grain: 0.04, halo: 0.04, haloColor: 'rgb(255,170,190)' },
     init(a) {
       const { W, H } = a, s = (a.s = {}), r = rng(37), sc = Math.max(0.75, Math.min(1.4, H / 760)), portrait = W < H * 0.95;
       const postW = W * (portrait ? 0.2 : 0.155), railY = H * 0.875;
@@ -1046,11 +1046,11 @@
         g.fillStyle = 'rgba(190,70,110,.85)'; g.beginPath(); g.arc(0, 0, 2.2, 0, TAU); g.fill();
         g.strokeStyle = 'rgba(255,236,170,.9)'; g.lineWidth = 0.7; for (let i = 0; i < 6; i++) { const q = i / 6 * TAU; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(q) * 5, Math.sin(q) * 5); g.stroke(); }
       });
-      const SP = { lit: [flowerSprite([238, 150, 184], [255, 232, 240]), flowerSprite([246, 170, 200], [255, 244, 248])], mid: [flowerSprite([226, 128, 168], [252, 204, 224]), flowerSprite([236, 144, 182], [255, 218, 232])], dark: [flowerSprite([196, 100, 146], [236, 166, 198]), flowerSprite([206, 112, 156], [240, 178, 206])] };
+      const SP = { lit: [flowerSprite([222, 128, 164], [244, 200, 218]), flowerSprite([232, 146, 180], [248, 214, 228])], mid: [flowerSprite([206, 108, 148], [232, 168, 198]), flowerSprite([216, 122, 160], [238, 184, 208])], dark: [flowerSprite([168, 84, 124], [208, 140, 172]), flowerSprite([180, 94, 134], [214, 150, 180])] };
       const bloom = (g, x, y, tone, k) => { const set = SP[tone], sp = set[Math.floor(r() * set.length)], z = (14 + r() * 12) * k * sc; g.save(); g.translate(x, y); g.rotate(r() * TAU); g.drawImage(sp, -z / 2, -z / 2, z, z); g.restore(); };
 
       // ---- a pale, misty sky and the garden beyond, out of focus ----
-      s.sky = a.layer(W, H, (g, w, h) => { a.vgrad(g, w, h, [[0, [232, 230, 236]], [0.55, [220, 218, 226]], [1, [204, 202, 210]]]); });
+      s.sky = a.layer(W, H, (g, w, h) => { a.vgrad(g, w, h, [[0, [176, 172, 186]], [0.55, [164, 160, 174]], [1, [146, 142, 156]]]); });
       s.far = a.blur(a.layer(W, H, (g, w, h) => {
         const blob = (x, y, rad, c, al) => { const gr = g.createRadialGradient(x, y, 0, x, y, rad); gr.addColorStop(0, rgb(c, al)); gr.addColorStop(0.65, rgb(c, al * 0.6)); gr.addColorStop(1, rgb(c, 0)); g.fillStyle = gr; g.fillRect(x - rad, y - rad, rad * 2, rad * 2); };
         for (let i = 0; i < 60; i++) blob(w * (0.15 + r() * 0.36), h * (0.34 + r() * 0.5), (50 + r() * 70) * sc, mix([232, 150, 186], [248, 200, 218], r()), 0.85);           // pink trees on the left
@@ -1061,7 +1061,7 @@
         g.fillStyle = 'rgb(62,66,72)'; g.beginPath(); g.moveTo(bx - w * 0.03, by + h * 0.12); g.quadraticCurveTo(bx + w * 0.02, by + h * 0.04, bx + w * 0.12, by); g.lineTo(bx + w * 0.4, by - h * 0.01); g.lineTo(bx + w * 0.4, by + h * 0.12); g.closePath(); g.fill();
         for (let i = 0; i < 12; i++) { g.strokeStyle = 'rgba(160,170,180,.35)'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(bx - w * 0.02 + i * w * 0.036, by + h * 0.1); g.lineTo(bx + w * 0.02 + i * w * 0.036, by + h * 0.005); g.stroke(); }
         g.fillStyle = 'rgba(90,70,56,.8)'; g.fillRect(bx + w * 0.02, by + h * 0.12, w * 0.3, h * 0.012);
-        const mist = g.createLinearGradient(0, h * 0.4, 0, h * 0.9); mist.addColorStop(0, 'rgba(232,230,238,0)'); mist.addColorStop(1, 'rgba(232,230,238,.12)'); g.fillStyle = mist; g.fillRect(0, h * 0.4, w, h * 0.5);
+        const mist = g.createLinearGradient(0, h * 0.4, 0, h * 0.9); mist.addColorStop(0, 'rgba(232,230,238,0)'); mist.addColorStop(1, 'rgba(190,186,200,.1)'); g.fillStyle = mist; g.fillRect(0, h * 0.4, w, h * 0.5);
       }), 3.2 * sc);
 
       // ---- the big tree: dark trunk and limbs, then thousands of blossoms ----
@@ -1132,6 +1132,7 @@
         ctx.restore();
       });
       ctx.globalAlpha = 1;
+      ctx.fillStyle = 'rgba(46,28,44,.2)'; ctx.fillRect(0, 0, W, H);   // a quieter, overcast light
       a.put(s.frame, 0, 0);
     },
   };
