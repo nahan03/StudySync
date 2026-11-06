@@ -70,3 +70,42 @@ class StudyPageTests(TestCase):
         offered = set(re.search(r"const SCENES = \[(.*?)\];", study).group(1).replace("'", '').replace(' ', '').split(','))
         self.assertEqual(scenes, offered)
         self.assertEqual(len(scenes), 8)
+
+
+@override_settings(STORAGES=STATIC_OVERRIDE)
+class FootageTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('alice', password='pw12345!')
+
+    def test_requires_login(self):
+        self.assertEqual(self.client.get(reverse('wallpaper_list')).status_code, 302)
+
+    def test_lists_only_playable_clips_with_optional_posters(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / 'core' / 'static' / 'wallpapers'
+            folder.mkdir(parents=True)
+            for name in ('rain-window.mp4', 'rain-window.jpg', 'deep_forest.webm', 'notes.txt', 'clip.mov', 'README.md'):
+                (folder / name).write_bytes(b'x')
+            with override_settings(BASE_DIR=Path(tmp)):
+                self.client.force_login(self.user)
+                items = self.client.get(reverse('wallpaper_list')).json()['wallpapers']
+        self.assertEqual([i['name'] for i in items], ['Deep Forest', 'Rain Window'])
+        by_id = {i['id']: i for i in items}
+        self.assertTrue(by_id['rain-window']['url'].endswith('wallpapers/rain-window.mp4'))
+        self.assertTrue(by_id['rain-window']['poster'].endswith('wallpapers/rain-window.jpg'))
+        self.assertEqual(by_id['deep_forest']['poster'], '')
+
+    def test_missing_folder_is_an_empty_list(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmp, override_settings(BASE_DIR=Path(tmp)):
+            self.client.force_login(self.user)
+            self.assertEqual(self.client.get(reverse('wallpaper_list')).json(), {'wallpapers': []})
+
+    def test_study_page_has_footage_controls(self):
+        self.client.force_login(self.user)
+        html = self.client.get(reverse('study')).content.decode()
+        for marker in ('id="bg-video"', 'id="st-footage"', 'id="st-videofile"', 'data-wallpapers='):
+            self.assertIn(marker, html, marker)

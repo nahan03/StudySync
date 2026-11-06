@@ -21,6 +21,7 @@ urlpatterns = [
     path('account/delete/', views.delete_account, name='delete_account'),
     path('api/sessions/', views.list_sessions, name='list_sessions'),
     path('api/sessions/record/', views.record_sessions, name='record_sessions'),
+    path('api/wallpapers/', views.wallpaper_list, name='wallpaper_list'),
     path('api/state/', views.get_state, name='get_state'),
     path('api/state/save/', views.save_state, name='save_state'),
     path('api/test-api/', views.test_api, name='test_api'),

@@ -6,7 +6,7 @@
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/study.css' %}?v=5">
+<link rel="stylesheet" href="{% static 'css/study.css' %}?v=6">
 <link rel="stylesheet" href="{% static 'css/tree_overlay.css' %}?v=1">
 {% endblock %}
 
@@ -28,6 +28,7 @@
   <div class="bgl bgl-base"></div>
   <canvas class="bg-canvas" id="bg-canvas" aria-hidden="true"></canvas>
   <div class="bgl bgl-image" id="bgl-image"></div>
+  <video class="bg-video" id="bg-video" muted loop playsinline preload="auto" aria-hidden="true"></video>
   <div class="bgl bgl-dim"></div>
 </div>
 <nav class="st-nav">
@@ -243,6 +244,13 @@
     <div class="st-bgs" id="st-bgs" role="radiogroup" aria-label="Background"></div>
   </div>
 
+  <div class="st-field" id="st-footage-box">
+    <span class="st-label">Real footage</span>
+    <div class="st-bgs" id="st-footage" role="radiogroup" aria-label="Real footage"></div>
+    <input id="st-videofile" type="file" accept="video/mp4,video/webm,video/*" hidden>
+    <p class="st-hint" id="st-footage-hint">Add looping .mp4 or .webm clips to <strong>core/static/wallpapers</strong> and they show up here, or use <strong>My video</strong> to play a clip from this device.</p>
+  </div>
+
   <div class="st-bgimage" id="st-bgimage-box" hidden>
     <span class="st-label">Your image</span>
     <div class="st-bgimage-row">
@@ -265,11 +273,12 @@
      data-end="{% static 'audio/end.wav' %}"
      data-start="{% static 'audio/start.mp3' %}"
      data-start1="{% static 'audio/start1.mp3' %}"
+     data-wallpapers="{% url 'wallpaper_list' %}"
      data-livebg="{% static 'js/live_bg.js' %}?v=19"></div>
 
 </div><!-- /.st-root -->
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/study.js' %}?v=4"></script>
+<script src="{% static 'js/study.js' %}?v=5"></script>
 {% endblock %}

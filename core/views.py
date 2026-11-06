@@ -8,7 +8,9 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
+from django.conf import settings
 from django.http import HttpResponse, JsonResponse
+from django.templatetags.static import static
 from django.views.decorators.http import require_POST
 from datetime import date as _date
 from django.contrib.auth.password_validation import validate_password
@@ -596,3 +598,27 @@ def delete_account(request):
     user.delete()  # sessions and synced data cascade
     messages.success(request, 'Your account and data were deleted')
     return redirect('login')
+
+
+WALLPAPER_EXTS = ('.mp4', '.webm')
+
+
+@login_required
+def wallpaper_list(request):
+    """Real-footage wallpapers: every .mp4/.webm dropped into core/static/wallpapers/ is offered.
+
+    An optional picture with the same name (clip.jpg next to clip.mp4) is used as its preview.
+    """
+    folder = settings.BASE_DIR / 'core' / 'static' / 'wallpapers'
+    items = []
+    if folder.is_dir():
+        for f in sorted(folder.iterdir(), key=lambda p: p.name.lower()):
+            if f.is_file() and f.suffix.lower() in WALLPAPER_EXTS:
+                poster = f.with_suffix('.jpg')
+                items.append({
+                    'id': f.stem,
+                    'name': f.stem.replace('-', ' ').replace('_', ' ').title(),
+                    'url': static('wallpapers/' + f.name),
+                    'poster': static('wallpapers/' + poster.name) if poster.is_file() else '',
+                })
+    return JsonResponse({'wallpapers': items})

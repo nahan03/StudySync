@@ -43,7 +43,7 @@
     autoBreak: true, autoFocus: false,
     focusSound: 'chime', breakSound: 'bell', volume: 70, repeat: 'once', vibrate: true, notify: false,
     subject: '', goal: '',
-    theme: 'forest', bg: 'theme', bgDim: 15,
+    theme: 'forest', bg: 'theme', bgVideo: '', bgDim: 15,
   };
   let prefs = Object.assign({}, DEFAULTS, load(PREFS_KEY, {}));
   let userPresets = load(PRESETS_KEY, []);
@@ -537,6 +537,19 @@
     { id: 'image',    name: 'My picture',      prev: 'linear-gradient(135deg,#444,#888)' },
   ];
   const SCENES = ['forest', 'rain', 'stars', 'aurora', 'ocean', 'campfire', 'snow', 'sakura'];
+  let footage = [];            // clips found in core/static/wallpapers
+  let localVideoUrl = '';      // object URL of the clip this device stored (My video)
+  const VDB = 'studySyncWallpapers', VSTORE = 'clips';
+  function vdb() {
+    return new Promise((resolve, reject) => {
+      const rq = indexedDB.open(VDB, 1);
+      rq.onupgradeneeded = () => rq.result.createObjectStore(VSTORE);
+      rq.onsuccess = () => resolve(rq.result); rq.onerror = () => reject(rq.error);
+    });
+  }
+  async function vget() { try { const db = await vdb(); return await new Promise(res => { const r = db.transaction(VSTORE).objectStore(VSTORE).get('mine'); r.onsuccess = () => res(r.result || null); r.onerror = () => res(null); }); } catch (e) { return null; } }
+  async function vput(blob) { const db = await vdb(); return new Promise((res, rej) => { const tx = db.transaction(VSTORE, 'readwrite'); tx.objectStore(VSTORE).put(blob, 'mine'); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
+  async function vdel() { try { const db = await vdb(); await new Promise(res => { const tx = db.transaction(VSTORE, 'readwrite'); tx.objectStore(VSTORE).delete('mine'); tx.oncomplete = res; tx.onerror = res; }); } catch (e) { /* ignore */ } }
   let liveLoading = false;
   function ensureLive(cb) {
     if (window.LiveBG) { cb(); return; }
@@ -563,9 +576,17 @@
     $('bgl-image').style.backgroundImage = bgImage ? `url("${bgImage}")` : '';
     $('st-dim').value = num(prefs.bgDim, 0, 80, 15);
     $('st-dim-out').textContent = $('st-dim').value;
+    const videoSrc = prefs.bg === 'video' ? (prefs.bgVideo === 'local' ? localVideoUrl : prefs.bgVideo) : '';
+    if (prefs.bg === 'video') bg = videoSrc ? 'video' : 'theme';
+    root.dataset.bg = bg;
+    const isVideo = bg === 'video', vid = $('bg-video');
+    if (isVideo) {
+      if (vid.getAttribute('src') !== videoSrc) { vid.src = videoSrc; }
+      if (!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) { const pr = vid.play(); if (pr && pr.catch) pr.catch(() => {}); }
+    } else { vid.pause(); if (vid.getAttribute('src')) { vid.removeAttribute('src'); vid.load(); } }
     const isScene = SCENES.includes(bg);
-    root.dataset.scene = isScene ? '1' : '0';
-    $('st-dim-box').hidden = !(isScene || prefs.bg === 'image');
+    root.dataset.scene = (isScene || isVideo) ? '1' : '0';
+    $('st-dim-box').hidden = !(isScene || isVideo || prefs.bg === 'image');
     $('st-bgimage-box').hidden = prefs.bg !== 'image';
     if (isScene) {
       ensureLive(() => { const cur = root.dataset.bg; if (SCENES.includes(cur) && window.LiveBG) window.LiveBG.start(cur, root.dataset.theme); });
@@ -575,6 +596,7 @@
     $('st-bgremove').hidden = !bgImage;
     $('st-themes').querySelectorAll('.st-theme').forEach(b => b.setAttribute('aria-checked', String(b.dataset.id === theme)));
     $('st-bgs').querySelectorAll('.st-bgtile').forEach(b => b.setAttribute('aria-checked', String(b.dataset.id === prefs.bg)));
+    $('st-footage').querySelectorAll('.st-bgtile').forEach(b => b.setAttribute('aria-checked', String(prefs.bg === 'video' && b.dataset.src === prefs.bgVideo)));
     const imgPrev = $('st-bgs').querySelector('[data-id="image"] .st-bgprev');
     if (imgPrev) imgPrev.style.backgroundImage = bgImage ? `url("${bgImage}")` : '';
   }
@@ -637,7 +659,46 @@
       if (prefs.bg === 'image') prefs.bg = 'theme';
       saveAppearance();
     });
-    $('st-appearance-reset').addEventListener('click', () => { prefs.theme = 'forest'; prefs.bg = 'theme'; prefs.bgDim = 15; saveAppearance(); });
+    $('st-appearance-reset').addEventListener('click', () => { prefs.theme = 'forest'; prefs.bg = 'theme'; prefs.bgVideo = ''; prefs.bgDim = 15; saveAppearance(); });
+
+    // ---- real footage ----
+    function renderFootage() {
+      const tiles = footage.map(f =>
+        `<button type="button" class="st-bgtile" role="radio" data-src="${esc(f.url)}" aria-checked="false">` +
+        `<span class="st-bgprev ${f.poster ? '' : 'st-bgprev-film'}" style="${f.poster ? `background-image:url('${esc(f.poster)}')` : ''}">${f.poster ? '' : '&#127910;'}</span>${esc(f.name)}</button>`);
+      tiles.push(`<button type="button" class="st-bgtile" role="radio" data-src="local" aria-checked="false">` +
+        `<span class="st-bgprev st-bgprev-film">&#128249;</span>My video${localVideoUrl ? '' : ' (add)'}` +
+        (localVideoUrl ? '<span class="st-footage-x" role="button" tabindex="0" data-del="1" aria-label="Remove my video">&times;</span>' : '') + `</button>`);
+      $('st-footage').innerHTML = tiles.join('');
+      applyAppearance();
+    }
+    $('st-footage').addEventListener('click', async e => {
+      const x = e.target.closest('[data-del]');
+      if (x) { e.stopPropagation(); await vdel(); if (localVideoUrl) URL.revokeObjectURL(localVideoUrl); localVideoUrl = ''; if (prefs.bgVideo === 'local') { prefs.bg = 'theme'; prefs.bgVideo = ''; save(PREFS_KEY, prefs); } renderFootage(); return; }
+      const b = e.target.closest('.st-bgtile'); if (!b) return;
+      if (b.dataset.src === 'local' && !localVideoUrl) { $('st-videofile').click(); return; }
+      prefs.bg = 'video'; prefs.bgVideo = b.dataset.src; saveAppearance();
+    });
+    $('st-videofile').addEventListener('change', async () => {
+      const f = $('st-videofile').files && $('st-videofile').files[0]; $('st-videofile').value = '';
+      const hint = $('st-footage-hint');
+      if (!f) return;
+      if (!/^video\//.test(f.type)) { hint.textContent = 'That file is not a video.'; return; }
+      if (f.size > 250 * 1024 * 1024) { hint.textContent = 'That clip is over 250 MB. Try a shorter or smaller one.'; return; }
+      try {
+        await vput(f);
+        if (localVideoUrl) URL.revokeObjectURL(localVideoUrl);
+        localVideoUrl = URL.createObjectURL(f);
+        prefs.bg = 'video'; prefs.bgVideo = 'local'; hint.textContent = 'Saved on this device. It plays silently on a loop.';
+        renderFootage(); save(PREFS_KEY, prefs);
+      } catch (err) { hint.textContent = 'This browser could not store that clip.'; }
+    });
+    document.addEventListener('visibilitychange', () => { const v = $('bg-video'); if (!v || !v.isConnected || root.dataset.bg !== 'video') return; if (document.hidden) v.pause(); else { const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); } });
+    (async () => {
+      const blob = await vget(); if (blob) localVideoUrl = URL.createObjectURL(blob);
+      try { const res = await fetch($('st-audio').dataset.wallpapers, { credentials: 'same-origin' }); if (res.ok) footage = (await res.json()).wallpapers || []; } catch (e) { /* offline: just no library clips */ }
+      renderFootage();
+    })();
 
     // drawer open/close
     const drawer = $('st-appearance'), scrim = $('st-scrim'), opener = $('st-appearance-open');
