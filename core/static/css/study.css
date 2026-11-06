@@ -589,3 +589,22 @@ body.is-fullscreen .st-treepanel { top: 12px; }
 }
 .st-root[data-theme="paper"][data-tfill="glass"] .st-time { -webkit-text-stroke-color: rgba(43,29,18,.7); background-image: linear-gradient(180deg, rgba(43,29,18,.4), rgba(43,29,18,.06) 55%, rgba(43,29,18,.22)); }
 .st-root[data-tfill="glass"] .st-round, .st-root[data-tfill="outline"] .st-round { text-shadow: 0 1px 10px rgba(0,0,0,.35); }
+
+
+/* timer colour: --tc is set from the chosen swatch; without it the digits keep the theme's text colour */
+.st-root .st-time { color: var(--tc, var(--cream)); }
+.st-root[data-tfill="outline"] .st-time { color: transparent; -webkit-text-stroke-color: var(--tc, var(--cream)); }
+.st-root[data-tfill="glass"] .st-time {
+  color: transparent; -webkit-text-stroke-color: color-mix(in srgb, var(--tc, #ffffff) 82%, transparent);
+  background-image: linear-gradient(180deg, color-mix(in srgb, var(--tc, #ffffff) 70%, transparent) 0%, color-mix(in srgb, var(--tc, #ffffff) 12%, transparent) 55%, color-mix(in srgb, var(--tc, #ffffff) 38%, transparent) 100%);
+}
+.st-root[data-theme="paper"][data-tfill="glass"] .st-time { -webkit-text-stroke-color: color-mix(in srgb, var(--tc, #2B1D12) 75%, transparent); background-image: linear-gradient(180deg, color-mix(in srgb, var(--tc, #2B1D12) 45%, transparent), color-mix(in srgb, var(--tc, #2B1D12) 8%, transparent) 55%, color-mix(in srgb, var(--tc, #2B1D12) 25%, transparent)); }
+.st-sublabel { display: block; margin: 14px 0 8px; }
+.st-tcolors { display: flex; flex-wrap: wrap; gap: 9px; }
+.st-tcolor { position: relative; width: 30px; height: 30px; padding: 0; border-radius: 50%; cursor: pointer; border: 2px solid rgba(var(--surf), .2); background: var(--sw); transition: transform .15s, border-color .15s, box-shadow .15s; display: grid; place-items: center; }
+.st-tcolor:hover { transform: scale(1.12); }
+.st-tcolor[aria-checked="true"], .st-tcolor-custom.is-on { border-color: var(--cream); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .45); }
+.st-tcolor span { font-size: 15px; font-weight: 700; color: var(--cream); line-height: 1; }
+.st-tcolor-custom { background: conic-gradient(#ff6b6b, #ffd27a, #9fffd0, #9fd2ff, #c9a9ff, #ff6b6b); overflow: hidden; }
+.st-tcolor-custom input { position: absolute; inset: -6px; width: 44px; height: 44px; opacity: 0; cursor: pointer; }
+.st-tcolor-custom span { text-shadow: 0 1px 3px rgba(0,0,0,.6); color: #fff; pointer-events: none; }

@@ -708,7 +708,7 @@
     init(a) {
       const { W, H } = a, s = (a.s = {}), r = rng(53), sc = Math.max(0.75, Math.min(1.4, H / 760));
       const shoreY = H * 0.57, lamp = (s.lamp = { x: W * 0.31, top: H * 0.3, base: H * 0.93 });
-      const edge = u => ({ x: W * (0.19 + 0.85 * u), y: H * (0.665 + 0.2 * u) });
+      const edge = u => ({ x: W * (0.19 + 0.85 * u), y: H * (0.665 + 0.2 * u) }); s.edge = edge;
       /* warm the things the lamp lights, and leave the rest cold: a radial wash applied on top of a layer's own pixels */
       const lit = (g, w, h, a0, rad) => { g.globalCompositeOperation = 'source-atop'; const gr = g.createRadialGradient(lamp.x, lamp.top + 20 * sc, 0, lamp.x, lamp.top + 20 * sc, rad); gr.addColorStop(0, `rgba(255,176,96,${a0})`); gr.addColorStop(0.5, `rgba(255,150,90,${a0 * 0.4})`); gr.addColorStop(1, 'rgba(255,150,90,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); g.globalCompositeOperation = 'source-over'; };
       const soft = (g, x, y, z, c, al) => { const gr = g.createRadialGradient(x, y, 0, x, y, z); gr.addColorStop(0, rgb(c, al)); gr.addColorStop(0.55, rgb(c, al * 0.7)); gr.addColorStop(1, rgb(c, 0)); g.fillStyle = gr; g.fillRect(x - z, y - z, z * 2, z * 2); };
@@ -818,6 +818,27 @@
         lit(g, w, h, 0.32, H * 0.6);       // the lamp warms the branches near it
       }), 0.8 * sc);
 
+      // people out for a walk: a few small figures on the far path, and walkers (sometimes a pair, sometimes under an umbrella) on the near bank
+      s.people = []; s.nextPerson = 1.5;
+      s.coats = [[128, 44, 52], [44, 62, 112], [74, 74, 84], [166, 116, 66], [44, 98, 84], [196, 192, 208], [92, 50, 108]];
+      s.hats = [[222, 220, 232], [160, 44, 56], [40, 40, 52], [226, 176, 80], [60, 110, 150]];
+      s.drawPerson = (ctx, p, x, y, k) => {
+        const sw = Math.sin(p.ph), bob = Math.abs(Math.cos(p.ph)) * k * 0.014, hipY = -k * 0.38 - bob, shY = -k * 0.64 - bob;
+        const limb = (x0, y0, ang, len, wd, col) => { ctx.strokeStyle = col; ctx.lineWidth = wd; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0 + Math.sin(ang) * len, y0 + Math.cos(ang) * len); ctx.stroke(); };
+        const coat = rgb(p.coat), dark = rgb(mix(p.coat, [0, 0, 0], 0.4));
+        ctx.save(); ctx.translate(x, y); ctx.scale(p.dir, 1); ctx.rotate(0.03);
+        ctx.fillStyle = 'rgba(16,12,30,.34)'; ctx.beginPath(); ctx.ellipse(-k * 0.02, 0, k * 0.22, k * 0.05, 0, 0, TAU); ctx.fill();
+        limb(0, hipY, -sw * 0.55, k * 0.38, k * 0.08, 'rgb(22,20,30)'); limb(0, shY + k * 0.03, sw * 0.5, k * 0.3, k * 0.06, dark);
+        ctx.fillStyle = coat; ctx.beginPath(); ctx.moveTo(-k * 0.1, shY); ctx.lineTo(k * 0.1, shY); ctx.lineTo(k * 0.18, hipY + k * 0.16); ctx.lineTo(-k * 0.18, hipY + k * 0.16); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(-k * 0.18, hipY + k * 0.1, k * 0.36, k * 0.06);
+        limb(0, hipY + k * 0.06, sw * 0.55, k * 0.34, k * 0.082, 'rgb(14,12,22)'); limb(0, shY + k * 0.03, -sw * 0.5, k * 0.3, k * 0.062, coat);
+        ctx.fillStyle = rgb(p.scarf); ctx.fillRect(-k * 0.09, shY - k * 0.035, k * 0.18, k * 0.05);
+        ctx.fillStyle = 'rgb(226,190,170)'; ctx.beginPath(); ctx.arc(k * 0.012, shY - k * 0.1, k * 0.074, 0, TAU); ctx.fill();
+        ctx.fillStyle = rgb(p.hat); ctx.beginPath(); ctx.arc(k * 0.012, shY - k * 0.11, k * 0.082, Math.PI, TAU); ctx.fill(); ctx.fillRect(-k * 0.072, shY - k * 0.118, k * 0.168, k * 0.032);
+        ctx.fillStyle = 'rgba(238,234,252,.75)'; ctx.fillRect(-k * 0.1, shY - k * 0.008, k * 0.2, k * 0.018); ctx.beginPath(); ctx.arc(k * 0.012, shY - k * 0.19, k * 0.05, Math.PI, TAU); ctx.fill();
+        if (p.umb) { ctx.strokeStyle = 'rgb(26,22,32)'; ctx.lineWidth = Math.max(1, k * 0.012); ctx.beginPath(); ctx.moveTo(k * 0.07, shY + k * 0.06); ctx.lineTo(k * 0.07, shY - k * 0.36); ctx.stroke(); ctx.fillStyle = rgb(p.umb); ctx.beginPath(); ctx.ellipse(k * 0.07, shY - k * 0.36, k * 0.3, k * 0.15, 0, Math.PI, TAU); ctx.fill(); ctx.fillStyle = 'rgba(238,234,252,.88)'; ctx.beginPath(); ctx.ellipse(k * 0.07, shY - k * 0.385, k * 0.26, k * 0.07, 0, Math.PI, TAU); ctx.fill(); }
+        ctx.restore();
+      };
       s.warm = a.glow([255, 170, 90], 256); s.win_g = a.glow([255, 200, 120], 32); s.flake = a.glow([255, 255, 255], 16); s.streak = a.glow([255, 168, 84], 32);
       s.flakes = [0, 1, 2].map(li => Array.from({ length: a.n([520, 220, 52][li]) }, () => ({ x: r() * W, y: r() * H, v: [38, 78, 150][li] * (0.8 + r() * 0.4), sz: [2.2, 4.6, 12][li], ph: r() * 90, al: [0.5, 0.62, 0.4][li] * (0.7 + r() * 0.5) })));
     },
@@ -825,6 +846,17 @@
       const { ctx, W, H, s } = a, sc = Math.max(0.75, Math.min(1.4, H / 760)), gust = a.gust(t, 1), wnd = a.wind(t, 4), L = s.lamp, shoreY = H * 0.57;
       a.put(s.back, 0, 0);
       ctx.drawImage(s.shore, 0, 0, W, H);
+      // ---- walkers: spawn now and then, move along their lane, swing their legs ----
+      s.nextPerson -= dt;
+      if (s.nextPerson <= 0 && s.people.length < 5) {
+        s.nextPerson = 9 + Math.random() * 16; const near = Math.random() < 0.72, dir = Math.random() < 0.5 ? 1 : -1, pair = near && Math.random() < 0.45, pick = arr => arr[Math.floor(Math.random() * arr.length)];
+        const x0 = near ? (dir > 0 ? W * 0.2 : W * 1.1) : (dir > 0 ? W * 0.18 : W * 0.56), v = (near ? 44 : 11) * sc * (0.8 + Math.random() * 0.4), ph = Math.random() * 6;
+        const mk = off => ({ near, dir, x: x0 - dir * off, v, ph: ph + off * 0.05, coat: pick(s.coats), hat: pick(s.hats), scarf: pick(s.coats), umb: near && Math.random() < 0.28 ? pick(s.coats) : null });
+        s.people.push(mk(0)); if (pair) s.people.push(mk(0.05 * W * sc / 1.4));
+      }
+      s.people.forEach(p => { p.x += p.dir * p.v * dt * (p.near ? 0.4 + 0.9 * clamp((p.x / W - 0.19) / 0.85, 0, 1) : 1); p.ph += dt * (p.near ? 5.2 : 3.4); });
+      s.people = s.people.filter(p => p.dir > 0 ? p.x < (p.near ? W * 1.14 : W * 0.6) : p.x > (p.near ? W * 0.16 : W * 0.14));
+      s.people.filter(p => !p.near).forEach(p => s.drawPerson(ctx, p, p.x, shoreY + 4 * sc, 26 * sc));
       a.put(s.river, 0, 0);
       // reflections: soft vertical smears that wobble sideways, stronger near the surface
       ctx.globalCompositeOperation = 'lighter';
@@ -834,6 +866,7 @@
       ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
       ctx.drawImage(s.ground, 0, 0, W, H);
       ctx.drawImage(s.fence, 0, 0, W, H);
+      s.people.filter(p => p.near).sort((m, n) => m.x - n.x).forEach(p => { const u = clamp((p.x / W - 0.19) / 0.85, -0.2, 1.2), e = s.edge(u), k = (96 + 150 * u) * sc; s.drawPerson(ctx, p, p.x, e.y + (46 + 70 * u) * sc, k); });
       ctx.save(); ctx.translate(0, H); ctx.transform(1, 0, (wnd * 0.5 + gust * 0.6) * 0.004, 1, 0, 0); ctx.translate(0, -H); ctx.drawImage(s.tree, 0, 0, W, H); ctx.restore();
       ctx.drawImage(s.lampArt, 0, 0, W, H);
       ctx.drawImage(s.bench, 0, 0, W, H);

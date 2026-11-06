@@ -44,7 +44,7 @@
     focusSound: 'chime', breakSound: 'bell', volume: 70, repeat: 'once', vibrate: true, notify: false,
     subject: '', goal: '',
     theme: 'forest', bg: 'theme', bgVideo: '', bgDim: 15,
-    ring: 'classic', font: 'serif', tsize: 'm', tfill: 'solid',
+    ring: 'classic', font: 'serif', tsize: 'm', tfill: 'solid', tcolor: '',
   };
   let prefs = Object.assign({}, DEFAULTS, load(PREFS_KEY, {}));
   let userPresets = load(PRESETS_KEY, []);
@@ -578,6 +578,7 @@
     { id: 'glass',    name: 'Glass',    swatch: 'linear-gradient(135deg,rgba(255,255,255,.55),rgba(120,160,255,.35) 55%,rgba(190,120,255,.5))' },
     { id: 'paper',    name: 'Paper',    swatch: 'linear-gradient(135deg,#F4F1E6,#D8D3BC)' },
   ];
+  const TCOLORS = [['', 'Theme'], ['#ffffff', 'White'], ['#ffd27a', 'Gold'], ['#ff9fbf', 'Rose'], ['#9fd2ff', 'Sky'], ['#9fffd0', 'Mint'], ['#c9a9ff', 'Lilac'], ['#ff9a6b', 'Coral']];
   const RINGS = [
     { id: 'classic',  name: 'Classic' },
     { id: 'thin',     name: 'Orbit' },
@@ -670,6 +671,10 @@
     $('st-rings').querySelectorAll('.st-ringtile').forEach(b => b.setAttribute('aria-checked', String(b.dataset.id === root.dataset.ring)));
     $('st-fonts').querySelectorAll('.st-fonttile').forEach(b => b.setAttribute('aria-checked', String(b.dataset.id === root.dataset.font)));
     $('st-tsize').querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.size === root.dataset.tsize)));
+    const tcol = /^#[0-9a-f]{6}$/i.test(prefs.tcolor || '') ? prefs.tcolor.toLowerCase() : '';
+    if (tcol) root.style.setProperty('--tc', tcol); else root.style.removeProperty('--tc');
+    $('st-tcolors').querySelectorAll('.st-tcolor').forEach(b => b.setAttribute('aria-checked', String(b.dataset.color === tcol)));
+    const cust = $('st-tcolor-custom'); if (cust) { cust.value = tcol || '#ffffff'; cust.parentElement.classList.toggle('is-on', !!tcol && !TCOLORS.some(c => c[0] === tcol)); }
     root.dataset.tfill = ['solid', 'outline', 'glass'].includes(prefs.tfill) ? prefs.tfill : 'solid';
     $('st-tfill').querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.fill === root.dataset.tfill)));
     root.style.setProperty('--dim', num(prefs.bgDim, 0, 80, 15) / 100);
@@ -737,7 +742,11 @@
       `<button type="button" class="st-ringtile" role="radio" data-id="${r.id}" aria-checked="false"><span class="st-ringprev">${ringPreview(r.id)}</span>${esc(r.name)}</button>`).join('');
     $('st-fonts').innerHTML = FONTS.map(f =>
       `<button type="button" class="st-fonttile" role="radio" data-id="${f.id}" aria-checked="false"><span class="st-fontprev" style="font-family:${f.css}">25:00</span>${esc(f.name)}</button>`).join('');
+    $('st-tcolors').innerHTML = TCOLORS.map(c => `<button type="button" class="st-tcolor" role="radio" data-color="${c[0]}" aria-checked="false" title="${c[1]}" style="--sw:${c[0] || 'linear-gradient(135deg,#F6EDD8,#7DB54A)'}"><span></span></button>`).join('') +
+      '<label class="st-tcolor st-tcolor-custom" title="Pick any colour"><input type="color" id="st-tcolor-custom" value="#ffffff" aria-label="Custom timer colour"><span>+</span></label>';
     applyAppearance();
+    $('st-tcolors').addEventListener('click', e => { const b = e.target.closest('button.st-tcolor'); if (b) { prefs.tcolor = b.dataset.color; saveAppearance(); } });
+    $('st-tcolor-custom').addEventListener('input', e => { prefs.tcolor = e.target.value; saveAppearance(); });
     $('st-rings').addEventListener('click', e => { const b = e.target.closest('.st-ringtile'); if (b) { prefs.ring = b.dataset.id; saveAppearance(); } });
     $('st-fonts').addEventListener('click', e => { const b = e.target.closest('.st-fonttile'); if (b) { prefs.font = b.dataset.id; saveAppearance(); } });
     $('st-tfill').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { prefs.tfill = b.dataset.fill; saveAppearance(); } });
@@ -773,7 +782,7 @@
       if (prefs.bg === 'image') prefs.bg = 'theme';
       saveAppearance();
     });
-    $('st-appearance-reset').addEventListener('click', () => { prefs.theme = 'forest'; prefs.bg = 'theme'; prefs.bgVideo = ''; prefs.bgDim = 15; prefs.ring = 'classic'; prefs.font = 'serif'; prefs.tsize = 'm'; prefs.tfill = 'solid'; saveAppearance(); });
+    $('st-appearance-reset').addEventListener('click', () => { prefs.theme = 'forest'; prefs.bg = 'theme'; prefs.bgVideo = ''; prefs.bgDim = 15; prefs.ring = 'classic'; prefs.font = 'serif'; prefs.tsize = 'm'; prefs.tfill = 'solid'; prefs.tcolor = ''; saveAppearance(); });
 
     // ---- real footage ----
     function renderFootage() {
