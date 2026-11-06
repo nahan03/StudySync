@@ -212,12 +212,13 @@
     if (del) {
       e.stopPropagation();
       const p = userPresets.find(x => x.id === del.dataset.del);
-      if (p && window.confirm(`Delete the preset "${p.name}"?`)) {
+      if (p) window.ssConfirm(`Delete the preset "${p.name}"?`, { ok: 'Delete', danger: true }).then(ok => {
+        if (!ok) return;
         userPresets = userPresets.filter(x => x.id !== p.id);
         save(PRESETS_KEY, userPresets);
         if (prefs.preset === p.id) prefs.preset = 'custom';
         renderPresets(); syncPrefsFromForm();
-      }
+      });
       return;
     }
     const chip = e.target.closest('.st-chip');
@@ -457,6 +458,9 @@
     const fresh = secs === run.total;
     $('st-toggle').textContent = run.running ? 'Pause' : (fresh ? (run.phase === 'focus' ? 'Start focus' : 'Start break') : 'Resume');
     $('st-skip').textContent = run.phase === 'focus' ? 'Finish early' : 'Skip break →';
+    // "Finish early" only appears near the end of a focus round: the last 10 minutes of a round of 30+ minutes, the last 5 of a shorter one
+    const finishWindow = run.total >= 30 * 60 ? 10 * 60 : 5 * 60;
+    $('st-skip').hidden = run.phase === 'focus' && secs > Math.min(finishWindow, run.total);
     document.title = `${mmss(secs)} · ${LABELS[run.phase] || ''} — StudySync`;
     updateTreeText();
   }
@@ -505,8 +509,12 @@
     if (run.phase === 'focus') {
       const doneSecs = run.total - remainingSecs();
       if (doneSecs < 60) { window.alert('Focus for at least a minute before finishing a round early.'); return; }
-      if (!window.confirm(`Finish this round now? ${Math.round(doneSecs / 60)} min will be saved as a completed session.`)) return;
-      run.earlyMins = Math.max(1, Math.round(doneSecs / 60));
+      window.ssConfirm(`Finish this round now? ${Math.round(doneSecs / 60)} min will be saved as a completed session.`, { title: 'Finish early?', ok: 'Finish round' }).then(ok => {
+        if (!ok || !run) return;
+        run.earlyMins = Math.max(1, Math.round(doneSecs / 60));
+        run.endAt = Date.now(); run.running = true; tick();
+      });
+      return;
     }
     run.endAt = Date.now();      // makes the phase end "now" and flows through the normal path
     run.running = true;
@@ -514,9 +522,11 @@
   });
 
   $('st-end').addEventListener('click', () => {
-    if (!window.confirm('End this session? Finished focus rounds are already saved.')) return;
-    stopRinging(); stopTick(); drop(RUN_KEY); run = null;
-    show('setup'); document.title = 'StudySync | Study';
+    window.ssConfirm('End this session? Finished focus rounds are already saved.', { title: 'End session?', ok: 'End session', danger: true }).then(ok => {
+      if (!ok) return;
+      stopRinging(); stopTick(); drop(RUN_KEY); run = null;
+      show('setup'); document.title = 'StudySync | Study';
+    });
   });
 
   $('st-dismiss').addEventListener('click', stopRinging);

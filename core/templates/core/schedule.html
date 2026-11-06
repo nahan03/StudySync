@@ -448,9 +448,9 @@ body.schedule-page {
   });
 
   document.getElementById('planner-clear-btn').addEventListener('click', () => {
-    if (confirm('Clear all planned sessions?')) {
-      planner = {}; savePlanner(); renderPlanner();
-    }
+    ssConfirm('Clear all planned sessions?', {ok: 'Clear all', danger: true}).then(ok => {
+      if (ok) { planner = {}; savePlanner(); renderPlanner(); }
+    });
   });
 
   renderPlanner();
@@ -498,6 +498,7 @@ body.schedule-page {
   }
   function nfShow(title, body) {
     try { new Notification(title, { body, icon: '/static/images/favicon.ico' }); } catch (e) {}
+    if (window.showGlobalAlert) window.showGlobalAlert(body, 'info', 7000); // the same reminder, in the site's theme
     if (nfPrefs().sound) nfBeep();
   }
   document.getElementById('nf-test').addEventListener('click', () => {

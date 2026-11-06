@@ -959,9 +959,9 @@ body.home-page {
   });
 
   document.getElementById('planner-clear-btn').addEventListener('click', () => {
-    if (confirm('Clear all planned sessions this week?')) {
-      planner = {}; savePlanner(); renderPlanner();
-    }
+    ssConfirm('Clear all planned sessions this week?', {ok: 'Clear all', danger: true}).then(ok => {
+      if (ok) { planner = {}; savePlanner(); renderPlanner(); }
+    });
   });
 
   // Notifications

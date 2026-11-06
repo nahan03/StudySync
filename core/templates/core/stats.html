@@ -170,7 +170,16 @@ body.stats-page{background:var(--soil);color:var(--cream);font-family:'DM Sans',
 
   // ── Subject bars ──────────────────────────────
   const subjectMap = {};
-  history.forEach(h => { if (h.subject) subjectMap[h.subject] = (subjectMap[h.subject] || 0) + 1; });
+  // the same subject typed as "MATHS", "Maths" or "maths " is one subject
+  const subjectName = {};
+  history.forEach(h => {
+    const raw = String(h.subject || '').trim().replace(/\s+/g, ' ');
+    if (!raw) return;
+    const key = raw.toLowerCase();
+    subjectMap[key] = (subjectMap[key] || 0) + 1;
+    subjectName[key] = key.charAt(0).toUpperCase() + key.slice(1);
+  });
+  Object.keys(subjectMap).forEach(k => { subjectMap[subjectName[k]] = subjectMap[k]; delete subjectMap[k]; });
   const subjectEl = document.getElementById('subject-bars');
   const subjects = Object.entries(subjectMap).sort((a,b) => b[1]-a[1]);
   if (subjects.length) {
@@ -181,7 +190,7 @@ body.stats-page{background:var(--soil);color:var(--cream);font-family:'DM Sans',
       const row = document.createElement('div');
       row.className = 'subject-bar-row';
       row.innerHTML = `
-        <div class="subject-bar-label">${sub}</div>
+        <div class="subject-bar-label">${sub.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}</div>
         <div class="subject-bar-track"><div class="subject-bar-fill" style="width:0%" data-pct="${pct}"></div></div>
         <div class="subject-bar-val">${count} session${count !== 1 ? 's':''}</div>
       `;

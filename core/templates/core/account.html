@@ -39,7 +39,7 @@
 
     <h3 class="account-h account-danger">Delete account</h3>
     <p class="account-note">Permanently deletes your account and all synced data. This cannot be undone.</p>
-    <form method="POST" action="{% url 'delete_account' %}" onsubmit="return confirm('Delete your account and all data? This cannot be undone.');">
+    <form method="POST" action="{% url 'delete_account' %}" data-confirm="Delete your account and all data? This cannot be undone." data-confirm-danger data-confirm-ok="Delete my account">
         {% csrf_token %}
         <label for="del_password">Confirm with your password</label>
         <input type="password" name="password" id="del_password" autocomplete="current-password" required>

@@ -359,13 +359,15 @@
     else if (b.id === 'gmp-match') { const bg = document.getElementById('st-root').dataset.bg, p = PRESETS.find(x => x.name === BG_MATCH[bg]); if (p) setPreset(p, true); }
     else if (b.id === 'gmp-save') {
       if (!anyOn()) { toast('Turn a sound up first, then save your mix.'); return; }
-      const name = (window.prompt('Name your mix', 'My mix') || '').trim().slice(0, 24); if (!name) return;
-      const vols = {}; SOUNDS.forEach(s => { if (state.vols[s.id] > 0) vols[s.id] = state.vols[s.id]; });
-      state.mixes = state.mixes.filter(m => m.name !== name).concat([{ name, vols }]).slice(-8); state.name = name; save(); renderMixes(); render();
+      window.ssPrompt('Name your mix', 'My mix', { title: 'Save mix', ok: 'Save', maxLength: 24 }).then(answer => {
+        const name = (answer || '').trim().slice(0, 24); if (!name) return;
+        const vols = {}; SOUNDS.forEach(s => { if (state.vols[s.id] > 0) vols[s.id] = state.vols[s.id]; });
+        state.mixes = state.mixes.filter(m => m.name !== name).concat([{ name, vols }]).slice(-8); state.name = name; save(); renderMixes(); render();
+      });
     }
     else if (b.id === 'gmp-silence') { SOUNDS.forEach(s => { state.vols[s.id] = 0; }); state.name = ''; save(); applyAll(); syncSliders(); pause(); }
   });
-  panel.addEventListener('contextmenu', e => { const b = e.target.closest('[data-mix]'); if (!b) return; e.preventDefault(); const m = state.mixes[+b.dataset.mix]; if (m && window.confirm('Delete the mix "' + m.name + '"?')) { state.mixes.splice(+b.dataset.mix, 1); save(); renderMixes(); render(); } });
+  panel.addEventListener('contextmenu', e => { const b = e.target.closest('[data-mix]'); if (!b) return; e.preventDefault(); const m = state.mixes[+b.dataset.mix]; if (m) window.ssConfirm('Delete the mix "' + m.name + '"?', {ok: 'Delete', danger: true}).then(ok => { if (ok) { state.mixes.splice(+b.dataset.mix, 1); save(); renderMixes(); render(); } }); });
   $('gmp-sleep').addEventListener('change', e => setSleep(+e.target.value));
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.classList.contains('hidden')) openPanel(false); });
   document.addEventListener('click', e => { if (!panel.classList.contains('hidden') && !panel.contains(e.target) && !bar.contains(e.target)) openPanel(false); });
