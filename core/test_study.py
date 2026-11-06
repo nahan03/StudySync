@@ -69,7 +69,7 @@ class StudyPageTests(TestCase):
         scenes = set(re.findall(r'^  scenes\.(\w+) = \{', engine, re.M))
         offered = set(re.search(r"const SCENES = \[(.*?)\];", study).group(1).replace("'", '').replace(' ', '').split(','))
         self.assertEqual(scenes, offered)
-        self.assertEqual(len(scenes), 7)
+        self.assertEqual(len(scenes), 8)
 
 
 @override_settings(STORAGES=STATIC_OVERRIDE)

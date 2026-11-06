@@ -547,11 +547,12 @@
     { id: 'ocean',    name: 'Sunset ocean',    prev: 'linear-gradient(180deg,#1a2260,#a85a8a 38%,#f08a6a 54%,#f6c47c 55%,#4a5a96 58%,#08224a)' },
     { id: 'campfire', name: 'Campfire',        prev: 'radial-gradient(circle at 50% 82%,#ffcf6a,#e8641e 14%,rgba(232,80,20,.35) 30%,transparent 55%),linear-gradient(180deg,#03050e,#14122a)' },
     { id: 'snow',     name: 'Cabin fireside',  prev: 'radial-gradient(circle at 70% 78%,#ffb060,rgba(255,140,60,.5) 14%,transparent 34%),linear-gradient(112deg,#8ea4a6 0,#6f8688 46%,#141a18 47%,#0c100f 100%)' },
+    { id: 'city',     name: 'City at dusk',   prev: 'radial-gradient(circle at 22% 62%,rgba(255,200,120,.7) 0 3px,transparent 4px),radial-gradient(circle at 60% 58%,rgba(255,220,150,.6) 0 2px,transparent 3px),linear-gradient(180deg,#141a3e 0,#5a4a8a 34%,#e8805a 55%,#0e1224 56%,#080a16)' },
     { id: 'sakura',   name: 'Cherry blossom',  prev: 'radial-gradient(circle at 85% 8%,#f6a8c0,transparent 30%),linear-gradient(180deg,#1e1a46,#a8689a 55%,#f6b8c4)' },
     { id: 'plain',    name: 'Plain',           prev: '#0b0f0a' },
     { id: 'image',    name: 'My picture',      prev: 'linear-gradient(135deg,#444,#888)' },
   ];
-  const SCENES = ['forest', 'stars', 'aurora', 'ocean', 'campfire', 'snow', 'sakura'];
+  const SCENES = ['forest', 'stars', 'aurora', 'ocean', 'campfire', 'snow', 'city', 'sakura'];
   let footage = [];            // clips found in core/static/wallpapers
   let localVideoUrl = '';      // object URL of the clip this device stored (My video)
   const VDB = 'studySyncWallpapers', VSTORE = 'clips';

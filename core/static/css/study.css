@@ -408,3 +408,20 @@ body.study-page #gmp-bar { z-index: 40; }
 .st-nav.st-idle { opacity: 0; pointer-events: none; }
 .st-root[data-fs="1"] .st-wrap { padding-top: 56px; }
 @media (max-width: 640px) { .st-fs-label { display: none; } }
+
+/* city wallpaper */
+.st-root[data-bg="city"] .bg-canvas { display: block; }
+.st-root[data-bg="city"] .bgl-dim { display: block; }
+.st-root[data-theme="paper"][data-bg="city"] {
+  --cream: #F6EDD8; --fog: #B8B09C; --surf: 255,255,255; --scheme: dark; --nav-bg: rgba(7,10,8,.72); --opt-bg: #14200f;
+  --leaf: #4E7A34; --sprout: #7DB54A; --lime: #A8D870; --amber: #E4B84A; --on-accent: #0E1A08;
+  --accent-rgb: 125,181,74; --accent-dark-rgb: 78,122,52; --warm-rgb: 228,184,74; --bg1: #070E06;
+}
+.st-root[data-theme="paper"][data-bg="city"] .st-card, .st-root[data-theme="paper"][data-bg="city"] .st-tree-card { background: rgba(0,0,0,.32); border-color: rgba(255,255,255,.12); }
+
+/* The old global fullscreen mode (global_ui.js) also reacts to the Fullscreen API. On this page the single
+   button in the top bar is the only control, so the global exit button and its side effects are switched off. */
+body.study-page #fs-exit-btn { display: none !important; }
+body.study-page.is-fullscreen::before { display: none; }
+body.study-page.is-fullscreen { overflow: auto !important; }
+body.study-page.is-fullscreen .tree-growth-overlay:not(.hidden) { display: flex !important; }
