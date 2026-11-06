@@ -702,7 +702,7 @@
     },
   };
 
-  /* ---------- winter lakeside: a snow-laden blossom tree, a glowing street lamp, a snowy bench, a river and lit chalets ---------- */
+  /* ---------- winter lakeside: a frozen lake with skaters, a glowing street lamp, a snowy bench and lit chalets ---------- */
   scenes.snow = {
     post: { bloom: 0.3, grade: 'rgb(150,140,190)', gradeA: 0.09, vignette: 0.5, grain: 0.075, halo: 0.07, haloColor: 'rgb(255,150,90)' },
     init(a) {
@@ -740,9 +740,30 @@
         for (let i = 0; i < 7; i++) soft(g, w * (0.27 + i * 0.042), shoreY - 2 * sc, 6 * sc, [255, 196, 120], 0.8);
       }), 1.7 * sc);
 
-      // ---- the river: dark, glassy, with the sky in it ----
-      s.river = a.layer(W, H, (g, w, h) => { const gr = g.createLinearGradient(0, shoreY, 0, h * 0.9); gr.addColorStop(0, 'rgb(58,60,84)'); gr.addColorStop(0.35, 'rgb(34,36,56)'); gr.addColorStop(1, 'rgb(18,20,32)'); g.fillStyle = gr; g.fillRect(0, shoreY, w, h * 0.4);
-        for (let i = 0; i < 90; i++) { const y = shoreY + r() * h * 0.3, x = r() * w, L = (20 + r() * 80) * sc; g.fillStyle = `rgba(150,146,176,${0.03 + r() * 0.05})`; g.fillRect(x, y, L, 1 + r()); } });
+      // ---- the frozen lake: pale blue ice with frost, long skate scratches, a few cracks and a snowy edge ----
+      s.river = a.layer(W, H, (g, w, h) => {
+        const bot = h * 0.9, gr = g.createLinearGradient(0, shoreY, 0, bot);
+        gr.addColorStop(0, 'rgb(116,128,158)'); gr.addColorStop(0.3, 'rgb(80,94,132)'); gr.addColorStop(1, 'rgb(44,54,90)'); g.fillStyle = gr; g.fillRect(0, shoreY, w, h * 0.4);
+        g.save(); g.beginPath(); g.rect(0, shoreY, w, bot - shoreY); g.clip();
+        const depth = y => 0.4 + (y - shoreY) / (h * 0.3);
+        for (let i = 0; i < 60; i++) {            // frost and thin snow: soft, wide, flat patches
+          const y = shoreY + r() * h * 0.33, x = r() * w, z = (30 + r() * 120) * sc * depth(y), c = r() > 0.5 ? '228,236,252' : '150,166,208';
+          const gp = g.createRadialGradient(x, y, 0, x, y, z); gp.addColorStop(0, `rgba(${c},.16)`); gp.addColorStop(1, `rgba(${c},0)`);
+          g.save(); g.translate(x, y); g.scale(1, 0.22); g.translate(-x, -y); g.fillStyle = gp; g.fillRect(x - z, y - z, z * 2, z * 2); g.restore();
+        }
+        for (let i = 0; i < 150; i++) {           // skate scratches running along the lake
+          const y = shoreY + (0.02 + r() * 0.3) * h, x = r() * w, L = (40 + r() * 260) * sc * depth(y), bend = (r() - 0.5) * 6 * sc;
+          g.strokeStyle = `rgba(${r() > 0.3 ? '224,232,252' : '30,36,66'},${0.05 + r() * 0.09})`; g.lineWidth = 0.7 + r() * 1.1;
+          g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + L / 2, y + bend, x + L, y + bend * 0.4); g.stroke();
+        }
+        for (let i = 0; i < 9; i++) {             // cracks
+          let x = r() * w, y = shoreY + (0.05 + r() * 0.27) * h; const dx = r() > 0.5 ? 1 : -1;
+          g.strokeStyle = 'rgba(216,228,252,.22)'; g.lineWidth = 0.9; g.beginPath(); g.moveTo(x, y);
+          for (let k = 0; k < 9; k++) { x += dx * (10 + r() * 34) * sc; y += (r() - 0.5) * 12 * sc; g.lineTo(x, y); } g.stroke();
+        }
+        const ed = g.createLinearGradient(0, shoreY, 0, shoreY + 18 * sc); ed.addColorStop(0, 'rgba(208,212,236,.5)'); ed.addColorStop(1, 'rgba(208,212,236,0)'); g.fillStyle = ed; g.fillRect(0, shoreY, w, 18 * sc);
+        g.restore();
+      });
 
       // ---- the near bank: deep, soft snow with footprints ----
       s.ground = a.blur(a.layer(W, H, (g, w, h) => {
@@ -792,57 +813,37 @@
         lit(g, w, h, 0.45, H * 0.8);
       }), 2.2 * sc);
 
-      // ---- the snow-laden tree: dark limbs, a lacework of twigs, soft drifts of snow, a few blossoms ----
-      s.tree = a.blur(a.layer(W, H, (g, w, h) => {
-        const curve = (c, n) => { const out = []; for (let i = 0; i <= n; i++) { const u = i / n, k = u * (c.length - 1), j = Math.min(c.length - 2, Math.floor(k)), f = k - j, p0 = c[Math.max(0, j - 1)], p1 = c[j], p2 = c[j + 1], p3 = c[Math.min(c.length - 1, j + 2)];
-          const cr = (a0, a1, a2, a3) => 0.5 * ((2 * a1) + (-a0 + a2) * f + (2 * a0 - 5 * a1 + 4 * a2 - a3) * f * f + (-a0 + 3 * a1 - 3 * a2 + a3) * f * f * f); out.push([cr(p0[0], p1[0], p2[0], p3[0]) * w, cr(p0[1], p1[1], p2[1], p3[1]) * h]); } return out; };
-        const limb = (pts, w0, w1, snowy) => { g.lineCap = 'round';
-          for (let i = 0; i < pts.length - 1; i++) { const u = i / (pts.length - 1), wd = Math.max(1.2, w0 + (w1 - w0) * u); g.strokeStyle = 'rgb(44,30,30)'; g.lineWidth = wd; g.beginPath(); g.moveTo(pts[i][0], pts[i][1]); g.lineTo(pts[i + 1][0], pts[i + 1][1]); g.stroke(); g.strokeStyle = 'rgba(120,86,74,.3)'; g.lineWidth = Math.max(0.6, wd * 0.2); g.beginPath(); g.moveTo(pts[i][0] + wd * 0.18, pts[i][1] + wd * 0.1); g.lineTo(pts[i + 1][0] + wd * 0.18, pts[i + 1][1] + wd * 0.1); g.stroke(); }
-          if (snowy) for (let i = 0; i < pts.length - 1; i++) { const u = i / (pts.length - 1), wd = Math.max(1.2, w0 + (w1 - w0) * u), th = wd * (0.35 + 0.8 * a.n2(pts[i][0] * 0.05 + pts[i][1] * 0.03, 7)); g.strokeStyle = 'rgba(210,204,234,.85)'; g.lineWidth = Math.max(1.4, th); g.beginPath(); g.moveTo(pts[i][0], pts[i][1] - wd * 0.42); g.lineTo(pts[i + 1][0], pts[i + 1][1] - wd * 0.42); g.stroke(); } };
-        const drift = (x, y, z) => { const gr = g.createRadialGradient(x - z * 0.2, y - z * 0.35, 0, x, y, z); gr.addColorStop(0, 'rgba(226,220,244,.9)'); gr.addColorStop(0.6, 'rgba(184,176,214,.7)'); gr.addColorStop(1, 'rgba(170,160,204,0)'); g.fillStyle = gr; g.beginPath(); g.ellipse(x, y, z * 1.4, z * 0.75, (r() - 0.5) * 0.4, 0, TAU); g.fill(); };
-        const flower = (x, y, z) => { g.fillStyle = r() > 0.4 ? 'rgba(238,196,212,.9)' : 'rgba(250,228,236,.9)'; for (let i = 0; i < 5; i++) { const q = i / 5 * TAU + 0.4; g.beginPath(); g.arc(x + Math.cos(q) * z * 0.65, y + Math.sin(q) * z * 0.65, z * 0.5, 0, TAU); g.fill(); } g.fillStyle = 'rgba(190,90,124,.8)'; g.beginPath(); g.arc(x, y, z * 0.28, 0, TAU); g.fill(); };
-        limb(curve([[0.035, 1.0], [0.03, 0.8], [0.045, 0.66], [0.06, 0.52], [0.075, 0.42]], 16), 66 * sc, 30 * sc, true);
-        const limbs = [
-          [[0.07, 0.46], [0.15, 0.37], [0.26, 0.29], [0.38, 0.23], [0.5, 0.19], [0.63, 0.2], [0.74, 0.22]], [[0.06, 0.34], [0.12, 0.22], [0.24, 0.14], [0.38, 0.1], [0.52, 0.06], [0.67, 0.05]],
-          [[0.07, 0.5], [0.14, 0.5], [0.24, 0.43], [0.34, 0.37], [0.44, 0.37], [0.55, 0.41]], [[0.05, 0.3], [0.04, 0.18], [0.1, 0.06], [0.2, 0.02]], [[0.08, 0.56], [0.12, 0.62], [0.18, 0.64], [0.24, 0.6]],
-        ];
-        const all = [], twig = (px, py, ang, len, wd, depth) => {
-          const tw = []; let x = px, y = py, a0 = ang; for (let q = 0; q <= 7; q++) { tw.push([x, y]); a0 += (r() - 0.5) * 0.5; x += Math.cos(a0) * len / 7; y += Math.sin(a0) * len / 7 + 0.7; }
-          limb(tw, wd, Math.max(0.9, wd * 0.25), true); all.push(tw);
-          if (depth < 2) for (let q = 2; q < tw.length; q += 2) if (r() > 0.3) twig(tw[q][0], tw[q][1], a0 + (r() - 0.5) * 2.2, len * rr(r, 0.35, 0.6), wd * 0.5, depth + 1);
-        };
-        limbs.forEach((c, i) => { const pts = curve(c, 28); limb(pts, (i < 2 ? 30 : 16) * sc, 3.2 * sc, true); all.push(pts);
-          for (let t = 3; t < pts.length - 1; t++) if (r() > 0.25) twig(pts[t][0], pts[t][1], -0.3 + (r() - 0.5) * 2.6, rr(r, 60, 150) * sc, 5.5 * sc, 0); });
-        all.forEach(pts => pts.forEach((p, i) => { if (i % 2 === 0 && r() > 0.3) { drift(p[0] + (r() - 0.5) * 12, p[1] - 5 * sc + (r() - 0.5) * 8, (4 + r() * 7) * sc); if (r() > 0.6) flower(p[0] + (r() - 0.5) * 26, p[1] + 6 * sc + r() * 12, (3.4 + r() * 2.6) * sc); } }));
-        for (let i = 0; i < 46; i++) { const bx0 = w * (0.06 + r() * 0.2), by0 = h * (0.74 + r() * 0.06), ang = -Math.PI / 2 + (r() - 0.5) * 1.6, len = rr(r, 20, 70) * sc; g.strokeStyle = 'rgba(60,46,46,.75)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(bx0, by0); g.lineTo(bx0 + Math.cos(ang) * len, by0 + Math.sin(ang) * len); g.stroke(); g.fillStyle = 'rgba(226,220,244,.8)'; g.beginPath(); g.arc(bx0 + Math.cos(ang) * len, by0 + Math.sin(ang) * len, 2.2 * sc, 0, TAU); g.fill(); }
-        lit(g, w, h, 0.32, H * 0.6);       // the lamp warms the branches near it
-      }), 0.8 * sc);
-
       // people out for a walk: a few small figures on the far path, and walkers (sometimes a pair, sometimes under an umbrella) on the near bank
       s.people = []; s.nextPerson = 1.5;
       s.coats = [[128, 44, 52], [44, 62, 112], [74, 74, 84], [166, 116, 66], [44, 98, 84], [196, 192, 208], [92, 50, 108]];
       s.hats = [[222, 220, 232], [160, 44, 56], [40, 40, 52], [226, 176, 80], [60, 110, 150]];
+      const pk = arr => arr[Math.floor(r() * arr.length)];
+      s.skaters = [[0.5, 0.2, -1], [0.78, 0.55, 1], [0.9, 0.38, -1], [0.62, 0.72, 1], [0.3, 0.45, 1]].map(([fx, f, dir]) => ({ skate: true, near: false, dir, x: W * fx, f, v: 26 + r() * 22, ph: r() * 6, coat: pk(s.coats), hat: pk(s.hats), scarf: pk(s.coats) }));
       s.drawPerson = (ctx, p, x, y, k) => {
         /* a walker in profile, ~9 heads tall: two-segment legs with a bending knee, long winter coat, swinging arms, scarf and hat,
            lit warmly on the side that faces the lamp */
-        const ph = p.ph, hip = -0.5 * k, sh = -0.8 * k, bob = Math.abs(Math.sin(ph)) * k * 0.012;
+        const ph = p.ph, hip = -0.5 * k, sh = -0.8 * k, bob = p.skate ? 0 : Math.abs(Math.sin(ph)) * k * 0.012;
         const lampSide = Math.sign(s.lamp.x - x) * p.dir || 1, lampK = clamp(1 - Math.abs(s.lamp.x - x) / (W * 0.7), 0, 1);
         const joint = (x0, y0, ang, len) => [x0 + Math.sin(ang) * len, y0 + Math.cos(ang) * len];
         const leg = phi => {
-          const th = 0.46 * Math.sin(phi), bend = 0.12 + 0.75 * Math.max(0, Math.sin(phi + 1.15)), kn = joint(0, hip - bob, th, 0.25 * k), an = joint(kn[0], kn[1], th - bend, 0.25 * k);
+          const pu = Math.max(0, Math.sin(phi));   // skating: one leg glides, the other pushes out behind and lifts
+          const th = p.skate ? 0.16 - 0.8 * pu : 0.46 * Math.sin(phi), bend = p.skate ? 0.42 * (1 - pu) + 0.08 * pu : 0.12 + 0.75 * Math.max(0, Math.sin(phi + 1.15)), kn = joint(0, hip - bob, th, 0.25 * k), an = joint(kn[0], kn[1], th - bend, 0.25 * k);
           return { kn, an, ang: th - bend };
         };
         const drawLeg = (L, col, wd) => {
           ctx.strokeStyle = col; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = wd; ctx.beginPath(); ctx.moveTo(0, hip - bob); ctx.lineTo(L.kn[0], L.kn[1]); ctx.lineWidth = wd * 0.86; ctx.lineTo(L.an[0], L.an[1]); ctx.stroke();
           ctx.fillStyle = 'rgb(14,12,18)'; ctx.beginPath(); ctx.ellipse(L.an[0] + k * 0.035, L.an[1] + k * 0.012, k * 0.058, k * 0.026, L.ang * 0.3, 0, TAU); ctx.fill();   // boot
+          if (p.skate) { ctx.strokeStyle = 'rgba(218,228,248,.95)'; ctx.lineWidth = Math.max(1, k * 0.012); ctx.beginPath(); ctx.moveTo(L.an[0] - k * 0.05, L.an[1] + k * 0.04); ctx.lineTo(L.an[0] + k * 0.1, L.an[1] + k * 0.04); ctx.stroke(); }   // blade
         };
         const drawArm = (phi, col, glove) => {
-          const a1 = -0.42 * Math.sin(phi), el = joint(0, sh + k * 0.02 - bob, a1, 0.17 * k), a2 = a1 + 0.25 + 0.35 * Math.max(0, Math.sin(phi + 0.6)), hd = joint(el[0], el[1], a2, 0.16 * k);
+          const a1 = p.skate ? 0.8 * Math.sin(phi) : -0.42 * Math.sin(phi), el = joint(0, sh + k * 0.02 - bob, a1, 0.17 * k), a2 = a1 + (p.skate ? 0.15 : 0.25 + 0.35 * Math.max(0, Math.sin(phi + 0.6))), hd = joint(el[0], el[1], a2, 0.16 * k);
           ctx.strokeStyle = col; ctx.lineCap = 'round'; ctx.lineWidth = k * 0.062; ctx.beginPath(); ctx.moveTo(0, sh + k * 0.02 - bob); ctx.lineTo(el[0], el[1]); ctx.lineWidth = k * 0.054; ctx.lineTo(hd[0], hd[1]); ctx.stroke();
           ctx.fillStyle = glove; ctx.beginPath(); ctx.arc(hd[0], hd[1], k * 0.03, 0, TAU); ctx.fill();
         };
         const coat = rgb(p.coat), coatDark = rgb(mix(p.coat, [0, 0, 8], 0.5)), coatLight = rgb(mix(p.coat, [255, 190, 130], 0.4));
-        ctx.save(); ctx.translate(x, y); ctx.scale(p.dir, 1); ctx.rotate(0.025);
+        ctx.save(); ctx.translate(x, y); ctx.scale(p.dir, 1);
+        if (p.skate) { const rg = ctx.createLinearGradient(0, 0, 0, k * 0.55); rg.addColorStop(0, rgb(p.coat, 0.3)); rg.addColorStop(1, rgb(p.coat, 0)); ctx.fillStyle = rg; ctx.fillRect(-k * 0.12, 0, k * 0.24, k * 0.55); }   // coat colour mirrored in the ice
+        ctx.rotate(p.skate ? 0.13 : 0.025);
         // soft shadow stretched away from the lamp
         ctx.fillStyle = 'rgba(14,10,28,.38)'; ctx.beginPath(); ctx.ellipse(-lampSide * p.dir * k * 0.12, 0, k * 0.26, k * 0.05, 0, 0, TAU); ctx.fill();
         const far = leg(ph + Math.PI), near = leg(ph);
@@ -885,10 +886,17 @@
       a.put(s.river, 0, 0);
       // reflections: soft vertical smears that wobble sideways, stronger near the surface
       ctx.globalCompositeOperation = 'lighter';
-      s.win.forEach(wd => { const tw = 0.7 + 0.3 * a.n2(t * 0.5 + wd.ph, 2); for (let k = 0; k < 9; k++) { const ry = shoreY + 8 * sc + k * (H * 0.03), off = (a.n2(ry * 0.03 + wd.ph, t * 0.5) - 0.5) * 16 * sc * (1 + k * 0.15); ctx.globalAlpha = 0.5 * tw * (1 - k / 10); ctx.drawImage(s.streak, wd.x + off - wd.w * 0.9, ry - H * 0.012, wd.w * 1.8, H * 0.05); } });
-      for (let k = 0; k < 8; k++) { const ry = shoreY + 6 * sc + k * (H * 0.034), off = (a.n2(ry * 0.03, t * 0.5) - 0.5) * 26 * sc; ctx.globalAlpha = 0.3 * (1 - k / 9); ctx.drawImage(s.streak, W * 0.36 + off - 12 * sc, ry - H * 0.014, 26 * sc, H * 0.06); }
+      s.win.forEach(wd => { const tw = 0.7 + 0.3 * a.n2(t * 0.5 + wd.ph, 2); for (let k = 0; k < 9; k++) { const ry = shoreY + 8 * sc + k * (H * 0.03), off = (a.n2(ry * 0.03 + wd.ph, t * 0.5) - 0.5) * 2 * sc; ctx.globalAlpha = 0.3 * tw * (1 - k / 10); ctx.drawImage(s.streak, wd.x + off - wd.w * 0.9, ry - H * 0.012, wd.w * 1.8, H * 0.05); } });
+      for (let k = 0; k < 8; k++) { const ry = shoreY + 6 * sc + k * (H * 0.034), off = (a.n2(ry * 0.03, t * 0.5) - 0.5) * 4 * sc; ctx.globalAlpha = 0.22 * (1 - k / 9); ctx.drawImage(s.streak, W * 0.36 + off - 12 * sc, ry - H * 0.014, 26 * sc, H * 0.06); }
       s.win.forEach(wd => { ctx.globalAlpha = 0.5 + 0.2 * a.n2(t * 0.4 + wd.ph, 4); a.sprite(s.win_g, wd.x, wd.y, 38 * sc); });
       ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+      s.skaters.forEach(p => {
+        const u0 = clamp((p.x / W - 0.19) / 0.85, 0, 1), top = shoreY + 14 * sc, bottom = s.edge(u0).y - 12 * sc;
+        p.y = top + p.f * Math.max(8 * sc, bottom - top); p.k = (22 + 120 * clamp((p.y - shoreY) / (H * 0.3), 0, 1.1)) * sc;
+        p.x += p.dir * p.v * sc * (0.45 + (p.y - shoreY) / (H * 0.3)) * dt; p.ph += dt * 1.9;
+        if ((p.dir > 0 && p.x > W * 0.97) || (p.dir < 0 && p.x < W * 0.1)) p.dir = -p.dir;
+      });
+      s.skaters.slice().sort((m, n) => m.y - n.y).forEach(p => s.drawPerson(ctx, p, p.x, p.y, p.k));
       ctx.drawImage(s.ground, 0, 0, W, H);
       ctx.drawImage(s.fence, 0, 0, W, H);
       s.people.filter(p => p.near).sort((m, n) => m.x - n.x).forEach(p => { const u = clamp((p.x / W - 0.19) / 0.85, -0.2, 1.2), e = s.edge(u), k = (96 + 150 * u) * sc; s.drawPerson(ctx, p, p.x, e.y + (46 + 70 * u) * sc, k); });
