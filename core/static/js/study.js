@@ -621,7 +621,7 @@
     { id: 'aurora',   name: 'Aurora lake',     prev: 'radial-gradient(ellipse at 30% 40%,#2fe0a0,transparent 55%),radial-gradient(ellipse at 75% 55%,#9a5cf0,transparent 55%),linear-gradient(180deg,#02050e,#0a1c30 75%,#04101c 76%)' },
     { id: 'ocean',    name: 'Sunset ocean',    prev: 'linear-gradient(180deg,#1a2260,#a85a8a 38%,#f08a6a 54%,#f6c47c 55%,#4a5a96 58%,#08224a)' },
     { id: 'campfire', name: 'Campfire',        prev: 'radial-gradient(circle at 50% 82%,#ffcf6a,#e8641e 14%,rgba(232,80,20,.35) 30%,transparent 55%),linear-gradient(180deg,#03050e,#14122a)' },
-    { id: 'snow',     name: 'Cabin fireside',  prev: 'radial-gradient(circle at 70% 78%,#ffb060,rgba(255,140,60,.5) 14%,transparent 34%),linear-gradient(112deg,#8ea4a6 0,#6f8688 46%,#141a18 47%,#0c100f 100%)' },
+    { id: 'snow',     name: 'Winter lakeside', prev: 'radial-gradient(circle at 30% 40%,rgba(255,190,110,.9) 0 3px,rgba(255,170,90,.4) 14%,transparent 30%),linear-gradient(180deg,#2a2640 0,#5a5272 48%,#2a2c44 50%,#1c2034 66%,#d8cce0 67%,#efe6f0)' },
     { id: 'city',     name: 'City at dusk',   prev: 'radial-gradient(circle at 22% 62%,rgba(255,200,120,.7) 0 3px,transparent 4px),radial-gradient(circle at 60% 58%,rgba(255,220,150,.6) 0 2px,transparent 3px),linear-gradient(180deg,#141a3e 0,#5a4a8a 34%,#e8805a 55%,#0e1224 56%,#080a16)' },
     { id: 'sakura',   name: 'Cherry blossom',  prev: 'radial-gradient(circle at 85% 8%,#f6a8c0,transparent 30%),linear-gradient(180deg,#1e1a46,#a8689a 55%,#f6b8c4)' },
     { id: 'plain',    name: 'Plain',           prev: '#0b0f0a' },
