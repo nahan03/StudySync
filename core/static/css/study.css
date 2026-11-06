@@ -434,3 +434,44 @@ body.study-page.is-fullscreen .tree-growth-overlay:not(.hidden) { display: flex 
 .st-root[data-bg="sakura"] .st-nav { background: rgba(34,16,32,.6); }
 .st-root[data-bg="sakura"] { --fog: #EBDCE6; }
 .st-root[data-bg="sakura"] .st-wrap h1, .st-root[data-bg="sakura"] .st-wrap p { text-shadow: 0 1px 10px rgba(30,12,28,.55); }
+
+/* ══════════════════════════════════════════
+   GLASS THEME: frosted panes over a soft colour mesh
+══════════════════════════════════════════ */
+.st-root[data-theme="glass"] {
+  --leaf: #6AA8FF; --sprout: #9CC4FF; --lime: #C9E0FF; --amber: #FFD58A; --cream: #F4F7FF; --fog: #B4BFDA;
+  --accent-rgb: 156,196,255; --accent-dark-rgb: 90,140,230; --warm-rgb: 255,213,138; --surf: 255,255,255;
+  --on-accent: #0B1530; --nav-bg: rgba(255,255,255,.08); --opt-bg: #1b2340;
+  --bg1: #10163a; --bg2: #0a0d24; --glow: rgba(120,140,255,.5);
+  --hill1: #232b5c; --hill2: #1a2148; --hill3: #121733; --ov-accent: #9CC4FF; --ov-accent-2: #C9E0FF;
+}
+.st-root[data-theme="glass"] .bgl-base {
+  background:
+    radial-gradient(ellipse 50% 45% at 18% 22%, rgba(88,120,255,.62), transparent 70%),
+    radial-gradient(ellipse 46% 42% at 82% 18%, rgba(190,100,255,.5), transparent 70%),
+    radial-gradient(ellipse 52% 48% at 70% 88%, rgba(40,200,210,.42), transparent 70%),
+    radial-gradient(ellipse 40% 40% at 12% 85%, rgba(255,110,170,.34), transparent 70%),
+    linear-gradient(180deg, var(--bg1), var(--bg2));
+}
+.st-root[data-theme="glass"] .st-card, .st-root[data-theme="glass"] .st-tree-card {
+  background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05));
+  border: 1px solid rgba(255,255,255,.26);
+  backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
+  box-shadow: 0 10px 40px rgba(4,8,30,.35), inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(255,255,255,.06);
+}
+.st-root[data-theme="glass"] .st-nav {
+  background: rgba(255,255,255,.07); border-bottom: 1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+}
+.st-root[data-theme="glass"] input, .st-root[data-theme="glass"] select {
+  background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22);
+}
+.st-root[data-theme="glass"] .st-btn-primary {
+  background: linear-gradient(135deg, rgba(120,160,255,.9), rgba(170,120,255,.85)); color: #fff;
+  box-shadow: 0 6px 24px rgba(100,120,255,.4), inset 0 1px 0 rgba(255,255,255,.45);
+}
+.st-root[data-theme="glass"] .st-ring-arc { filter: drop-shadow(0 0 8px rgba(156,196,255,.6)); }
+/* on scenes the pane picks up the picture behind it; the bright blossom scene still needs a darker tint */
+.st-root[data-theme="glass"][data-bg="sakura"] .st-card, .st-root[data-theme="glass"][data-bg="sakura"] .st-tree-card {
+  background: linear-gradient(135deg, rgba(40,20,44,.52), rgba(40,20,44,.34));
+}

@@ -537,6 +537,7 @@
     { id: 'lavender', name: 'Lavender', swatch: 'linear-gradient(135deg,#7455C8,#A98BE8)' },
     { id: 'rose',     name: 'Rose',     swatch: 'linear-gradient(135deg,#C8467A,#F07AA8)' },
     { id: 'slate',    name: 'Slate',    swatch: 'linear-gradient(135deg,#64748B,#E2E8F0)' },
+    { id: 'glass',    name: 'Glass',    swatch: 'linear-gradient(135deg,rgba(255,255,255,.55),rgba(120,160,255,.35) 55%,rgba(190,120,255,.5))' },
     { id: 'paper',    name: 'Paper',    swatch: 'linear-gradient(135deg,#F4F1E6,#D8D3BC)' },
   ];
   const BGS = [
