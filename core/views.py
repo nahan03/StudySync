@@ -143,16 +143,16 @@ def study(request):
 
 
 @login_required
-def daily_mode(request):
-    return render(request, 'core/daily_mode.html')
+def library(request):
+    """Resources, PDF reader and the AI coach: a standalone tool, not a study mode."""
+    return render(request, 'core/library.html')
+
 
 @login_required
-def exam_mode(request):
-    return render(request, 'core/exam_mode.html')
+def flashcards(request):
+    """Flashcards, practice questions and the exam countdown."""
+    return render(request, 'core/flashcards.html')
 
-@login_required
-def custom_mode(request):
-    return render(request, 'core/custom_mode.html')
 
 @login_required
 def schedule(request):

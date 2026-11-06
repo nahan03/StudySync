@@ -44,6 +44,7 @@
     focusSound: 'chime', breakSound: 'bell', volume: 70, repeat: 'once', vibrate: true, notify: false,
     subject: '', goal: '',
     theme: 'forest', bg: 'theme', bgVideo: '', bgDim: 15,
+    ring: 'classic', font: 'serif', tsize: 'm',
   };
   let prefs = Object.assign({}, DEFAULTS, load(PREFS_KEY, {}));
   let userPresets = load(PRESETS_KEY, []);
@@ -361,7 +362,34 @@
     window.scrollTo(0, 0);
   }
 
-  const CIRC = 2 * Math.PI * 88;
+  const CIRC = 2 * Math.PI * 88, CIRC_IN = 2 * Math.PI * 74, TICKS = 60;
+  /* the extra parts some ring styles use: a travelling dot, tick marks, an inner session ring and a plain bar */
+  let ticksBuilt = false, lastTicks = -1;
+  function buildTicks() {
+    const g = $('st-ticks'); if (!g || ticksBuilt) return; ticksBuilt = true;
+    let h = '';
+    for (let i = 0; i < TICKS; i++) {
+      const a = i / TICKS * 2 * Math.PI, c = Math.cos(a), s = Math.sin(a);
+      h += `<line class="st-tick" x1="${(100 + 79 * c).toFixed(2)}" y1="${(100 + 79 * s).toFixed(2)}" x2="${(100 + 94 * c).toFixed(2)}" y2="${(100 + 94 * s).toFixed(2)}"/>` +
+           `<circle class="st-dotp" cx="${(100 + 88 * c).toFixed(2)}" cy="${(100 + 88 * s).toFixed(2)}" r="2.6"/>`;
+    }
+    g.innerHTML = h;
+  }
+  function drawRingExtras(frac) {
+    buildTicks();
+    const a = frac * 2 * Math.PI, knob = $('st-knob');
+    if (knob) { knob.setAttribute('cx', (100 + 88 * Math.cos(a)).toFixed(2)); knob.setAttribute('cy', (100 + 88 * Math.sin(a)).toFixed(2)); }
+    const lit = Math.ceil(frac * TICKS - 1e-6);
+    if (lit !== lastTicks) {
+      lastTicks = lit;
+      const g = $('st-ticks');
+      if (g) { const kids = g.children; for (let i = 0; i < TICKS; i++) { const on = i < lit; kids[i * 2].classList.toggle('on', on); kids[i * 2 + 1].classList.toggle('on', on); } }
+    }
+    // inner ring: how far through the whole session you are
+    const c = run.cfg, done = (run.round - 1) + (run.phase === 'focus' ? 1 - frac : (run.phase === 'done' ? 1 : 1)), prog = Math.max(0, Math.min(1, done / Math.max(1, c.rounds)));
+    const in2 = $('st-arc2'); if (in2) { in2.style.strokeDasharray = CIRC_IN.toFixed(2); in2.style.strokeDashoffset = (CIRC_IN * (1 - prog)).toFixed(2); }
+    const mf = $('st-minfill'); if (mf) mf.style.width = ((1 - frac) * 100).toFixed(1) + '%';
+  }
   function treeKind() {
     return window.TreeArt ? window.TreeArt.getTreeForSubject(run ? run.subject : prefs.subject) : { kind: 'oak', name: 'Oak' };
   }
@@ -409,6 +437,7 @@
     $('st-round').textContent = `Round ${Math.min(run.round, c.rounds)} of ${c.rounds}`;
     $('st-arc').style.strokeDasharray = CIRC.toFixed(2);
     $('st-arc').style.strokeDashoffset = (CIRC * (1 - (run.total ? secs / run.total : 0))).toFixed(2);
+    drawRingExtras(run.total ? secs / run.total : 0);
 
     let dots = '';
     for (let r = 1; r <= c.rounds; r++) {
@@ -541,6 +570,42 @@
     { id: 'glass',    name: 'Glass',    swatch: 'linear-gradient(135deg,rgba(255,255,255,.55),rgba(120,160,255,.35) 55%,rgba(190,120,255,.5))' },
     { id: 'paper',    name: 'Paper',    swatch: 'linear-gradient(135deg,#F4F1E6,#D8D3BC)' },
   ];
+  const RINGS = [
+    { id: 'classic',  name: 'Classic' },
+    { id: 'thin',     name: 'Orbit' },
+    { id: 'neon',     name: 'Neon' },
+    { id: 'gradient', name: 'Gradient' },
+    { id: 'ticks',    name: 'Ticks' },
+    { id: 'dots',     name: 'Dots' },
+    { id: 'double',   name: 'Double' },
+    { id: 'minimal',  name: 'Minimal' },
+  ];
+  const FONTS = [
+    { id: 'serif',  name: 'Classic',     css: "'Playfair Display',serif" },
+    { id: 'sans',   name: 'Clean',       css: "'DM Sans',sans-serif" },
+    { id: 'mono',   name: 'Mono',        css: "'Space Mono',monospace" },
+    { id: 'round',  name: 'Rounded',     css: "'Nunito',sans-serif" },
+    { id: 'digital', name: 'Digital',    css: "'Orbitron',sans-serif" },
+    { id: 'slab',   name: 'Slab',        css: "'Roboto Slab',serif" },
+    { id: 'light',  name: 'Light',       css: "'Outfit',sans-serif" },
+    { id: 'hand',   name: 'Handwritten', css: "'Caveat',cursive" },
+  ];
+  /* tiny drawings of each ring style for the picker */
+  function ringPreview(id) {
+    const C = 2 * Math.PI * 15, arc = (w, extra) => `<circle cx="20" cy="20" r="15" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${(C * 0.7).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 20 20)" ${extra || ''}/>`;
+    const track = w => `<circle cx="20" cy="20" r="15" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="${w}"/>`;
+    let g = '';
+    if (id === 'classic') g = track(4) + arc(4);
+    else if (id === 'thin') g = track(1.4) + arc(1.4) + '<circle cx="31.6" cy="30.6" r="2.6" fill="currentColor"/>';
+    else if (id === 'neon') g = track(1) + arc(3.2, 'style="filter:drop-shadow(0 0 3px currentColor)"');
+    else if (id === 'gradient') g = '<defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7DB54A"/><stop offset="1" stop-color="#F6C85A"/></linearGradient></defs>' + track(4) + arc(4).replace('currentColor', 'url(#rg)');
+    else if (id === 'ticks' || id === 'dots') {
+      for (let i = 0; i < 24; i++) { const a = i / 24 * 2 * Math.PI - Math.PI / 2, on = i < 17, x = 20 + 15 * Math.cos(a), y = 20 + 15 * Math.sin(a);
+        g += id === 'dots' ? `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.3" fill="currentColor" opacity="${on ? 1 : .22}"/>` : `<line x1="${(20 + 12.5 * Math.cos(a)).toFixed(1)}" y1="${(20 + 12.5 * Math.sin(a)).toFixed(1)}" x2="${(20 + 17 * Math.cos(a)).toFixed(1)}" y2="${(20 + 17 * Math.sin(a)).toFixed(1)}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="${on ? 1 : .22}"/>`; }
+    } else if (id === 'double') g = track(2.6) + arc(2.6) + `<circle cx="20" cy="20" r="9.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-opacity=".9" stroke-dasharray="${(2 * Math.PI * 9.5 * 0.45).toFixed(1)} 80" transform="rotate(-90 20 20)"/>`;
+    else g = '<rect x="6" y="18" width="28" height="3" rx="1.5" fill="currentColor" opacity=".2"/><rect x="6" y="18" width="19" height="3" rx="1.5" fill="currentColor"/>';
+    return `<svg viewBox="0 0 40 40" width="40" height="40" aria-hidden="true">${g}</svg>`;
+  }
   const BGS = [
     { id: 'theme',    name: 'Gradient',        prev: 'linear-gradient(180deg,#14301a,#050a04)' },
     { id: 'forest',   name: 'Enchanted forest', prev: 'radial-gradient(circle at 74% 14%,rgba(255,230,160,.55),transparent 42%),linear-gradient(180deg,#0d1c2e 0%,#1e3a34 55%,#0a1c10 56%,#050d08 100%)' },
@@ -590,6 +655,12 @@
     if (bg === 'image' && !bgImage) bg = 'theme'; // nothing chosen yet
     root.dataset.theme = theme;
     root.dataset.bg = bg;
+    root.dataset.ring = RINGS.some(r => r.id === prefs.ring) ? prefs.ring : 'classic';
+    root.dataset.font = FONTS.some(f => f.id === prefs.font) ? prefs.font : 'serif';
+    root.dataset.tsize = ['s', 'm', 'l'].includes(prefs.tsize) ? prefs.tsize : 'm';
+    $('st-rings').querySelectorAll('.st-ringtile').forEach(b => b.setAttribute('aria-checked', String(b.dataset.id === root.dataset.ring)));
+    $('st-fonts').querySelectorAll('.st-fonttile').forEach(b => b.setAttribute('aria-checked', String(b.dataset.id === root.dataset.font)));
+    $('st-tsize').querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.size === root.dataset.tsize)));
     root.style.setProperty('--dim', num(prefs.bgDim, 0, 80, 15) / 100);
     $('bgl-image').style.backgroundImage = bgImage ? `url("${bgImage}")` : '';
     $('st-dim').value = num(prefs.bgDim, 0, 80, 15);
@@ -645,7 +716,14 @@
     $('st-bgs').innerHTML = BGS.map(b =>
       `<button type="button" class="st-bgtile" role="radio" data-id="${b.id}" aria-checked="false">` +
       `<span class="st-bgprev" style="background:${b.prev}"></span>${esc(b.name)}</button>`).join('');
+    $('st-rings').innerHTML = RINGS.map(r =>
+      `<button type="button" class="st-ringtile" role="radio" data-id="${r.id}" aria-checked="false"><span class="st-ringprev">${ringPreview(r.id)}</span>${esc(r.name)}</button>`).join('');
+    $('st-fonts').innerHTML = FONTS.map(f =>
+      `<button type="button" class="st-fonttile" role="radio" data-id="${f.id}" aria-checked="false"><span class="st-fontprev" style="font-family:${f.css}">25:00</span>${esc(f.name)}</button>`).join('');
     applyAppearance();
+    $('st-rings').addEventListener('click', e => { const b = e.target.closest('.st-ringtile'); if (b) { prefs.ring = b.dataset.id; saveAppearance(); } });
+    $('st-fonts').addEventListener('click', e => { const b = e.target.closest('.st-fonttile'); if (b) { prefs.font = b.dataset.id; saveAppearance(); } });
+    $('st-tsize').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { prefs.tsize = b.dataset.size; saveAppearance(); } });
 
     $('st-themes').addEventListener('click', e => {
       const b = e.target.closest('.st-theme'); if (!b) return;
@@ -677,7 +755,7 @@
       if (prefs.bg === 'image') prefs.bg = 'theme';
       saveAppearance();
     });
-    $('st-appearance-reset').addEventListener('click', () => { prefs.theme = 'forest'; prefs.bg = 'theme'; prefs.bgVideo = ''; prefs.bgDim = 15; saveAppearance(); });
+    $('st-appearance-reset').addEventListener('click', () => { prefs.theme = 'forest'; prefs.bg = 'theme'; prefs.bgVideo = ''; prefs.bgDim = 15; prefs.ring = 'classic'; prefs.font = 'serif'; prefs.tsize = 'm'; saveAppearance(); });
 
     // ---- real footage ----
     function renderFootage() {

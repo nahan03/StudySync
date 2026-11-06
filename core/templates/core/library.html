@@ -1,0 +1,236 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Library &amp; AI coach — StudySync{% endblock %}
+{% block body_class %}tool-page library-page{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/study.css' %}?v=14">
+<link rel="stylesheet" href="{% static 'css/daily_mode.css' %}?v=48">
+<link rel="stylesheet" href="{% static 'css/tools.css' %}?v=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+{% endblock %}
+
+{% block content %}
+{% include 'core/partials/tool_shell_open.html' with active='library' %}
+
+<div class="tool-head">
+  <div class="st-eyebrow">Library &amp; AI coach</div>
+  <h1 class="st-title">Your <em>study</em> library</h1>
+  <p class="st-sub">Keep links, PDFs and notes in one place, read them side by side with an AI summary, and ask the coach anything. Everything here is separate from the timer.</p>
+  <div class="tool-subject">
+    <label for="tool-subject-input">Subject for the coach</label>
+    <input id="tool-subject-input" type="text" maxlength="60" placeholder="e.g. Biology" list="tool-subject-list" autocomplete="off">
+    <datalist id="tool-subject-list"></datalist>
+    <button type="button" class="dm-btn dm-btn-primary" id="coach-toggle">&#129302; Ask the coach</button>
+  </div>
+</div>
+
+<div class="dm-wrap tool-dm-wrap">
+  <div class="dm-layout tool-layout">
+    <main class="dm-main">
+
+      <!-- RESOURCES PANEL -->
+      <section class="dm-panel dm-panel-resources">
+        <div class="dm-panel-header">
+          <h2 class="dm-panel-title">Resources</h2>
+          <div class="dm-panel-actions">
+            <button class="dm-btn dm-btn-ghost" id="add-resource-btn">+ Add</button>
+            <button class="dm-btn dm-btn-ghost" id="export-refs-btn" title="Export resources">↓ Export</button>
+          </div>
+        </div>
+
+        <!-- Add resource form (collapsible) -->
+        <div class="dm-add-resource-panel hidden" id="add-resource-panel">
+          <form id="reference-form" class="dm-add-resource-form">
+            <!-- Type toggle -->
+            <div class="dm-res-type-toggle">
+              <button type="button" class="dm-res-type-btn active" data-type="link">🔗 Link</button>
+              <button type="button" class="dm-res-type-btn" data-type="pdf">📄 PDF</button>
+            </div>
+            <input id="ref-title" type="text" placeholder="Title" class="dm-res-input" />
+            <!-- Link fields -->
+            <div id="ref-link-fields">
+              <input id="ref-url" type="url" placeholder="URL" class="dm-res-input" />
+            </div>
+            <!-- PDF fields -->
+            <div id="ref-pdf-fields" class="hidden">
+              <label class="dm-pdf-upload-label" id="ref-pdf-label">
+                <span id="ref-pdf-label-text">Choose PDF file…</span>
+                <input id="ref-pdf-input" type="file" accept=".pdf,application/pdf" class="hidden" />
+              </label>
+            </div>
+            <select id="ref-subject-select" class="dm-res-select">
+              <option value="">Subject</option>
+              <option value="Math">Math</option>
+              <option value="Science">Science</option>
+              <option value="Other">Other</option>
+            </select>
+            <input id="ref-chapter" type="text" placeholder="Chapter (optional)" class="dm-res-input" />
+            <textarea id="ref-notes" placeholder="Notes (optional)" class="dm-res-textarea" rows="2"></textarea>
+            <div class="dm-add-resource-btns">
+              <button type="submit" class="dm-btn dm-btn-primary">Save</button>
+              <button type="button" class="dm-btn dm-btn-ghost" id="cancel-resource-btn">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Toolbar: count + subject filter + search -->
+        <div class="dm-toolbar">
+          <span class="dm-note-count" id="daily-note-count">0 resources</span>
+          <div class="dm-toolbar-right">
+            <button class="dm-btn dm-btn-ghost dm-search-toggle-btn" id="search-toggle-btn" title="Search resources">🔍</button>
+          </div>
+        </div>
+        <div class="dm-res-filter-row" id="res-filter-row">
+          <button class="dm-res-chip active" data-filter="">All</button>
+          <button class="dm-res-chip" data-filter="Math">Math</button>
+          <button class="dm-res-chip" data-filter="Science">Science</button>
+          <button class="dm-res-chip" data-filter="Other">Other</button>
+        </div>
+        <div class="dm-inline-search hidden" id="inline-search-wrap">
+          <input id="global-search" class="dm-search" type="search" placeholder="Search resources…" />
+        </div>
+
+        <div id="resources-board" class="dm-resources-board">
+          <div class="dm-empty-state">
+            <svg class="dm-empty-illustration" viewBox="0 0 120 80" fill="none" aria-hidden="true">
+              <path d="M20,60 Q40,40 60,55 Q80,35 100,50" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" fill="none"/>
+              <path d="M30,65 Q50,50 70,60 Q90,45 110,55" stroke="rgba(255,255,255,0.08)" stroke-width="1" fill="none"/>
+              <circle cx="60" cy="48" r="6" fill="rgba(125,181,74,0.15)" stroke="rgba(125,181,74,0.2)" stroke-width="1"/>
+              <circle cx="60" cy="48" r="2.5" fill="rgba(125,181,74,0.3)"/>
+              <circle cx="40" cy="55" r="4" fill="rgba(125,181,74,0.1)" stroke="rgba(125,181,74,0.15)" stroke-width="0.8"/>
+              <circle cx="78" cy="52" r="3.5" fill="rgba(125,181,74,0.1)" stroke="rgba(125,181,74,0.15)" stroke-width="0.8"/>
+              <path d="M56,48 L60,43 L64,48" fill="rgba(125,181,74,0.2)" stroke="rgba(125,181,74,0.25)" stroke-width="0.5"/>
+            </svg>
+            <p class="dm-empty-title">Your resource garden is empty</p>
+            <p class="dm-empty-sub">Add links, PDFs, and notes to grow your study collection.</p>
+            <button class="dm-btn dm-btn-primary dm-btn-empty" id="add-resource-empty-btn">+ Add your first resource</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ── Note Graph Modal ──────────────────────────────────── -->
+<div id="dm-graph-modal" class="dm-graph-modal hidden" role="dialog" aria-modal="true" aria-label="Note Graph">
+  <div class="dm-graph-header">
+    <span class="dm-graph-title">⬡ Note Graph</span>
+    <span class="dm-graph-hint">Click a node to jump to that note</span>
+    <button id="dm-graph-close" class="dm-graph-close-btn">✕</button>
+  </div>
+  <canvas id="dm-graph-canvas"></canvas>
+</div>
+
+<!-- ── AI Study Coach Sidebar ────────────────────────────── -->
+<div id="coach-sidebar" class="coach-sidebar">
+  <div class="coach-header">
+    <span class="coach-title">🤖 Study Coach</span>
+    <button id="coach-close" class="coach-close-btn">✕</button>
+  </div>
+  <div class="coach-quick-chips">
+    <button class="coach-chip" data-msg="Quiz me on my notes">Quiz me</button>
+    <button class="coach-chip" data-msg="What should I focus on next?">Focus tip</button>
+  </div>
+  <div id="coach-messages" class="coach-messages"></div>
+  <div class="coach-input-row">
+    <input id="coach-input" class="coach-input" placeholder="Ask anything…" autocomplete="off" />
+    <button id="coach-send" class="coach-send-btn">↑</button>
+  </div>
+</div>
+<!-- ── PDF Viewer Modal ──────────────────────────────────────── -->
+<div id="pdf-viewer-modal" class="pdf-viewer-modal hidden" role="dialog" aria-modal="true">
+  <div class="pdf-viewer-toolbar">
+    <button id="pdf-viewer-close" class="pdf-toolbar-btn pdf-close-btn" title="Close">✕</button>
+    <span id="pdf-viewer-filename" class="pdf-viewer-filename"></span>
+    <div class="pdf-nav-group">
+      <button id="pdf-prev" class="pdf-toolbar-btn pdf-nav-btn" title="Previous page">◀</button>
+      <span id="pdf-page-label" class="pdf-page-label">1 / 1</span>
+      <button id="pdf-next" class="pdf-toolbar-btn pdf-nav-btn" title="Next page">▶</button>
+    </div>
+    <div class="pdf-toolbar-actions">
+      <button id="pdf-bookmark-page" class="pdf-toolbar-btn" title="Bookmark this page">🔖</button>
+      <button class="pdf-tab-trigger pdf-toolbar-btn active" data-tab="summary" title="AI Summary">📋 Summary</button>
+      <button class="pdf-tab-trigger pdf-toolbar-btn" data-tab="chat" title="Chat with PDF">🤖 Chat</button>
+      <button class="pdf-tab-trigger pdf-toolbar-btn" data-tab="annotations" title="Annotations">📝 Notes</button>
+    </div>
+  </div>
+  <div class="pdf-viewer-body">
+    <div class="pdf-canvas-wrap" id="pdf-canvas-wrap">
+      <div id="pdf-loading" class="pdf-loading hidden">Loading PDF…</div>
+      <canvas id="pdf-canvas"></canvas>
+      <div id="pdf-text-layer" class="pdf-text-layer"></div>
+      <div id="pdf-highlight-layer" class="pdf-highlight-layer"></div>
+      <div id="pdf-ann-popover" class="pdf-ann-popover hidden">
+        <span id="pdf-ann-selected-text" class="pdf-ann-selected-text"></span>
+        <div class="pdf-ann-popover-actions">
+          <button id="pdf-ann-save" class="pdf-ann-btn pdf-ann-btn-primary">💛 Highlight</button>
+          <button id="pdf-ann-note" class="pdf-ann-btn">📝 + Note</button>
+          <button id="pdf-ann-cancel" class="pdf-ann-btn">✕</button>
+        </div>
+        <textarea id="pdf-ann-note-input" class="pdf-ann-note-input hidden" rows="2" placeholder="Add a note…"></textarea>
+      </div>
+    </div>
+    <aside id="pdf-side-panel" class="pdf-side-panel">
+      <div id="pdf-tab-summary" class="pdf-tab-content">
+        <div id="pdf-summary-loading" class="pdf-summary-loading">
+          <div class="pdf-spinner"></div>
+          <p>Generating AI summary…</p>
+        </div>
+        <div id="pdf-summary-body" class="pdf-summary-body hidden"></div>
+      </div>
+      <div id="pdf-tab-chat" class="pdf-tab-content hidden">
+        <div class="pdf-chat-chips">
+          <button class="pdf-chat-chip" data-msg="What are the most important concepts?">Key concepts</button>
+          <button class="pdf-chat-chip" id="pdf-chip-page">Explain this page</button>
+        </div>
+        <div id="pdf-chat-messages" class="pdf-chat-messages"></div>
+        <div class="pdf-chat-input-row">
+          <input id="pdf-chat-input" class="pdf-chat-input" placeholder="Ask about this PDF…" autocomplete="off"/>
+          <button id="pdf-chat-send" class="pdf-chat-send-btn">↑</button>
+        </div>
+      </div>
+      <div id="pdf-tab-annotations" class="pdf-tab-content hidden">
+        <div id="pdf-annotations-list" class="pdf-annotations-list">
+          <p class="pdf-ann-empty">No highlights yet. Select text on the PDF to highlight it.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ── Dictionary Popup ───────────────────────────────────── -->
+<div id="dm-dict-tooltip" class="dm-dict-tooltip hidden">📖 Define</div>
+<div id="dm-dict-popup" class="dm-dict-popup hidden">
+  <div class="dm-dict-header">
+    <div class="dm-dict-word-row">
+      <span id="dm-dict-word" class="dm-dict-word"></span>
+      <span id="dm-dict-phonetic" class="dm-dict-phonetic"></span>
+    </div>
+    <div class="dm-dict-header-actions">
+      <button id="dm-dict-audio" class="dm-dict-audio-btn" title="Pronounce" style="display:none">🔊</button>
+      <button id="dm-dict-close" class="dm-dict-close-btn">✕</button>
+    </div>
+  </div>
+  <div id="dm-dict-body" class="dm-dict-body"></div>
+</div>
+
+
+{% include 'core/partials/tool_shell_close.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="{% static 'js/library.js' %}?v=1"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+<script type="module">
+  import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+  window._pdfjsLib = pdfjsLib;
+</script>
+{% endblock %}

@@ -12,7 +12,7 @@
     <link rel="icon" href="{% static 'images/favicon.ico' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4">
     <link rel="stylesheet" href="{% static 'css/alert.css' %}">
-    <link rel="stylesheet" href="{% static 'css/music_player.css' %}?v=6">
+    <link rel="stylesheet" href="{% static 'css/music_player.css' %}?v=7">
     <meta name="ss-page-css-start">
     {% block extra_css %}{% endblock %}
     <meta name="ss-page-css-end">
@@ -27,7 +27,7 @@
     </script>
     {% if sync_payload %}{{ sync_payload|json_script:"server-session-history" }}{% endif %}
     <script src="{% static 'js/sync.js' %}?v=3"></script>
-    <script src="{% static 'js/tree_art.js' %}?v=1"></script>
+    <script src="{% static 'js/tree_art.js' %}?v=2"></script>
     <script src="{% static 'js/tree_grow.js' %}?v=2"></script>
 
 </head>
@@ -63,30 +63,85 @@
       <button id="gmp-toggle" type="button" aria-label="Open sound mixer" aria-expanded="false">&#9650;</button>
     </div>
 
-    <div id="gmp-panel" class="hidden" role="dialog" aria-label="Sound mixer">
+    <div id="gmp-panel" class="hidden" role="dialog" aria-label="Music">
       <div class="gmp-panel-header">
-        <span class="gmp-panel-title">Sound mixer</span>
+        <span class="gmp-panel-title">Music</span>
         <button id="gmp-close" type="button" aria-label="Close">&#10005;</button>
       </div>
-      <p class="gmp-section-label">Mixes</p>
-      <div class="gmp-chips" id="gmp-presets"></div>
-      <button id="gmp-match" class="gmp-match" type="button" hidden></button>
-      <p class="gmp-section-label">Sounds <span class="gmp-hint">drag any slider up to blend it in</span></p>
-      <div class="gmp-grid" id="gmp-grid"></div>
-      <div class="gmp-foot">
-        <label class="gmp-foot-item">Master <input id="gmp-master" class="gmp-range" type="range" min="0" max="100" value="80"></label>
-        <label class="gmp-foot-item">Sleep timer
-          <select id="gmp-sleep" class="gmp-select"><option value="0">Off</option><option value="15">15 min</option><option value="30">30 min</option><option value="60">1 hour</option><option value="90">90 min</option></select>
-        </label>
-        <button id="gmp-save" class="gmp-btn" type="button">&#9733; Save mix</button>
-        <button id="gmp-silence" class="gmp-btn gmp-btn-quiet" type="button">Silence all</button>
+      <div class="gmp-tabs" role="tablist">
+        <button type="button" class="gmp-tab active" role="tab" data-tab="sounds" aria-selected="true">&#127911; Sounds</button>
+        <button type="button" class="gmp-tab" role="tab" data-tab="playlists" aria-selected="false">&#127925; Playlists</button>
+        <button type="button" class="gmp-tab" role="tab" data-tab="files" aria-selected="false">&#128193; My files</button>
+      </div>
+
+      <!-- ambient mixer -->
+      <div class="gmp-pane" data-pane="sounds">
+        <p class="gmp-section-label">Mixes</p>
+        <div class="gmp-chips" id="gmp-presets"></div>
+        <button id="gmp-match" class="gmp-match" type="button" hidden></button>
+        <p class="gmp-section-label">Sounds <span class="gmp-hint">drag any slider up to blend it in</span></p>
+        <div class="gmp-grid" id="gmp-grid"></div>
+        <div class="gmp-foot">
+          <label class="gmp-foot-item">Master <input id="gmp-master" class="gmp-range" type="range" min="0" max="100" value="80"></label>
+          <label class="gmp-foot-item">Sleep timer
+            <select id="gmp-sleep" class="gmp-select"><option value="0">Off</option><option value="15">15 min</option><option value="30">30 min</option><option value="60">1 hour</option><option value="90">90 min</option></select>
+          </label>
+          <button id="gmp-save" class="gmp-btn" type="button">&#9733; Save mix</button>
+          <button id="gmp-silence" class="gmp-btn gmp-btn-quiet" type="button">Silence all</button>
+        </div>
+      </div>
+
+      <!-- music services and playlist links -->
+      <div class="gmp-pane" data-pane="playlists" hidden>
+        <p class="gmp-section-label">Your music app</p>
+        <div class="gmp-services" id="gmp-services"></div>
+        <p class="gmp-section-label">Paste any playlist, album or track link</p>
+        <form class="gmp-link-row" id="gmp-link-form" autocomplete="off">
+          <input id="gmp-link-input" class="gmp-text" type="url" inputmode="url" placeholder="Spotify, Apple Music, YouTube, SoundCloud, Deezer, or an audio file URL" aria-label="Playlist link">
+          <button class="gmp-btn" type="submit">Play</button>
+        </form>
+        <p class="gmp-note" id="gmp-link-note">In your music app choose Share &rarr; Copy link, then paste it here. Sign in to the service in this browser to hear full tracks.</p>
+        <div id="gmp-suggest" class="gmp-chips"></div>
+        <div id="gmp-embed" class="gmp-embed" hidden></div>
+        <div id="gmp-recent-wrap" hidden>
+          <p class="gmp-section-label">Recent</p>
+          <div id="gmp-recent" class="gmp-recent"></div>
+        </div>
+      </div>
+
+      <!-- files from this device -->
+      <div class="gmp-pane" data-pane="files" hidden>
+        <p class="gmp-section-label">Play music from your computer</p>
+        <div class="gmp-drop" id="gmp-drop">
+          <p>Drop audio files here, or</p>
+          <div class="gmp-drop-btns">
+            <label class="gmp-btn">Choose files<input id="gmp-file-input" type="file" accept="audio/*" multiple hidden></label>
+            <label class="gmp-btn gmp-btn-quiet">Choose a folder<input id="gmp-dir-input" type="file" webkitdirectory multiple hidden></label>
+          </div>
+          <small>MP3, M4A, WAV, OGG, FLAC &middot; kept on this device only</small>
+        </div>
+        <div id="gmp-local" class="gmp-local" hidden>
+          <div class="gmp-now"><span id="gmp-now-title">Nothing playing</span></div>
+          <input id="gmp-seek" class="gmp-range" type="range" min="0" max="1000" value="0" aria-label="Seek">
+          <div class="gmp-times"><span id="gmp-t-cur">0:00</span><span id="gmp-t-dur">0:00</span></div>
+          <div class="gmp-transport">
+            <button type="button" class="gmp-icon-btn" id="gmp-shuffle" title="Shuffle" aria-pressed="false">&#128256;</button>
+            <button type="button" class="gmp-icon-btn" id="gmp-prev" title="Previous">&#9198;</button>
+            <button type="button" class="gmp-icon-btn gmp-icon-main" id="gmp-lplay" title="Play / pause">&#9654;</button>
+            <button type="button" class="gmp-icon-btn" id="gmp-next" title="Next">&#9197;</button>
+            <button type="button" class="gmp-icon-btn" id="gmp-repeat" title="Repeat" aria-pressed="false">&#128257;</button>
+          </div>
+          <ol class="gmp-tracks" id="gmp-tracks"></ol>
+          <button type="button" class="gmp-btn gmp-btn-quiet gmp-clear" id="gmp-clear-files">Remove all</button>
+        </div>
+        <audio id="gmp-audio" preload="metadata"></audio>
       </div>
     </div>
 
     <!-- Global Alert -->
     <div id="global-toast" class="toast"></div>
     <script src="{% static 'js/alert.js' %}"></script>
-    <script src="{% static 'js/music_player.js' %}?v=12" defer></script>
+    <script src="{% static 'js/music_player.js' %}?v=13" defer></script>
     <script src="{% static 'js/global_ui.js' %}?v=1" defer></script>
     <script src="{% static 'js/tree_fx.js' %}?v=2" defer></script>
 
@@ -608,7 +663,7 @@
     }
     /* Exit button visible when controls are shown OR always visible on non-timer pages */
     body.fs-controls-visible #fs-exit-btn,
-    .is-fullscreen:not(.exam-page):not(.daily-mode-page):not(.custom-page) #fs-exit-btn {
+    .is-fullscreen:not(.study-page) #fs-exit-btn {
       opacity: 1 !important;
       pointer-events: auto !important;
     }

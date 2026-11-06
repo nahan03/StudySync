@@ -228,11 +228,12 @@
 
   /* ───────────── channels ───────────── */
   const channels = {};
+  let audioEl = null;
   const curve = v => Math.pow(v / 100, 1.7);
   let state = load();
   function load() {
-    try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && typeof s === 'object') return { vols: s.vols || {}, master: s.master == null ? 80 : s.master, mixes: Array.isArray(s.mixes) ? s.mixes : [], name: s.name || '' }; } catch (e) { }
-    return { vols: {}, master: 80, mixes: [], name: '' };
+    try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && typeof s === 'object') return { vols: s.vols || {}, master: s.master == null ? 80 : s.master, mixes: Array.isArray(s.mixes) ? s.mixes : [], recent: Array.isArray(s.recent) ? s.recent : [], name: s.name || '' }; } catch (e) { }
+    return { vols: {}, master: 80, mixes: [], recent: [], name: '' };
   }
   let saveT = null;
   function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { } }, 400); }
@@ -324,6 +325,7 @@
     $('gmp-name').textContent = state.name || (on.length ? 'Custom mix' : 'Study sounds');
     let sub = on.length ? on.slice(0, 3).map(s => s.name).join(' · ') + (on.length > 3 ? ' +' + (on.length - 3) : '') : 'Tap play for a calm mix';
     if (sleepAt) { const m = Math.max(0, Math.ceil((sleepAt - Date.now()) / 60000)); sub += ' · sleep in ' + m + ' min'; }
+    if (typeof audioEl !== 'undefined' && audioEl && !audioEl.paused) sub = '♪ ' + $('gmp-now-title').textContent + (on.length ? ' + sounds' : '');
     $('gmp-sub').textContent = sub;
     panel.querySelectorAll('[data-preset]').forEach(b => b.classList.toggle('active', PRESETS[+b.dataset.preset].name === state.name));
     panel.querySelectorAll('[data-mix]').forEach(b => b.classList.toggle('active', state.mixes[+b.dataset.mix] && state.mixes[+b.dataset.mix].name === state.name));
@@ -351,7 +353,7 @@
   });
   $('gmp-bar-vol').addEventListener('input', e => { state.master = +e.target.value; e.target.style.setProperty('--v', e.target.value + '%'); $('gmp-master').value = e.target.value; $('gmp-master').style.setProperty('--v', e.target.value + '%'); applyMaster(); save(); });
   panel.addEventListener('click', e => {
-    const b = e.target.closest('button'); if (!b) return;
+    const b = e.target.closest('button'); if (!b || b.closest('[data-pane="playlists"], [data-pane="files"], .gmp-tabs')) return;
     if (b.dataset.preset != null) setPreset(PRESETS[+b.dataset.preset], true);
     else if (b.dataset.mix != null) { const m = state.mixes[+b.dataset.mix]; if (m) setPreset({ name: m.name, vols: m.vols }, true); }
     else if (b.id === 'gmp-match') { const bg = document.getElementById('st-root').dataset.bg, p = PRESETS.find(x => x.name === BG_MATCH[bg]); if (p) setPreset(p, true); }
@@ -368,6 +370,169 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.classList.contains('hidden')) openPanel(false); });
   document.addEventListener('click', e => { if (!panel.classList.contains('hidden') && !panel.contains(e.target) && !bar.contains(e.target)) openPanel(false); });
   if ('mediaSession' in navigator) { try { navigator.mediaSession.setActionHandler('play', play); navigator.mediaSession.setActionHandler('pause', pause); } catch (e) { } }
+
+  /* ───────────── tabs ───────────── */
+  function showTab(name) {
+    panel.querySelectorAll('.gmp-tab').forEach(t => { const on = t.dataset.tab === name; t.classList.toggle('active', on); t.setAttribute('aria-selected', String(on)); });
+    panel.querySelectorAll('.gmp-pane').forEach(p => { p.hidden = p.dataset.pane !== name; });
+    try { sessionStorage.setItem('gmpTab', name); } catch (e) { }
+  }
+  panel.querySelector('.gmp-tabs').addEventListener('click', e => { const t = e.target.closest('.gmp-tab'); if (t) showTab(t.dataset.tab); });
+  try { const t = sessionStorage.getItem('gmpTab'); if (t) showTab(t); } catch (e) { }
+
+  /* ───────────── music services and playlist links ───────────── */
+  const SERVICES = [
+    { id: 'spotify', name: 'Spotify', color: '#1DB954', open: 'https://open.spotify.com/', hint: 'Open a playlist in Spotify, choose Share → Copy link to playlist, then paste it above.' },
+    { id: 'apple', name: 'Apple Music', color: '#FA243C', open: 'https://music.apple.com/', hint: 'In Apple Music choose ••• → Share → Copy Link on any playlist or album, then paste it above.' },
+    { id: 'youtube', name: 'YouTube Music', color: '#FF0033', open: 'https://music.youtube.com/', hint: 'Works with YouTube and YouTube Music videos, mixes and playlists.' },
+    { id: 'soundcloud', name: 'SoundCloud', color: '#FF5500', open: 'https://soundcloud.com/', hint: 'Paste a track, set or profile link from SoundCloud.' },
+    { id: 'deezer', name: 'Deezer', color: '#A238FF', open: 'https://www.deezer.com/', hint: 'Paste a Deezer playlist, album or track link.' },
+    { id: 'amazon', name: 'Amazon Music', color: '#25D1DA', open: 'https://music.amazon.com/', hint: 'Amazon Music cannot be embedded, so it plays in its own tab. Your sounds keep playing here.' },
+  ];
+  const SUGGEST = [
+    { label: 'Peaceful Piano', url: 'https://open.spotify.com/playlist/37i9dQZF1DX4sWSpwq3LiO' },
+    { label: 'Deep Focus', url: 'https://open.spotify.com/playlist/37i9dQZF1DWZeKCadgRdKQ' },
+    { label: 'Lofi Beats', url: 'https://open.spotify.com/playlist/37i9dQZF1DWWQRwui0ExPn' },
+    { label: 'Lofi Girl live radio', url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk' },
+  ];
+
+  /* turn whatever the user pasted into something we can embed */
+  function parseLink(raw) {
+    raw = (raw || '').trim(); if (!raw) return null;
+    if (!/^https?:\/\//i.test(raw)) raw = 'https://' + raw;
+    let u; try { u = new URL(raw); } catch (e) { return null; }
+    const host = u.hostname.replace(/^www\.|^m\./, ''), path = u.pathname;
+    let m;
+    if (host === 'open.spotify.com') {
+      m = path.match(/\/(?:intl-[a-z]+\/)?(playlist|album|track|artist|show|episode)\/([A-Za-z0-9]+)/);
+      if (m) return { service: 'spotify', label: 'Spotify ' + m[1], embed: `https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator&theme=0`, height: /track|episode/.test(m[1]) ? 152 : 380 };
+      return { error: 'That Spotify link has no playlist, album or track in it. Use Share → Copy link.' };
+    }
+    if (host === 'music.apple.com' || host === 'embed.music.apple.com') {
+      if (/\/(playlist|album|song|station|artist)\//.test(path)) return { service: 'apple', label: 'Apple Music', embed: 'https://embed.music.apple.com' + path + u.search, height: /\/song\//.test(path) || /[?&]i=/.test(u.search) ? 175 : 450 };
+      return { error: 'Open a playlist or album in Apple Music, then choose Share → Copy Link.' };
+    }
+    if (/(^|\.)youtube\.com$/.test(host) || host === 'youtu.be') {
+      const list = u.searchParams.get('list'), v = u.searchParams.get('v') || (host === 'youtu.be' ? path.slice(1) : (path.match(/\/(?:embed|shorts|live)\/([\w-]{11})/) || [])[1]);
+      if (list && !/^RD/.test(list)) return { service: 'youtube', label: 'YouTube playlist', embed: `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(list)}&autoplay=1&rel=0`, height: 315 };
+      if (v && /^[\w-]{11}$/.test(v)) return { service: 'youtube', label: 'YouTube', embed: `https://www.youtube.com/embed/${v}?autoplay=1&rel=0`, height: 315 };
+      return { error: 'That YouTube link has no video or playlist in it.' };
+    }
+    if (host === 'soundcloud.com' || host === 'on.soundcloud.com') return { service: 'soundcloud', label: 'SoundCloud', embed: 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(raw) + '&auto_play=true&hide_related=true&show_comments=false', height: 300 };
+    if (host === 'deezer.com') {
+      m = path.match(/\/(?:[a-z]{2}\/)?(playlist|album|track|artist)\/(\d+)/);
+      if (m) return { service: 'deezer', label: 'Deezer ' + m[1], embed: `https://widget.deezer.com/widget/dark/${m[1]}/${m[2]}?autoplay=true`, height: m[1] === 'track' ? 150 : 350 };
+    }
+    if (/(^|\.)music\.amazon\./.test(host)) return { service: 'amazon', label: 'Amazon Music', external: raw };
+    if (/\.(mp3|m4a|aac|ogg|oga|wav|flac|opus)(\?|$)/i.test(path)) return { service: 'audio', label: 'Audio file', audio: raw };
+    return { error: 'I do not recognise that link. Spotify, Apple Music, YouTube, SoundCloud, Deezer and direct audio links work.' };
+  }
+
+  const embedBox = $('gmp-embed'), noteEl = $('gmp-link-note');
+  const NOTE_DEFAULT = noteEl.textContent;
+  function note(msg, bad) { noteEl.textContent = msg || NOTE_DEFAULT; noteEl.classList.toggle('bad', !!bad); }
+  function clearEmbed() { embedBox.innerHTML = ''; embedBox.hidden = true; }
+
+  function playLink(raw) {
+    const r = parseLink(raw);
+    if (!r) { note('Paste a link first.', true); return false; }
+    if (r.error) { note(r.error, true); return false; }
+    note('');
+    if (r.external) { window.open(r.external, '_blank', 'noopener'); note('Opened in a new tab: Amazon Music cannot play inside other pages.'); remember(raw, r); return true; }
+    clearEmbed();
+    if (r.audio) {
+      const a = document.createElement('audio'); a.controls = true; a.autoplay = true; a.src = r.audio; a.className = 'gmp-audio-el'; embedBox.appendChild(a);
+    } else {
+      const f = document.createElement('iframe');
+      f.src = r.embed; f.height = r.height; f.className = 'gmp-iframe'; f.title = r.label; f.loading = 'lazy';
+      f.referrerPolicy = 'strict-origin-when-cross-origin'; f.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture'; f.setAttribute('allowfullscreen', '');
+      embedBox.appendChild(f);
+    }
+    embedBox.hidden = false; remember(raw, r);
+    return true;
+  }
+  function remember(raw, r) {
+    state.recent = [{ url: raw.trim(), label: r.label }].concat((state.recent || []).filter(x => x.url !== raw.trim())).slice(0, 8); save(); renderRecent();
+  }
+  function renderRecent() {
+    const list = state.recent || [];
+    $('gmp-recent-wrap').hidden = !list.length;
+    $('gmp-recent').innerHTML = list.map((x, i) => `<div class="gmp-recent-row"><button type="button" class="gmp-recent-item" data-recent="${i}" title="${escapeHtml(x.url)}"><b>${escapeHtml(x.label)}</b><span>${escapeHtml(x.url.replace(/^https?:\/\/(www\.)?/, '').slice(0, 52))}</span></button><button type="button" class="gmp-recent-x" data-recent-del="${i}" aria-label="Remove">&#10005;</button></div>`).join('');
+  }
+
+  $('gmp-services').innerHTML = SERVICES.map(s => `<button type="button" class="gmp-service" data-service="${s.id}" style="--c:${s.color}"><span class="gmp-service-dot"></span>${s.name}</button>`).join('');
+  $('gmp-suggest').innerHTML = SUGGEST.map((s, i) => `<button type="button" class="gmp-chip" data-suggest="${i}">&#9835; ${s.label}</button>`).join('');
+  $('gmp-services').addEventListener('click', e => {
+    const b = e.target.closest('[data-service]'); if (!b) return; const s = SERVICES.find(x => x.id === b.dataset.service);
+    $('gmp-services').querySelectorAll('.gmp-service').forEach(x => x.classList.toggle('active', x === b));
+    note(s.hint); window.open(s.open, '_blank', 'noopener'); $('gmp-link-input').focus();
+  });
+  $('gmp-link-form').addEventListener('submit', e => { e.preventDefault(); if (playLink($('gmp-link-input').value)) $('gmp-link-input').value = ''; });
+  $('gmp-suggest').addEventListener('click', e => { const b = e.target.closest('[data-suggest]'); if (b) playLink(SUGGEST[+b.dataset.suggest].url); });
+  $('gmp-recent').addEventListener('click', e => {
+    const d = e.target.closest('[data-recent-del]'); if (d) { state.recent.splice(+d.dataset.recentDel, 1); save(); renderRecent(); return; }
+    const b = e.target.closest('[data-recent]'); if (b) playLink(state.recent[+b.dataset.recent].url);
+  });
+  renderRecent();
+
+  /* ───────────── files from this computer ───────────── */
+  audioEl = $('gmp-audio');
+  let tracks = [], cur = -1, shuffle = false, repeat = false, urls = {};
+  function idb() { return new Promise((res, rej) => { const q = indexedDB.open('studySyncLocalMusic', 1); q.onupgradeneeded = () => q.result.createObjectStore('files', { keyPath: 'id', autoIncrement: true }); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+  async function dbAll() { try { const db = await idb(); return await new Promise(r => { const q = db.transaction('files').objectStore('files').getAll(); q.onsuccess = () => r(q.result || []); q.onerror = () => r([]); }); } catch (e) { return []; } }
+  async function dbPut(rec) { try { const db = await idb(); return await new Promise(r => { const q = db.transaction('files', 'readwrite').objectStore('files').add(rec); q.onsuccess = () => r(q.result); q.onerror = () => r(null); }); } catch (e) { return null; } }
+  async function dbDel(id) { try { const db = await idb(); db.transaction('files', 'readwrite').objectStore('files').delete(id); } catch (e) { } }
+  async function dbClear() { try { const db = await idb(); db.transaction('files', 'readwrite').objectStore('files').clear(); } catch (e) { } }
+
+  const fmt = s => { if (!isFinite(s)) return '0:00'; s = Math.floor(s); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  const prettyName = n => n.replace(/\.[a-z0-9]+$/i, '').replace(/_+/g, ' ');
+  async function addFiles(list) {
+    const files = Array.from(list).filter(f => /^audio\//.test(f.type) || /\.(mp3|m4a|aac|ogg|oga|wav|flac|opus|weba)$/i.test(f.name));
+    if (!files.length) { toast('No audio files found in that selection.'); return; }
+    for (const f of files.slice(0, 300)) { const id = await dbPut({ name: f.name, blob: f }); tracks.push({ id, name: f.name, blob: f }); }
+    renderTracks(); if (cur < 0) loadTrack(0, true);
+  }
+  function renderTracks() {
+    $('gmp-local').hidden = !tracks.length;
+    $('gmp-tracks').innerHTML = tracks.map((t, i) => `<li class="${i === cur ? 'now' : ''}"><button type="button" data-track="${i}"><span class="gmp-tn">${i === cur && !audioEl.paused ? '&#9654;' : i + 1}</span><span class="gmp-tt">${escapeHtml(prettyName(t.name))}</span></button><button type="button" class="gmp-recent-x" data-track-del="${i}" aria-label="Remove">&#10005;</button></li>`).join('');
+  }
+  function loadTrack(i, quiet) {
+    if (!tracks.length) return; cur = (i + tracks.length) % tracks.length; const t = tracks[cur];
+    if (!urls[t.id]) urls[t.id] = URL.createObjectURL(t.blob);
+    audioEl.src = urls[t.id]; $('gmp-now-title').textContent = prettyName(t.name); renderTracks();
+    if (!quiet) audioEl.play().catch(() => { });
+    try { if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: prettyName(t.name), artist: 'My files' }); } catch (e) { }
+  }
+  function nextTrack(dir) { if (!tracks.length) return; if (shuffle && dir > 0 && tracks.length > 1) { let n; do { n = Math.floor(Math.random() * tracks.length); } while (n === cur); loadTrack(n); } else loadTrack(cur + dir); }
+  $('gmp-file-input').addEventListener('change', e => { addFiles(e.target.files); e.target.value = ''; });
+  $('gmp-dir-input').addEventListener('change', e => { addFiles(e.target.files); e.target.value = ''; });
+  const drop = $('gmp-drop');
+  ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => { if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
+  $('gmp-lplay').addEventListener('click', () => { if (cur < 0) loadTrack(0); else if (audioEl.paused) audioEl.play().catch(() => { }); else audioEl.pause(); });
+  $('gmp-next').addEventListener('click', () => nextTrack(1));
+  $('gmp-prev').addEventListener('click', () => { if (audioEl.currentTime > 4) audioEl.currentTime = 0; else nextTrack(-1); });
+  $('gmp-shuffle').addEventListener('click', e => { shuffle = !shuffle; e.currentTarget.setAttribute('aria-pressed', String(shuffle)); e.currentTarget.classList.toggle('on', shuffle); });
+  $('gmp-repeat').addEventListener('click', e => { repeat = !repeat; e.currentTarget.setAttribute('aria-pressed', String(repeat)); e.currentTarget.classList.toggle('on', repeat); });
+  $('gmp-seek').addEventListener('input', e => { if (audioEl.duration) audioEl.currentTime = audioEl.duration * (+e.target.value / 1000); });
+  audioEl.addEventListener('timeupdate', () => { if (audioEl.duration) { $('gmp-seek').value = Math.round(audioEl.currentTime / audioEl.duration * 1000); $('gmp-seek').style.setProperty('--v', ($('gmp-seek').value / 10) + '%'); } $('gmp-t-cur').textContent = fmt(audioEl.currentTime); $('gmp-t-dur').textContent = fmt(audioEl.duration); });
+  audioEl.addEventListener('play', () => { $('gmp-lplay').innerHTML = '&#10074;&#10074;'; renderTracks(); render(); });
+  audioEl.addEventListener('pause', () => { $('gmp-lplay').innerHTML = '&#9654;'; renderTracks(); render(); });
+  audioEl.addEventListener('ended', () => { if (repeat && !shuffle) loadTrack(cur); else if (cur < tracks.length - 1 || shuffle || repeat) nextTrack(1); });
+  $('gmp-tracks').addEventListener('click', e => {
+    const d = e.target.closest('[data-track-del]');
+    if (d) {
+      const i = +d.dataset.trackDel, t = tracks[i]; dbDel(t.id); if (urls[t.id]) { URL.revokeObjectURL(urls[t.id]); delete urls[t.id]; }
+      tracks.splice(i, 1);
+      if (i === cur) { audioEl.pause(); audioEl.removeAttribute('src'); cur = -1; $('gmp-now-title').textContent = 'Nothing playing'; if (tracks.length) loadTrack(Math.min(i, tracks.length - 1), true); }
+      else if (i < cur) cur--;
+      renderTracks(); return;
+    }
+    const b = e.target.closest('[data-track]'); if (b) loadTrack(+b.dataset.track);
+  });
+  $('gmp-clear-files').addEventListener('click', () => { audioEl.pause(); audioEl.removeAttribute('src'); Object.values(urls).forEach(u => URL.revokeObjectURL(u)); urls = {}; tracks = []; cur = -1; dbClear(); $('gmp-now-title').textContent = 'Nothing playing'; renderTracks(); });
+  dbAll().then(list => { tracks = list.map(r => ({ id: r.id, name: r.name, blob: r.blob })); if (tracks.length) renderTracks(); });
 
   window.SSMixer = {
     play, pause, toggle, duck, isPlaying: () => running,

@@ -1,4 +1,4 @@
-/* Saved flashcard decks (Exam mode). Decks are named snapshots of the card list,
+/* Saved flashcard decks (Flashcards page). Decks are named snapshots of the card list,
    stored under 'studySyncDecks' (synced to the server by sync.js). */
 window.ssReady(function () {
   const $ = id => document.getElementById(id);

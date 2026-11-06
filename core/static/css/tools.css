@@ -1,0 +1,30 @@
+/* Standalone tool pages (Library & AI coach, Flashcards & practice): they wear the Study page's theme. */
+body.tool-page { background: #050a04; padding-bottom: 72px; }
+.tool-root { min-height: 100vh; color: var(--cream); font-family: 'DM Sans', sans-serif; }
+.tool-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 140px; }
+.tool-head { max-width: 760px; margin: 0 0 22px; }
+.tool-head .st-title { margin: 6px 0 8px; }
+.tool-links .st-nav-link { display: inline-flex !important; }
+.tool-links .st-nav-link.is-active { background: rgba(var(--accent-rgb), .22); border-color: rgba(var(--accent-rgb), .6); color: var(--cream); }
+@media (max-width: 760px) { .tool-links { flex-wrap: wrap; justify-content: flex-end; gap: 6px; } .tool-links .st-nav-link { font-size: 12px; padding: 6px 9px; } }
+
+.tool-subject { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+.tool-subject label { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--fog); }
+.tool-subject input { flex: 1 1 200px; max-width: 280px; padding: 10px 14px; border-radius: 12px; color: var(--cream); font: 500 14px 'DM Sans', sans-serif; background: rgba(var(--surf), .06); border: 1px solid rgba(var(--surf), .16); }
+
+/* the old pages' dark panels, sitting on the themed gradient */
+.tool-root .dm-wrap, .tool-root .dm-layout { display: block; position: static; min-height: 0; padding: 0; background: none; }
+.tool-root .dm-main { width: 100%; max-width: none; padding: 0; margin: 0; }
+.tool-root .dm-panel, .tool-root .dm-card, .tool-root .em-countdown-card {
+  background: rgba(var(--surf), .06); border: 1px solid rgba(var(--surf), .14); border-radius: 20px;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: var(--cream);
+}
+.tool-root .em-page { max-width: none; padding: 0; margin: 0; }
+.tool-root .em-top-row { display: block; margin-bottom: 18px; padding: 0; }
+.tool-root .em-countdown-card { width: 100%; max-width: 640px; margin: 0; }
+.tool-root .dm-main-grid { padding: 0 0 40px; }
+.tool-root .em-btn-primary, .tool-root .dm-btn-primary { background: linear-gradient(135deg, var(--leaf), var(--sprout)); color: var(--on-accent); }
+.tool-root .ec-input { color: var(--cream); background: rgba(var(--surf), .08); border-color: rgba(var(--surf), .18); }
+.tool-root .tool-head ~ * { position: relative; z-index: 1; }
+/* the coach and PDF panels slide over the page */
+.coach-sidebar { z-index: 900; }

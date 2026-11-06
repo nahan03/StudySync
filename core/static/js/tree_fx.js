@@ -1,6 +1,6 @@
 /* Tree growth celebration effects.
  *
- * Works with the shared #tree-growth-overlay used by Daily, Exam and Custom mode.
+ * Works with the shared #tree-growth-overlay used by the Study page.
  * It only observes the DOM, so it needs no changes to the session logic:
  *   - overlay shown            -> aura, light rays and drifting leaves/sparkles start
  *   - #tg-stage text changes   -> tree "pops", a ring ripples out, a small burst

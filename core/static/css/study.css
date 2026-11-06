@@ -447,31 +447,110 @@ body.study-page.is-fullscreen .tree-growth-overlay:not(.hidden) { display: flex 
 }
 .st-root[data-theme="glass"] .bgl-base {
   background:
-    radial-gradient(ellipse 50% 45% at 18% 22%, rgba(88,120,255,.62), transparent 70%),
-    radial-gradient(ellipse 46% 42% at 82% 18%, rgba(190,100,255,.5), transparent 70%),
-    radial-gradient(ellipse 52% 48% at 70% 88%, rgba(40,200,210,.42), transparent 70%),
-    radial-gradient(ellipse 40% 40% at 12% 85%, rgba(255,110,170,.34), transparent 70%),
+    radial-gradient(ellipse 50% 45% at 18% 22%, rgba(88,120,255,.78), transparent 70%),
+    radial-gradient(ellipse 46% 42% at 82% 18%, rgba(200,100,255,.68), transparent 70%),
+    radial-gradient(ellipse 52% 48% at 70% 88%, rgba(40,210,220,.58), transparent 70%),
+    radial-gradient(ellipse 40% 40% at 12% 85%, rgba(255,110,170,.5), transparent 70%),
     linear-gradient(180deg, var(--bg1), var(--bg2));
 }
 .st-root[data-theme="glass"] .st-card, .st-root[data-theme="glass"] .st-tree-card {
-  background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05));
-  border: 1px solid rgba(255,255,255,.26);
-  backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
-  box-shadow: 0 10px 40px rgba(4,8,30,.35), inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(255,255,255,.06);
+  /* clear glass: almost no tint, so the picture behind shows through, bent a little by the blur */
+  background: linear-gradient(135deg, rgba(255,255,255,.1) 0%, rgba(255,255,255,.015) 45%, rgba(255,255,255,.05) 100%);
+  border: 1px solid rgba(255,255,255,.3); border-top-color: rgba(255,255,255,.55); border-left-color: rgba(255,255,255,.45);
+  backdrop-filter: blur(9px) saturate(185%) brightness(1.08); -webkit-backdrop-filter: blur(9px) saturate(185%) brightness(1.08);
+  box-shadow: 0 8px 32px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.5), inset 1px 0 0 rgba(255,255,255,.25), inset 0 -1px 0 rgba(255,255,255,.08), inset 0 0 28px rgba(255,255,255,.04);
 }
 .st-root[data-theme="glass"] .st-nav {
-  background: rgba(255,255,255,.07); border-bottom: 1px solid rgba(255,255,255,.18);
-  backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+  background: rgba(255,255,255,.04); border-bottom: 1px solid rgba(255,255,255,.28);
+  backdrop-filter: blur(10px) saturate(180%); -webkit-backdrop-filter: blur(10px) saturate(180%);
 }
 .st-root[data-theme="glass"] input, .st-root[data-theme="glass"] select {
-  background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22);
+  background: rgba(255,255,255,.035); border-color: rgba(255,255,255,.28);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.12);
 }
 .st-root[data-theme="glass"] .st-btn-primary {
-  background: linear-gradient(135deg, rgba(120,160,255,.9), rgba(170,120,255,.85)); color: #fff;
-  box-shadow: 0 6px 24px rgba(100,120,255,.4), inset 0 1px 0 rgba(255,255,255,.45);
+  background: linear-gradient(135deg, rgba(150,190,255,.55), rgba(190,140,255,.5)); color: #fff; border: 1px solid rgba(255,255,255,.5);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 6px 24px rgba(100,120,255,.3), inset 0 1px 0 rgba(255,255,255,.6);
 }
 .st-root[data-theme="glass"] .st-ring-arc { filter: drop-shadow(0 0 8px rgba(156,196,255,.6)); }
 /* on scenes the pane picks up the picture behind it; the bright blossom scene still needs a darker tint */
 .st-root[data-theme="glass"][data-bg="sakura"] .st-card, .st-root[data-theme="glass"][data-bg="sakura"] .st-tree-card {
   background: linear-gradient(135deg, rgba(40,20,44,.52), rgba(40,20,44,.34));
 }
+
+/* ══════════════════════════════════════════
+   TIMER RING STYLES  (data-ring) and FONTS  (data-font, data-tsize)
+══════════════════════════════════════════ */
+#st-run { --ring-c: var(--sprout); }
+#st-run[data-phase="short"], #st-run[data-phase="long"] { --ring-c: var(--amber); }
+.st-ring-in-bg, .st-ring-in, #st-ticks, .st-knob, .st-minbar { display: none; }
+.st-ring-in-bg { fill: none; stroke: rgba(var(--surf),.08); stroke-width: 3; }
+.st-ring-in { fill: none; stroke: var(--ring-c); stroke-width: 3; stroke-linecap: round; opacity: .85; transition: stroke-dashoffset .6s ease; }
+.st-knob { fill: var(--ring-c); filter: drop-shadow(0 0 7px var(--ring-c)); }
+.st-tick { stroke: rgba(var(--surf),.16); stroke-width: 2.4; stroke-linecap: round; transition: stroke .3s; }
+.st-tick.on { stroke: var(--ring-c); }
+.st-dotp { fill: rgba(var(--surf),.16); display: none; transition: fill .3s; }
+.st-dotp.on { fill: var(--ring-c); }
+.st-minbar { width: min(78vw, 320px); height: 6px; border-radius: 3px; background: rgba(var(--surf),.1); overflow: hidden; }
+.st-minbar span { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--ring-c); transition: width .3s linear; }
+
+/* orbit: a hairline ring with a dot riding on its end */
+.st-root[data-ring="thin"] .st-ring-arc, .st-root[data-ring="thin"] .st-ring-bg { stroke-width: 2.4; filter: none; }
+.st-root[data-ring="thin"] .st-ring-arc { stroke: var(--ring-c); }
+.st-root[data-ring="thin"] .st-knob { display: block; }
+/* neon: a bright tube with a halo */
+.st-root[data-ring="neon"] .st-ring-bg { stroke-width: 1.5; }
+.st-root[data-ring="neon"] .st-ring-arc { stroke: var(--ring-c); stroke-width: 6; filter: drop-shadow(0 0 4px var(--ring-c)) drop-shadow(0 0 14px var(--ring-c)); }
+.st-root[data-ring="neon"] .st-ring-in-bg { display: block; stroke-width: 1; opacity: .6; }
+/* gradient */
+.st-root[data-ring="gradient"] .st-ring-arc { stroke: url(#st-grad); stroke-width: 11; }
+.st-root[data-ring="gradient"] .st-ring-bg { stroke-width: 11; }
+/* ticks and dots: the ring is drawn as 60 marks that go out as time passes */
+.st-root[data-ring="ticks"] .st-ring-arc, .st-root[data-ring="ticks"] .st-ring-bg,
+.st-root[data-ring="dots"] .st-ring-arc, .st-root[data-ring="dots"] .st-ring-bg { display: none; }
+.st-root[data-ring="ticks"] #st-ticks, .st-root[data-ring="dots"] #st-ticks { display: block; }
+.st-root[data-ring="ticks"] .st-dotp { display: none; }
+.st-root[data-ring="dots"] .st-tick { display: none; }
+.st-root[data-ring="dots"] .st-dotp { display: block; }
+/* double: the main ring plus an inner one for the whole session */
+.st-root[data-ring="double"] .st-ring-arc, .st-root[data-ring="double"] .st-ring-bg { stroke-width: 7; stroke: var(--ring-c); }
+.st-root[data-ring="double"] .st-ring-bg { stroke: rgba(var(--surf),.08); }
+.st-root[data-ring="double"] .st-ring-in-bg, .st-root[data-ring="double"] .st-ring-in { display: block; }
+/* minimal: no ring at all, just the time and a slim bar */
+.st-root[data-ring="minimal"] .st-ring svg { display: none; }
+.st-root[data-ring="minimal"] .st-ring { aspect-ratio: auto; height: 130px; width: min(78vw, 320px); animation: none !important; }
+.st-root[data-ring="minimal"] .st-ring-center { position: static; height: 100%; }
+.st-root[data-ring="minimal"] .st-minbar { display: block; }
+.st-root[data-ring="minimal"] .st-time { font-size: clamp(64px, 18vw, 104px); }
+.st-root[data-theme="glass"][data-ring="classic"] .st-ring-arc, .st-root[data-theme="glass"][data-ring="gradient"] .st-ring-arc { filter: drop-shadow(0 0 8px rgba(156,196,255,.6)); }
+
+/* the time itself */
+.st-time { transition: font-size .2s; }
+.st-root[data-font="sans"]    .st-time { font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: -.035em; }
+.st-root[data-font="mono"]    .st-time { font-family: 'Space Mono', monospace; font-weight: 700; letter-spacing: -.05em; }
+.st-root[data-font="round"]   .st-time { font-family: 'Nunito', sans-serif; font-weight: 800; letter-spacing: -.01em; }
+.st-root[data-font="digital"] .st-time { font-family: 'Orbitron', sans-serif; font-weight: 700; letter-spacing: .02em; font-size: clamp(36px, 11.5vw, 56px); }
+.st-root[data-font="slab"]    .st-time { font-family: 'Roboto Slab', serif; font-weight: 700; letter-spacing: -.02em; }
+.st-root[data-font="light"]   .st-time { font-family: 'Outfit', sans-serif; font-weight: 200; letter-spacing: -.02em; font-size: clamp(52px, 16vw, 78px); }
+.st-root[data-font="hand"]    .st-time { font-family: 'Caveat', cursive; font-weight: 700; letter-spacing: 0; font-size: clamp(56px, 17vw, 84px); }
+.st-root[data-tsize="s"] .st-time { zoom: .78; }
+.st-root[data-tsize="l"] .st-time { zoom: 1.22; }
+.st-root[data-ring="minimal"][data-tsize="s"] .st-time { zoom: .72; }
+
+/* pickers */
+.st-rings, .st-fonts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.st-fonts { grid-template-columns: repeat(2, 1fr); }
+.st-ringtile, .st-fonttile {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px 8px; border-radius: 12px; cursor: pointer;
+  font: 600 11px 'DM Sans', sans-serif; color: var(--cream); background: rgba(var(--surf),.05); border: 1.5px solid rgba(var(--surf),.1);
+  transition: border-color .15s, background .15s, transform .15s;
+}
+.st-ringtile:hover, .st-fonttile:hover { transform: translateY(-2px); }
+.st-ringtile[aria-checked="true"], .st-fonttile[aria-checked="true"] { border-color: var(--sprout); background: rgba(var(--accent-rgb), .14); }
+.st-ringprev { display: block; color: var(--sprout); line-height: 0; }
+.st-fontprev { font-size: 22px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.st-seg { display: flex; gap: 4px; margin-top: 10px; padding: 3px; border-radius: 11px; background: rgba(var(--surf),.06); }
+.st-seg button { flex: 1; padding: 7px 4px; border: 0; border-radius: 8px; cursor: pointer; font: 600 12px 'DM Sans', sans-serif; color: var(--fog); background: transparent; }
+.st-seg button[aria-checked="true"] { color: var(--cream); background: rgba(var(--surf),.14); }
+@media (prefers-reduced-motion: reduce) { .st-ring-in, .st-minbar span, .st-tick { transition: none; } }

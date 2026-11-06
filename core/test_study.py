@@ -186,3 +186,28 @@ class SoundMixerTests(TestCase):
     def test_saved_mixes_sync_to_the_account(self):
         from .models import UserState
         self.assertIn('studySyncMixer', UserState.SYNCED_KEYS)
+
+
+@override_settings(STORAGES=STATIC_OVERRIDE)
+class ToolPageTests(TestCase):
+    """Library, coach and flashcards are standalone tools; the old study modes are gone."""
+
+    def setUp(self):
+        self.client.force_login(User.objects.create_user('tools', password='x'))
+
+    def test_library_and_flashcards_render_without_any_timer(self):
+        for name, marker in (('library', 'id="coach-toggle"'), ('flashcards', 'id="fc-deck"')):
+            html = self.client.get(reverse(name)).content.decode()
+            self.assertIn(marker, html)
+            for gone in ('timer-start-btn', 'focus-start', 'id="cp-overlay"', 'Daily Mode', 'Exam Mode', 'Custom Mode'):
+                self.assertNotIn(gone, html, f'{name}: {gone}')
+
+    def test_old_mode_addresses_redirect(self):
+        for old, new in (('/daily/', '/library/'), ('/exam/', '/flashcards/'), ('/custom/', '/study/')):
+            r = self.client.get(old)
+            self.assertEqual((r.status_code, r['Location']), (301, new))
+
+    def test_study_page_offers_ring_and_font_choices(self):
+        html = self.client.get(reverse('study')).content.decode()
+        for marker in ('id="st-rings"', 'id="st-fonts"', 'id="st-tsize"', 'id="st-minbar"', 'id="st-knob"'):
+            self.assertIn(marker, html)

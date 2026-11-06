@@ -406,7 +406,6 @@ body.home-page {
 .stat-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.08); }
 
 /* ── MODE SECTION ── */
-.mode-section { max-width: 1000px; margin: 0 auto; padding: 80px 24px 80px; }
 .section-head { margin-bottom: 48px; }
 
 .eyebrow {
@@ -422,85 +421,18 @@ body.home-page {
 /* ── MODE CARDS ── */
 .modes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 
-.mode-card {
-  position: relative; border-radius: var(--r-lg); padding: 0;
-  cursor: pointer; text-align: left; color: var(--cream);
-  transition: transform .25s, box-shadow .25s; overflow: hidden; border: none; background: none;
-}
 
-.mode-card-inner {
-  height: 100%; padding: 28px 26px 56px;
-  background: rgba(20,14,8,0.9); border: 1.5px solid rgba(255,255,255,0.07);
-  border-radius: var(--r-lg); transition: border-color .25s, background .25s;
-  position: relative; overflow: hidden;
-}
 
-.mode-card-inner::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0;
-  height: 2px; opacity: 0; transition: opacity .3s;
-}
-.mode-card[data-mode="daily"]  .mode-card-inner::before { background: linear-gradient(90deg, var(--leaf), var(--sprout)); }
-.mode-card[data-mode="exam"]   .mode-card-inner::before { background: linear-gradient(90deg, #1a5a4a, #3ac8b8); }
-.mode-card[data-mode="custom"] .mode-card-inner::before { background: linear-gradient(90deg, var(--gold), var(--amber)); }
-.mode-card:hover .mode-card-inner::before,
-.mode-card.active .mode-card-inner::before { opacity: 1; }
 
-.mode-card::after {
-  content: ''; position: absolute; inset: -1px;
-  border-radius: calc(var(--r-lg) + 1px); opacity: 0; transition: opacity .3s; z-index: -1;
-}
-.mode-card[data-mode="daily"]::after  { box-shadow: 0 0 40px rgba(78,122,52,0.4),  0 20px 60px rgba(0,0,0,0.5); }
-.mode-card[data-mode="exam"]::after   { box-shadow: 0 0 40px rgba(58,200,184,0.3), 0 20px 60px rgba(0,0,0,0.5); }
-.mode-card[data-mode="custom"]::after { box-shadow: 0 0 40px rgba(201,149,42,0.3), 0 20px 60px rgba(0,0,0,0.5); }
-.mode-card:hover, .mode-card.active { transform: translateY(-6px); }
-.mode-card:hover::after, .mode-card.active::after { opacity: 1; }
 
-.mode-card[data-mode="daily"]:hover  .mode-card-inner,
-.mode-card[data-mode="daily"].active .mode-card-inner  { border-color: rgba(78,122,52,0.5);  background: rgba(22,18,10,0.95); }
-.mode-card[data-mode="exam"]:hover   .mode-card-inner,
-.mode-card[data-mode="exam"].active  .mode-card-inner  { border-color: rgba(58,200,184,0.35); background: rgba(4,18,20,0.97); }
-.mode-card[data-mode="custom"]:hover .mode-card-inner,
-.mode-card[data-mode="custom"].active .mode-card-inner { border-color: rgba(201,149,42,0.4); background: rgba(22,18,10,0.95); }
 
-.mode-icon-wrap { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px; }
-.mode-card[data-mode="daily"]  .mode-icon-wrap { background: linear-gradient(135deg, #2E4A2C, #4E7A34); box-shadow: 0 8px 24px rgba(78,122,52,0.3); }
-.mode-card[data-mode="exam"]   .mode-icon-wrap { background: linear-gradient(135deg, #0a2e2a, #1a5a4a); box-shadow: 0 8px 24px rgba(58,200,184,0.22); }
-.mode-card[data-mode="custom"] .mode-icon-wrap { background: linear-gradient(135deg, #5A3A10, #A07020); box-shadow: 0 8px 24px rgba(160,112,32,0.3); }
 
-.mode-name { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--cream); }
-.mode-tagline { font-size: 13.5px; color: var(--fog); line-height: 1.6; margin-bottom: 20px; }
 
-.mode-features {
-  display: flex; flex-direction: column; gap: 8px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  max-height: 0; overflow: hidden;
-  transition: max-height .35s ease, padding-top .35s ease; padding-top: 0;
-}
-.mode-card:hover .mode-features,
-.mode-card.active .mode-features { max-height: 220px; padding-top: 16px; }
 
-.mode-feat { display: flex; align-items: center; gap: 9px; font-size: 13px; color: #B0A090; }
 .feat-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-.mode-card[data-mode="daily"]  .feat-dot { background: var(--sprout); }
-.mode-card[data-mode="exam"]   .feat-dot { background: #3ac8b8; }
-.mode-card[data-mode="custom"] .feat-dot { background: var(--amber); }
 
-.mode-cta-row {
-  position: absolute; bottom: 22px; left: 26px; right: 26px;
-  display: flex; align-items: center; justify-content: space-between;
-  opacity: 0; transform: translateY(6px); transition: opacity .25s, transform .25s;
-}
-.mode-card:hover .mode-cta-row, .mode-card.active .mode-cta-row { opacity: 1; transform: translateY(0); }
 
-.mode-cta-text { font-size: 12px; font-weight: 600; letter-spacing: .04em; }
-.mode-card[data-mode="daily"]  .mode-cta-text { color: var(--sprout); }
-.mode-card[data-mode="exam"]   .mode-cta-text { color: #3ac8b8; }
-.mode-card[data-mode="custom"] .mode-cta-text { color: var(--amber); }
 
-.mode-cta-arrow { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--soil); font-weight: 700; }
-.mode-card[data-mode="daily"]  .mode-cta-arrow { background: var(--sprout); }
-.mode-card[data-mode="exam"]   .mode-cta-arrow { background: #3ac8b8; }
-.mode-card[data-mode="custom"] .mode-cta-arrow { background: var(--amber); }
 
 /* ── PLAN FORM WRAPPER ── */
 .plan-outer { grid-column: 1 / -1; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s cubic-bezier(.4,0,.2,1); }
@@ -761,8 +693,8 @@ body.home-page {
 
   <div class="tools-label">More tools</div>
   <div class="tools-row">
-    <a class="tool-card" href="/exam/"><span class="tool-ico">&#127183;</span><span><strong>Flashcards &amp; practice</strong><small>AI flashcards, practice questions, exam countdown</small></span></a>
-    <a class="tool-card" href="/daily/"><span class="tool-ico">&#128218;</span><span><strong>Library &amp; AI coach</strong><small>Resources, PDF reader, notes and study coach</small></span></a>
+    <a class="tool-card" href="/flashcards/"><span class="tool-ico">&#127183;</span><span><strong>Flashcards &amp; practice</strong><small>AI flashcards, practice questions, exam countdown</small></span></a>
+    <a class="tool-card" href="/library/"><span class="tool-ico">&#128218;</span><span><strong>Library &amp; AI coach</strong><small>Resources, PDF reader, notes and study coach</small></span></a>
     <a class="tool-card" href="/schedule/"><span class="tool-ico">&#128197;</span><span><strong>Weekly schedule</strong><small>Plan your study blocks and get reminders</small></span></a>
     <a class="tool-card" href="/forest/"><span class="tool-ico">&#127794;</span><span><strong>My forest</strong><small>See every tree your sessions have grown</small></span></a>
   </div>
@@ -1065,7 +997,7 @@ body.home-page {
   <div class="asw-body">
     <div class="asw-top">
       <span class="asw-dot"></span>
-      <span class="asw-mode" id="asw-mode">Daily Mode</span>
+      <span class="asw-mode" id="asw-mode">Study</span>
     </div>
     <p class="asw-subject" id="asw-subject"></p>
     <p class="asw-timer" id="asw-timer">--:--</p>
@@ -1210,6 +1142,7 @@ body.home-page {
 .study-cta-chips span { padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--lime); background: rgba(125,181,74,.1); border: 1px solid rgba(125,181,74,.22); }
 .study-cta-arrow { flex: 0 0 auto; width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #0E1A08; background: var(--sprout); transition: transform .25s; }
 .study-cta:hover .study-cta-arrow { transform: translateX(6px); }
+.mode-section { max-width: 1000px; margin: 0 auto; padding: 80px 24px 80px; }
 .tools-label { margin: 34px 0 14px; font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--fog); }
 .tools-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .tool-card { display: flex; align-items: flex-start; gap: 12px; padding: 16px 16px; border-radius: 18px; text-decoration: none; color: var(--cream); background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); transition: transform .2s, border-color .2s, background .2s; }
@@ -1253,76 +1186,7 @@ window.ssReady(function () {
     }, 350);
   });
 
-  /* ── MODE CARDS + PLAN FORM (legacy; the markup was replaced by the single Study entry) ── */
-  if (document.getElementById('planForm')) {
-  var MODES = {
-    daily:  { icon: '🌱', label: 'Daily Mode',  a: '#4E7A34', b: '#7DB54A', redirect: '/daily/'  },
-    exam:   { icon: '🌲', label: 'Exam Mode',   a: '#2E4A2C', b: '#4E7A34', redirect: '/exam/'   },
-    custom: { icon: '🍂', label: 'Custom Mode', a: '#A07020', b: '#C9952A', redirect: '/custom/' },
-  };
-
-  var selectedMode = null;
-
-  function applyMode(mode) {
-    var m = MODES[mode];
-    document.documentElement.style.setProperty('--active-a', m.a);
-    document.documentElement.style.setProperty('--active-b', m.b);
-    document.querySelectorAll('.q-num').forEach(function (el) { el.style.color = m.b; });
-    var badge = document.getElementById('planBadge');
-    badge.textContent = m.icon + ' ' + m.label;
-    badge.style.color = m.b;
-    badge.style.border = '1px solid ' + m.a + '88';
-    badge.style.background = m.a + '22';
-    document.getElementById('planBar').style.background = 'linear-gradient(90deg,' + m.a + ',' + m.b + ')';
-    document.getElementById('doExercises').style.accentColor = m.b;
-  }
-
-  document.querySelectorAll('.mode-card').forEach(function (card) {
-    card.addEventListener('click', function () {
-      var mode = this.dataset.mode;
-
-      // Check if there is an active session for this mode
-      var hasActiveSession = false;
-      if (mode === 'daily') {
-        var dmState = JSON.parse(localStorage.getItem('studySyncTimerState') || 'null');
-        hasActiveSession = !!(dmState && dmState.sessionStarted && !dmState.timerFinished);
-      } else if (mode === 'exam') {
-        hasActiveSession = !!localStorage.getItem('studySyncExamLock');
-      }
-
-      // Only clear the plan if there is no active session — otherwise resume it
-      if (!hasActiveSession) {
-        localStorage.removeItem('studySyncActivePlan');
-      }
-
-      window.location.href = MODES[mode].redirect;
-    });
-  });
-
-  document.getElementById('startSessionBtn').addEventListener('click', function (e) {
-    e.preventDefault();
-    var subject  = document.getElementById('subject').value.trim();
-    var topic    = document.getElementById('topic').value.trim();
-    var hours    = document.getElementById('hours').value;
-    var deadline = document.getElementById('deadline').value;
-    var goal     = document.getElementById('goal').value.trim();
-    var doEx     = document.getElementById('doExercises').checked;
-    var errEl    = document.getElementById('formError');
-
-    if (!selectedMode || !subject || !topic || !hours || !deadline) {
-      errEl.classList.add('show');
-      return;
-    }
-    errEl.classList.remove('show');
-    var plan = { mode: selectedMode, subject: subject, topic: topic, goal: goal, hours: hours, deadline: deadline, doExercises: doEx };
-    localStorage.setItem('studySyncActivePlan', JSON.stringify(plan));
-    // Mirror to mode-specific key so modes don't clobber each other's plan
-    var modeKey = { daily: 'studySyncDailyPlan', exam: 'studySyncExamPlan', custom: 'studySyncCustomPlan' }[selectedMode];
-    if (modeKey) localStorage.setItem(modeKey, JSON.stringify(plan));
-    window.location.href = MODES[selectedMode].redirect;
-  });
-
-  } /* end legacy mode/plan block */
+ /* end legacy mode/plan block */
 
   /* ── GRADE BADGE ── */
   var profile = JSON.parse(localStorage.getItem('studySyncProfile') || 'null');
@@ -1393,44 +1257,6 @@ document.getElementById('ss-av-edit').addEventListener('click', () => {
       };
     }
 
-    // Daily mode
-    const dmState = JSON.parse(localStorage.getItem('studySyncTimerState') || 'null');
-    if (dmState && dmState.sessionStarted && !dmState.timerFinished) {
-      let remaining = dmState.timeLeft;
-      if (dmState.timerRunning) {
-        const elapsed = (Date.now() - dmState.savedAt) / 1000;
-        remaining = Math.max(0, dmState.timeLeft - elapsed);
-      }
-      const plan = JSON.parse(localStorage.getItem('studySyncActivePlan') || 'null');
-      return {
-        mode: 'Daily Mode',
-        subject: dmState.planSubject || (plan && plan.subject) || 'Session',
-        remaining,
-        running: !!dmState.timerRunning,
-        url: '/daily/',
-      };
-    }
-
-    // Exam mode
-    const exLock = localStorage.getItem('studySyncExamLock');
-    const exState = JSON.parse(localStorage.getItem('studySyncPomoState') || 'null');
-    if (exLock && exState && exState.cyclesDone < 4) {
-      let remaining = exState.timeLeft;
-      if (exState.timerActive) {
-        const elapsed = (Date.now() - exState.savedAt) / 1000;
-        remaining = Math.max(0, exState.timeLeft - elapsed);
-      }
-      const plan = JSON.parse(localStorage.getItem('studySyncActivePlan') || 'null');
-      const subject = (plan && plan.mode === 'exam' && plan.subject) || 'Session';
-      return {
-        mode: 'Exam Mode',
-        subject,
-        remaining,
-        running: !!exState.timerActive,
-        url: '/exam/',
-      };
-    }
-
     return null;
   }
 
@@ -1451,9 +1277,7 @@ document.getElementById('ss-av-edit').addEventListener('click', () => {
   timerEl.textContent  = fmtTime(session.remaining);
 
   // Label + colour theme based on mode
-  const isExam = session.mode === 'Exam Mode';
-  btnEl.textContent = session.mode === 'Study' ? 'Back to Study Session →' : (isExam ? 'Back to Exam Session →' : 'Back to Daily Session →');
-  widget.classList.toggle('asw-exam', isExam);
+  btnEl.textContent = 'Back to Study Session →';
 
   // Live countdown
   let remaining = session.remaining;

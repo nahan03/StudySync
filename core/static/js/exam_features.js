@@ -1,4 +1,4 @@
-/* exam_features.js — Flashcards + Practice Questions for Exam Mode */
+/* exam_features.js — Flashcards and practice questions (the Flashcards page) */
 ssReady(function () {
   if (!document.getElementById('fc-deck')) return;
 
@@ -10,12 +10,11 @@ ssReady(function () {
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  // Prefer exam-specific key; fall back to shared key for backward compat
-  const _sharedPlan = JSON.parse(localStorage.getItem('studySyncActivePlan') || 'null');
-  const plan = (_sharedPlan && _sharedPlan.mode === 'exam')
-    ? _sharedPlan
-    : (JSON.parse(localStorage.getItem('studySyncExamPlan') || 'null') || _sharedPlan);
-  const planSubject = (plan && plan.subject) ? plan.subject.toLowerCase() : 'general';
+  // the subject the flashcards and practice questions are about: what you last studied, unless you changed it
+  const planSubject = (function () {
+    try { return (JSON.parse(localStorage.getItem('studySyncStudyPrefs') || '{}').subject || '').trim().toLowerCase() || 'general'; }
+    catch (e) { return 'general'; }
+  })();
 
   /* ══════════════════════════════════════════
      SHARED SOURCES (files + URLs, used by flashcards + practice)

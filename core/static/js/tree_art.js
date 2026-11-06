@@ -5,25 +5,30 @@
 'use strict';
 
 const TREE_MAP = [
-  { keywords: ['math', 'calc', 'algebra', 'geometry', 'statistic', 'number'],  kind: 'conifer',   name: 'Pine'         },
-  { keywords: ['bio', 'life', 'ecology', 'genetics', 'anatomy', 'botany'],      kind: 'oak',       name: 'Oak'          },
+  { keywords: ['math', 'calc', 'algebra', 'geometry', 'statistic', 'trigonom', 'number'],  kind: 'conifer',   name: 'Pine'         },
+  { keywords: ['bio', 'life', 'ecolog', 'genetic', 'anatom', 'botan', 'zoolog', 'environment', 'health', 'medic', 'nurs'],      kind: 'oak',       name: 'Oak'          },
   { keywords: ['chem', 'periodic', 'molecule', 'reaction', 'element'],          kind: 'bamboo',    name: 'Bamboo'       },
-  { keywords: ['phys', 'mechanics', 'force', 'quantum', 'optic', 'wave'],       kind: 'palm',      name: 'Palm'         },
-  { keywords: ['history', 'histor', 'civil', 'war', 'ancient', 'medieval'],     kind: 'maple',     name: 'Maple'        },
-  { keywords: ['english', 'literature', 'writing', 'essay', 'grammar', 'lang'], kind: 'fern',      name: 'Fern'         },
+  { keywords: ['phys', 'mechanic', 'force', 'quantum', 'optic', 'wave', 'astronom', 'space'],       kind: 'palm',      name: 'Palm'         },
+  { keywords: ['histor', 'civil', '=war', 'ancient', 'medieval', 'politic', 'government', 'social stud'],     kind: 'maple',     name: 'Maple'        },
+  { keywords: ['english', 'literature', 'writing', 'essay', 'grammar', 'lang', 'spanish', 'french', 'german', 'latin', 'chinese', 'japanese', 'arabic', 'hindi'], kind: 'fern',      name: 'Fern'         },
   { keywords: ['geo', 'earth', 'climate', 'plate', 'volcano', 'ocean'],         kind: 'cactus',    name: 'Cactus'       },
-  { keywords: ['art', 'design', 'draw', 'paint', 'creative', 'visual'],         kind: 'blossom',   name: 'Blossom'      },
+  { keywords: ['=art', 'design', 'draw', 'paint', 'creative', 'visual', 'drama', 'film', 'photograph', 'theatre'],         kind: 'blossom',   name: 'Blossom'      },
   { keywords: ['music', 'theory', 'harmony', 'rhythm', 'instrument'],           kind: 'bamboo',    name: 'Bamboo Grove' },
-  { keywords: ['computer', 'coding', 'program', 'software', 'data', 'cs'],      kind: 'cyber',     name: 'Cyber Tree'   },
-  { keywords: ['economics', 'econom', 'finance', 'market', 'business'],         kind: 'autumn',    name: 'Autumn Oak'   },
+  { keywords: ['computer', 'coding', 'program', 'software', 'data', '=cs', '=it', 'robot', 'cyber', 'engineer'],      kind: 'cyber',     name: 'Cyber Tree'   },
+  { keywords: ['econom', 'financ', 'market', 'business', 'account', 'law'],         kind: 'autumn',    name: 'Autumn Oak'   },
   { keywords: ['psychology', 'psych', 'mind', 'behaviour', 'cognitive'],        kind: 'lotus',     name: 'Lotus'        },
 ];
 const DEFAULT_TREE = { kind: 'oak', name: 'Oak' };
 
+/* A keyword matches at the start of a word ("bio" finds "biology" but "start" does not find "art");
+   a keyword starting with = must be a whole word, so "=cs" does not match "economics" and "=war" does not match "software". */
+function hasKeyword(text, kw) {
+  return kw[0] === '=' ? new RegExp('(^|[^a-z])' + kw.slice(1) + '($|[^a-z])').test(text) : new RegExp('(^|[^a-z])' + kw).test(text);
+}
 function getTreeForSubject(subject) {
   if (!subject) return DEFAULT_TREE;
   const s = String(subject).toLowerCase();
-  for (const t of TREE_MAP) if (t.keywords.some(k => s.includes(k))) return t;
+  for (const t of TREE_MAP) if (t.keywords.some(k => hasKeyword(s, k))) return t;
   return DEFAULT_TREE;
 }
 

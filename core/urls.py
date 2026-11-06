@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import RedirectView
 from . import views
 
 urlpatterns = [
@@ -10,9 +11,12 @@ urlpatterns = [
     # path('studytracker/', views.studytracker, name='studytracker'),
     # path('notes/', views.notes, name='notes'),
     path('study/', views.study, name='study'),
-    path('daily/', views.daily_mode, name='daily_mode'),
-    path('exam/', views.exam_mode, name='exam_mode'),
-    path('custom/', views.custom_mode, name='custom_mode'),
+    path('library/', views.library, name='library'),
+    path('flashcards/', views.flashcards, name='flashcards'),
+    # the old study "modes" no longer exist; keep their addresses working
+    path('daily/', RedirectView.as_view(pattern_name='library', permanent=True)),
+    path('exam/', RedirectView.as_view(pattern_name='flashcards', permanent=True)),
+    path('custom/', RedirectView.as_view(pattern_name='study', permanent=True)),
     path('schedule/', views.schedule, name='schedule'),
     path('forest/', views.forest, name='forest'),
     path('stats/', views.stats, name='stats'),

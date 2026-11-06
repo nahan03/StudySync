@@ -5,8 +5,8 @@
 
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/study.css' %}?v=13">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Nunito:wght@600;800&family=Orbitron:wght@500;700&family=Roboto+Slab:wght@500;700&family=Outfit:wght@200;300;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/study.css' %}?v=14">
 <link rel="stylesheet" href="{% static 'css/tree_overlay.css' %}?v=1">
 {% endblock %}
 
@@ -19,6 +19,9 @@
     var p = JSON.parse(localStorage.getItem('studySyncStudyPrefs') || '{}'), r = document.getElementById('st-root');
     if (p.theme) r.dataset.theme = p.theme;
     if (p.bg) r.dataset.bg = p.bg;
+    if (p.ring) r.dataset.ring = p.ring;
+    if (p.font) r.dataset.font = p.font;
+    if (p.tsize) r.dataset.tsize = p.tsize;
     r.style.setProperty('--dim', (p.bgDim == null ? 15 : p.bgDim) / 100);
   } catch (e) { /* storage unavailable */ }
 })();
@@ -163,14 +166,24 @@
     <div class="st-timer">
       <div class="st-ring" id="st-ring">
         <svg viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <linearGradient id="st-grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="var(--sprout)"/><stop offset=".55" stop-color="var(--lime)"/><stop offset="1" stop-color="var(--amber)"/>
+            </linearGradient>
+          </defs>
           <circle class="st-ring-bg" cx="100" cy="100" r="88"/>
           <circle class="st-ring-arc" id="st-arc" cx="100" cy="100" r="88"/>
+          <circle class="st-ring-in-bg" cx="100" cy="100" r="74"/>
+          <circle class="st-ring-in" id="st-arc2" cx="100" cy="100" r="74"/>
+          <g id="st-ticks"></g>
+          <circle class="st-knob" id="st-knob" cx="188" cy="100" r="6"/>
         </svg>
         <div class="st-ring-center">
           <div class="st-time" id="st-time" role="timer" aria-live="off">25:00</div>
           <div class="st-round" id="st-round">Round 1 of 4</div>
         </div>
       </div>
+      <div class="st-minbar" id="st-minbar" aria-hidden="true"><span id="st-minfill"></span></div>
       <div class="st-dots" id="st-dots" aria-hidden="true"></div>
     </div>
 
@@ -256,6 +269,21 @@
     <p class="st-hint" id="st-bgimage-hint">It is resized to fit and saved to your account, so it follows you to other devices.</p>
   </div>
 
+  <div class="st-field">
+    <span class="st-label">Timer ring</span>
+    <div class="st-rings" id="st-rings" role="radiogroup" aria-label="Timer ring style"></div>
+  </div>
+
+  <div class="st-field">
+    <span class="st-label">Timer font</span>
+    <div class="st-fonts" id="st-fonts" role="radiogroup" aria-label="Timer font"></div>
+    <div class="st-seg" id="st-tsize" role="radiogroup" aria-label="Timer size">
+      <button type="button" role="radio" data-size="s" aria-checked="false">Small</button>
+      <button type="button" role="radio" data-size="m" aria-checked="true">Medium</button>
+      <button type="button" role="radio" data-size="l" aria-checked="false">Large</button>
+    </div>
+  </div>
+
   <label class="st-field" id="st-dim-box">
     <span class="st-label">Dim the background <output id="st-dim-out">35</output>%</span>
     <input id="st-dim" type="range" min="0" max="80" step="5">
@@ -275,5 +303,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/study.js' %}?v=10"></script>
+<script src="{% static 'js/study.js' %}?v=11"></script>
 {% endblock %}

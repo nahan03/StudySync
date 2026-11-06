@@ -1,15 +1,16 @@
 # StudySync
 
-A Django study companion with focus timers, an AI study coach, flashcards, and a growing forest that rewards study time.
+A Django study companion with a focus timer, an AI study coach, flashcards, and a growing forest that rewards study time.
 
 ## Features
 
-- **Daily mode** – focus timer with a session goal, timeline and automatic breaks
-- **Exam mode** – AI-generated flashcards and practice questions, PDF chat and summaries
-- **Custom mode** – build your own session setup
+- **Study page** – one configurable timer: presets or your own focus, breaks, rounds and alarms. Every finished cycle grows a tree
+- **Looks** – themes (including a clear Glass theme), eight live wallpapers, real-footage and your own picture or video, eight timer ring styles and eight timer fonts
+- **Music** – a built-in sound mixer (rain, thunder, wind, fire, ocean, birds, crickets, café, noise, lo-fi keys, ambient pad) with saved mixes and a sleep timer; paste any Spotify, Apple Music, YouTube, SoundCloud or Deezer playlist link; or play audio files and folders from your own computer
+- **Flashcards & practice** – AI flashcards, saved decks, Guess It, practice questions and an exam countdown
+- **Library & AI coach** – resources, PDF reader with summaries, note graph and a study coach
 - **Schedule and stats** – plan study time and track progress
-- **Forest** – trees grow as you study
-- **Music player** – YouTube-powered study music search
+- **Forest** – trees grow as you study; each subject gets its own kind of tree
 
 ## Setup
 
