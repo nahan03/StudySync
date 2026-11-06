@@ -43,6 +43,7 @@
     autoBreak: true, autoFocus: false,
     focusSound: 'chime', breakSound: 'bell', volume: 70, repeat: 'once', vibrate: true, notify: false,
     subject: '', goal: '',
+    theme: 'forest', bg: 'theme', bgDim: 35,
   };
   let prefs = Object.assign({}, DEFAULTS, load(PREFS_KEY, {}));
   let userPresets = load(PRESETS_KEY, []);
@@ -463,7 +464,7 @@
   $('st-again').addEventListener('click', () => { stopRinging(); drop(RUN_KEY); run = null; show('setup'); document.title = 'StudySync | Study'; });
 
   document.addEventListener('keydown', e => {
-    if (e.code !== 'Space' || !run || $('st-run').hidden) return;
+    if (e.code !== 'Space' || !run || !$('st-run') || $('st-run').hidden) return;
     const tag = (e.target.tagName || '').toLowerCase();
     if (['input', 'select', 'textarea', 'button'].includes(tag)) return;
     e.preventDefault(); $('st-toggle').click();
@@ -512,8 +513,147 @@
     if (run && run.phase === 'done') showDone();
   });
 
+  /* ---------- appearance: theme + background ---------- */
+  const THEMES = [
+    { id: 'forest',   name: 'Forest',   swatch: 'linear-gradient(135deg,#4E7A34,#7DB54A)' },
+    { id: 'ocean',    name: 'Ocean',    swatch: 'linear-gradient(135deg,#1A9A8A,#3AC8B8)' },
+    { id: 'sunset',   name: 'Sunset',   swatch: 'linear-gradient(135deg,#C8562E,#F08A5D)' },
+    { id: 'lavender', name: 'Lavender', swatch: 'linear-gradient(135deg,#7455C8,#A98BE8)' },
+    { id: 'rose',     name: 'Rose',     swatch: 'linear-gradient(135deg,#C8467A,#F07AA8)' },
+    { id: 'slate',    name: 'Slate',    swatch: 'linear-gradient(135deg,#64748B,#E2E8F0)' },
+    { id: 'paper',    name: 'Paper',    swatch: 'linear-gradient(135deg,#F4F1E6,#D8D3BC)' },
+  ];
+  const BGS = [
+    { id: 'theme',  name: 'Gradient',     prev: 'linear-gradient(180deg,#14301a,#050a04)' },
+    { id: 'forest', name: 'Forest hills', prev: 'linear-gradient(180deg,#0b1c0f 0%,#0b1c0f 45%,#1d4a24 46%,#14301a 100%)' },
+    { id: 'rain',   name: 'Rain',         prev: 'repeating-linear-gradient(100deg,#0a1420 0 5px,#16283a 5px 6px)' },
+    { id: 'stars',  name: 'Starry night', prev: 'radial-gradient(circle at 78% 28%,#E9EFFA 0 6px,transparent 7px),linear-gradient(180deg,#040a1c,#15284c)' },
+    { id: 'aurora', name: 'Aurora',       prev: 'radial-gradient(ellipse at 30% 40%,#2fb98f,transparent 60%),radial-gradient(ellipse at 75% 60%,#7c5cd6,transparent 60%),#06101c' },
+    { id: 'plain',  name: 'Plain',        prev: '#0b0f0a' },
+    { id: 'image',  name: 'My picture',   prev: 'linear-gradient(135deg,#444,#888)' },
+  ];
+  const BG_IMAGE_KEY = 'studySyncStudyBgImage';
+  const root = $('st-root');
+  let bgImage = load(BG_IMAGE_KEY, '');
+  if (typeof bgImage !== 'string') bgImage = '';
+
+  function buildBackgroundFx() {
+    // decorative particles are created once; CSS shows only the layer for the chosen background
+    const r = window.TreeArt ? window.TreeArt.rng(11) : Math.random;
+    const f = n => Math.round(n * 10) / 10;
+    if (!$('bgl-stars').querySelector('i')) {
+      let h = '';
+      for (let i = 0; i < 55; i++) h += `<i style="left:${f(r() * 100)}%;top:${f(r() * 70)}%;width:${r() > .85 ? 3 : 2}px;height:${r() > .85 ? 3 : 2}px;--tw:${f(2 + r() * 4)}s;--td:${f(-r() * 5)}s"></i>`;
+      $('bgl-stars').insertAdjacentHTML('afterbegin', h);
+    }
+    if (!$('bgl-rain').firstChild) {
+      let h = '';
+      for (let i = 0; i < 70; i++) h += `<i style="left:${f(r() * 100)}%;--dur:${f(0.7 + r() * 0.7)}s;--del:${f(-r() * 1.4)}s;opacity:${f(0.35 + r() * 0.65)}"></i>`;
+      $('bgl-rain').innerHTML = h;
+    }
+    if (!$('bgl-forest').querySelector('.bg-mote')) {
+      let h = '';
+      for (let i = 0; i < 16; i++) h += `<span class="bg-mote" style="left:${f(r() * 100)}%;top:${f(40 + r() * 55)}%;--dur:${f(7 + r() * 8)}s;--del:${f(-r() * 10)}s;--dx:${f((r() - .5) * 90)}px;--dy:${f(-20 - r() * 70)}px"></span>`;
+      $('bgl-forest').insertAdjacentHTML('beforeend', h);
+    }
+  }
+
+  function applyAppearance() {
+    const theme = THEMES.some(t => t.id === prefs.theme) ? prefs.theme : 'forest';
+    let bg = BGS.some(b => b.id === prefs.bg) ? prefs.bg : 'theme';
+    if (bg === 'image' && !bgImage) bg = 'theme'; // nothing chosen yet
+    root.dataset.theme = theme;
+    root.dataset.bg = bg;
+    root.style.setProperty('--dim', num(prefs.bgDim, 0, 80, 35) / 100);
+    $('bgl-image').style.backgroundImage = bgImage ? `url("${bgImage}")` : '';
+    $('st-dim').value = num(prefs.bgDim, 0, 80, 35);
+    $('st-dim-out').textContent = $('st-dim').value;
+    $('st-dim-box').hidden = prefs.bg !== 'image';
+    $('st-bgimage-box').hidden = prefs.bg !== 'image';
+    $('st-bgremove').hidden = !bgImage;
+    $('st-themes').querySelectorAll('.st-theme').forEach(b => b.setAttribute('aria-checked', String(b.dataset.id === theme)));
+    $('st-bgs').querySelectorAll('.st-bgtile').forEach(b => b.setAttribute('aria-checked', String(b.dataset.id === prefs.bg)));
+    const imgPrev = $('st-bgs').querySelector('[data-id="image"] .st-bgprev');
+    if (imgPrev) imgPrev.style.backgroundImage = bgImage ? `url("${bgImage}")` : '';
+  }
+  const saveAppearance = () => { save(PREFS_KEY, prefs); applyAppearance(); };
+
+  function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image(), url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(img.width * scale)); c.height = Math.max(1, Math.round(img.height * scale));
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        let q = 0.82, out = c.toDataURL('image/jpeg', q);
+        while (out.length > 700000 && q > 0.3) { q -= 0.1; out = c.toDataURL('image/jpeg', q); }
+        out.length > 900000 ? reject(new Error('too big')) : resolve(out);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('unreadable')); };
+      img.src = url;
+    });
+  }
+
+  function initAppearance() {
+    $('st-themes').innerHTML = THEMES.map(t =>
+      `<button type="button" class="st-theme" role="radio" data-id="${t.id}" aria-checked="false">` +
+      `<span class="st-swatch" style="background:${t.swatch}"></span>${esc(t.name)}</button>`).join('');
+    $('st-bgs').innerHTML = BGS.map(b =>
+      `<button type="button" class="st-bgtile" role="radio" data-id="${b.id}" aria-checked="false">` +
+      `<span class="st-bgprev" style="background:${b.prev}"></span>${esc(b.name)}</button>`).join('');
+    buildBackgroundFx();
+    applyAppearance();
+
+    $('st-themes').addEventListener('click', e => {
+      const b = e.target.closest('.st-theme'); if (!b) return;
+      prefs.theme = b.dataset.id; saveAppearance();
+    });
+    $('st-bgs').addEventListener('click', e => {
+      const b = e.target.closest('.st-bgtile'); if (!b) return;
+      prefs.bg = b.dataset.id; saveAppearance();
+      if (prefs.bg === 'image' && !bgImage) $('st-bgfile').click();
+    });
+    $('st-dim').addEventListener('input', () => { prefs.bgDim = num($('st-dim').value, 0, 80, 35); saveAppearance(); });
+    $('st-bgfile').addEventListener('change', async () => {
+      const f = $('st-bgfile').files && $('st-bgfile').files[0];
+      $('st-bgfile').value = '';
+      if (!f) return;
+      const hint = $('st-bgimage-hint');
+      try {
+        bgImage = await fileToDataUrl(f);
+        save(BG_IMAGE_KEY, bgImage);
+        prefs.bg = 'image';
+        hint.textContent = 'Picture saved. Use the slider to dim it if text is hard to read.';
+        saveAppearance();
+      } catch (err) {
+        hint.textContent = err.message === 'too big' ? 'That picture is too detailed to save. Try a smaller one.' : 'That file could not be read as a picture.';
+      }
+    });
+    $('st-bgremove').addEventListener('click', () => {
+      bgImage = ''; drop(BG_IMAGE_KEY);
+      if (prefs.bg === 'image') prefs.bg = 'theme';
+      saveAppearance();
+    });
+    $('st-appearance-reset').addEventListener('click', () => { prefs.theme = 'forest'; prefs.bg = 'theme'; prefs.bgDim = 35; saveAppearance(); });
+
+    // drawer open/close
+    const drawer = $('st-appearance'), scrim = $('st-scrim'), opener = $('st-appearance-open');
+    function setOpen(open) {
+      drawer.hidden = !open; scrim.hidden = !open;
+      opener.setAttribute('aria-expanded', String(open));
+      if (open) $('st-appearance-close').focus(); else opener.focus();
+    }
+    opener.addEventListener('click', () => setOpen(drawer.hidden));
+    $('st-appearance-close').addEventListener('click', () => setOpen(false));
+    scrim.addEventListener('click', () => setOpen(false));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !drawer.hidden && drawer.isConnected) setOpen(false); });
+  }
+
   /* ---------- boot ---------- */
   initSetup();
+  initAppearance();
   const saved = load(RUN_KEY, null);
   if (saved && saved.v === 1 && saved.cfg) {
     run = saved;

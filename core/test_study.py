@@ -16,6 +16,12 @@ class StudyPageTests(TestCase):
     def test_requires_login(self):
         self.assertEqual(self.client.get(reverse('study')).status_code, 302)
 
+    def test_page_has_appearance_controls(self):
+        self.client.force_login(self.user)
+        html = self.client.get(reverse('study')).content.decode()
+        for marker in ('id="st-root"', 'data-theme=', 'id="st-appearance"', 'id="st-themes"', 'id="st-bgs"', 'id="st-bgfile"'):
+            self.assertIn(marker, html, marker)
+
     def test_page_renders_setup_run_and_overlay(self):
         self.client.force_login(self.user)
         html = self.client.get(reverse('study')).content.decode()
@@ -45,8 +51,9 @@ class StudyPageTests(TestCase):
         r = self.client.post(reverse('save_state'), json.dumps({'changes': {
             'studySyncStudyPrefs': '{"focus":30}',
             'studySyncTimerPresets': '[{"id":"u1","name":"Mine"}]',
+            'studySyncStudyBgImage': '"data:image/jpeg;base64,AAAA"',
             'studySyncStudyRun': '{"running":true}',   # per-device state must be refused
         }}), content_type='application/json')
-        self.assertEqual(r.json(), {'saved': 2})
+        self.assertEqual(r.json(), {'saved': 3})
         self.assertEqual(set(UserState.objects.values_list('key', flat=True)),
-                         {'studySyncStudyPrefs', 'studySyncTimerPresets'})
+                         {'studySyncStudyPrefs', 'studySyncTimerPresets', 'studySyncStudyBgImage'})

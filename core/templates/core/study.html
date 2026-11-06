@@ -6,17 +6,48 @@
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/study.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'css/study.css' %}?v=4">
 <link rel="stylesheet" href="{% static 'css/tree_overlay.css' %}?v=1">
 {% endblock %}
 
 {% block content %}
+<div class="st-root" id="st-root" data-theme="forest" data-bg="theme">
+<script>
+/* apply the saved look before first paint (study.js takes over afterwards) */
+(function () {
+  try {
+    var p = JSON.parse(localStorage.getItem('studySyncStudyPrefs') || '{}'), r = document.getElementById('st-root');
+    if (p.theme) r.dataset.theme = p.theme;
+    if (p.bg) r.dataset.bg = p.bg;
+    r.style.setProperty('--dim', (p.bgDim == null ? 35 : p.bgDim) / 100);
+  } catch (e) { /* storage unavailable */ }
+})();
+</script>
+
+<div class="st-bg" aria-hidden="true">
+  <div class="bgl bgl-base"></div>
+  <div class="bgl bgl-forest" id="bgl-forest">
+    <svg viewBox="0 0 1000 400" preserveAspectRatio="none">
+      <path class="h3" d="M0 120 C120 60 250 70 380 105 C520 140 640 40 780 60 C880 75 950 100 1000 85 L1000 400 L0 400Z"/>
+      <path class="h2" d="M0 190 C140 140 280 175 420 190 C560 205 700 140 840 160 C920 171 970 180 1000 175 L1000 400 L0 400Z"/>
+      <path class="h1" d="M0 260 C160 235 300 255 460 265 C620 275 760 240 900 253 C950 258 980 261 1000 259 L1000 400 L0 400Z"/>
+    </svg>
+  </div>
+  <div class="bgl bgl-rain" id="bgl-rain"></div>
+  <div class="bgl bgl-stars" id="bgl-stars"><span class="bg-moon"></span></div>
+  <div class="bgl bgl-aurora"><b></b><b></b><b></b></div>
+  <div class="bgl bgl-image" id="bgl-image"></div>
+  <div class="bgl bgl-dim"></div>
+</div>
 <nav class="st-nav">
   <div class="st-nav-left">
     <a href="/" class="st-back">&larr; Home</a>
     <a href="/" class="st-logo"><span>Study</span>Sync</a>
   </div>
-  <a href="/forest/" class="st-nav-link">&#127794; My forest</a>
+  <div class="st-nav-right">
+    <a href="/forest/" class="st-nav-link">&#127794; My forest</a>
+    <button class="st-back st-appearance-btn" id="st-appearance-open" type="button" aria-haspopup="dialog" aria-controls="st-appearance">&#127912; Appearance</button>
+  </div>
 </nav>
 
 <div class="st-wrap">
@@ -204,12 +235,49 @@
   </div>
 </div>
 
+<div class="st-scrim" id="st-scrim" hidden></div>
+<aside class="st-drawer" id="st-appearance" role="dialog" aria-label="Appearance" hidden>
+  <div class="st-drawer-head">
+    <h2>Appearance</h2>
+    <button class="st-drawer-x" id="st-appearance-close" type="button" aria-label="Close appearance settings">&times;</button>
+  </div>
+
+  <div class="st-field">
+    <span class="st-label">Theme</span>
+    <div class="st-themes" id="st-themes" role="radiogroup" aria-label="Theme"></div>
+  </div>
+
+  <div class="st-field">
+    <span class="st-label">Background</span>
+    <div class="st-bgs" id="st-bgs" role="radiogroup" aria-label="Background"></div>
+  </div>
+
+  <div class="st-bgimage" id="st-bgimage-box" hidden>
+    <span class="st-label">Your image</span>
+    <div class="st-bgimage-row">
+      <label class="st-btn st-btn-ghost st-btn-sm" for="st-bgfile">Choose a picture&hellip;</label>
+      <input id="st-bgfile" type="file" accept="image/*" hidden>
+      <button class="st-btn st-btn-ghost st-btn-sm" id="st-bgremove" type="button">Remove</button>
+    </div>
+    <p class="st-hint" id="st-bgimage-hint">It is resized to fit and saved to your account, so it follows you to other devices.</p>
+  </div>
+
+  <label class="st-field" id="st-dim-box">
+    <span class="st-label">Dim the background <output id="st-dim-out">35</output>%</span>
+    <input id="st-dim" type="range" min="0" max="80" step="5">
+  </label>
+
+  <button class="st-btn st-btn-ghost" id="st-appearance-reset" type="button">Reset appearance</button>
+</aside>
+
 <div id="st-audio" hidden
      data-end="{% static 'audio/end.wav' %}"
      data-start="{% static 'audio/start.mp3' %}"
      data-start1="{% static 'audio/start1.mp3' %}"></div>
+
+</div><!-- /.st-root -->
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/study.js' %}?v=1"></script>
+<script src="{% static 'js/study.js' %}?v=3"></script>
 {% endblock %}
