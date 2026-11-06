@@ -742,8 +742,9 @@
         const f2 = g.createLinearGradient(0, h * 0.5, 0, h * 0.85); f2.addColorStop(0, 'rgba(190,204,208,0)'); f2.addColorStop(1, 'rgba(160,178,182,.55)'); g.fillStyle = f2; g.fillRect(0, h * 0.5, w, h * 0.35);
       }), 3 * sc);
       s.outNear = a.blur(a.layer(W * 1.08, H, (g, w, h) => {
-        const fr = rng(61); [[0.05, 1.0], [0.26, 0.86], [0.49, 1.1], [0.71, 0.92], [0.93, 1.02]].forEach(([fx, sz], i) => a.fir(g, w * fx, h * 1.02, h * sz, `rgb(${16 + i},${32 + i * 2},${34 + i})`, fr, false));
-      }), 2.6 * sc);
+        const fr = rng(61); [[0.05, 1.0], [0.26, 0.86], [0.49, 1.1], [0.71, 0.92], [0.93, 1.02]].forEach(([fx, sz], i) => a.fir(g, w * fx, h * 1.02, h * sz, `rgb(${34 + i * 2},${58 + i * 2},${62 + i})`, fr, false));
+        g.globalCompositeOperation = 'source-atop'; const nf = g.createLinearGradient(0, h * 0.15, 0, h * 0.9); nf.addColorStop(0, 'rgba(200,216,222,.05)'); nf.addColorStop(1, 'rgba(200,216,222,.62)'); g.fillStyle = nf; g.fillRect(0, 0, w, h); g.globalCompositeOperation = 'source-over';
+      }), 3.2 * sc);
       s.fog = a.cloudTex(1024, 220, 6, { shadow: [168, 184, 190], lit: [212, 224, 228], rim: [236, 242, 244] }, { sx: 3, sy: 1.6, cut: 0.4, gain: 2.2, alpha: 0.7 }); s.foff = [r() * 900, r() * 900];
 
       // ---- the cabin ----
@@ -767,13 +768,6 @@
         // window seat with dark cushions and a folded blanket
         const bx = 0, bw = W * 0.2, by = gyB - H * 0.085; g.fillStyle = 'rgb(66,44,30)'; g.fillRect(bx, by, bw, H * 0.09); g.fillStyle = 'rgba(0,0,0,.4)'; g.fillRect(bx, by + H * 0.085, bw, 5);
         [[bw * 0.04, 0.82], [bw * 0.38, 0.7]].forEach(([cx, sz], i) => { g.fillStyle = i ? 'rgb(74,78,72)' : 'rgb(58,62,58)'; g.beginPath(); g.roundRect ? g.roundRect(cx, by - H * 0.085 * sz, bw * 0.34, H * 0.085 * sz + 4, 14 * sc) : g.rect(cx, by - H * 0.085 * sz, bw * 0.34, H * 0.085 * sz); g.fill(); g.strokeStyle = 'rgba(255,255,255,.08)'; g.lineWidth = 1.2; g.stroke(); });
-        // plants and lanterns standing along the base of the glass
-        const pr = rng(87), plant = (px, sz) => {
-          const py = gyB + H * 0.006; g.fillStyle = 'rgb(112,84,52)'; g.beginPath(); g.moveTo(px - 22 * sc * sz, py - 34 * sc * sz); g.lineTo(px + 22 * sc * sz, py - 34 * sc * sz); g.lineTo(px + 17 * sc * sz, py); g.lineTo(px - 17 * sc * sz, py); g.closePath(); g.fill(); g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1; for (let k = 0; k < 4; k++) { g.beginPath(); g.moveTo(px - 20 * sc * sz, py - 8 * k * sc * sz); g.lineTo(px + 20 * sc * sz, py - 8 * k * sc * sz); g.stroke(); }
-          for (let i = 0; i < 13; i++) { const ang = -Math.PI / 2 + (i - 6) * 0.2 + (pr() - 0.5) * 0.18, len = rr(pr, 60, 130) * sc * sz; const ex = px + Math.cos(ang) * len * 0.55, ey = py - 34 * sc * sz + Math.sin(ang) * len, cx2 = px + Math.cos(ang) * len * 0.15, cy2 = py - 34 * sc * sz + Math.sin(ang) * len * 0.55; const lg = g.createLinearGradient(px, py, ex, ey); lg.addColorStop(0, 'rgb(16,36,26)'); lg.addColorStop(1, rgb(mix([30, 66, 44], [64, 104, 64], pr()))); g.fillStyle = lg; g.beginPath(); g.moveTo(px, py - 34 * sc * sz); g.quadraticCurveTo(cx2 - 9 * sc, cy2, ex, ey); g.quadraticCurveTo(cx2 + 9 * sc, cy2, px, py - 34 * sc * sz); g.fill(); }
-        };
-        [0.26, 0.33, 0.41, 0.2, 0.47].forEach((fx, i) => plant(W * fx * (portrait ? 0.85 : 1), 0.8 + (i % 3) * 0.2));
-        [0.22, 0.3, 0.385, 0.44].forEach((fx, i) => { const lx = W * fx * (portrait ? 0.85 : 1) + 12 * sc, ly = gyB + H * (0.018 + (i % 2) * 0.012), lw = 22 * sc, lh = 32 * sc; g.fillStyle = 'rgb(30,28,26)'; g.fillRect(lx - lw / 2, ly - lh, lw, lh); g.fillStyle = 'rgba(255,190,110,.55)'; g.fillRect(lx - lw / 2 + 3, ly - lh + 6, lw - 6, lh - 10); g.strokeStyle = 'rgb(20,18,16)'; g.lineWidth = 2; g.strokeRect(lx - lw / 2, ly - lh, lw, lh); lanterns.push({ x: lx, y: ly - lh / 2, ph: i * 1.7 }); });
         // shelves of books, candles and trailing plants on the right
         const shX0 = Math.max(gx1 * 0.97, w * 0.74), shX1 = w * 0.985, sh = [0.27, 0.4, 0.53, 0.66].map(f => h * f);
         sh.forEach((sy, ri) => {
@@ -807,6 +801,16 @@
         for (let i = 0; i < 26; i++) { const u = i / 25, bxx2 = xr(gyB) * u * 0.98 + 6, byy = gyB - H * 0.02 - Math.sin(u * Math.PI * 4) * 6 * sc - 4 * sc * Math.sin(u * 9); bulbs.push({ x: bxx2, y: byy, ph: r() * 9 }); }
         for (let i = 0; i < 12; i++) { const u = i / 11, yy = gyB * (0.12 + 0.7 * u), bxx2 = xr(yy) - 30 * sc - w * 0.0; bulbs.push({ x: Math.max(8, xr(yy) - w * 0.26 + 16 * sc), y: yy, ph: r() * 9 }); }
       }), 1.5 * sc);
+      s.plantL = a.blur(a.layer(W, H, (g, w, h) => {
+        // plants and lanterns standing along the base of the glass
+        const pr = rng(87), plant = (px, sz) => {
+          const py = gyB + H * 0.006; g.fillStyle = 'rgb(112,84,52)'; g.beginPath(); g.moveTo(px - 22 * sc * sz, py - 34 * sc * sz); g.lineTo(px + 22 * sc * sz, py - 34 * sc * sz); g.lineTo(px + 17 * sc * sz, py); g.lineTo(px - 17 * sc * sz, py); g.closePath(); g.fill(); g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1; for (let k = 0; k < 4; k++) { g.beginPath(); g.moveTo(px - 20 * sc * sz, py - 8 * k * sc * sz); g.lineTo(px + 20 * sc * sz, py - 8 * k * sc * sz); g.stroke(); }
+          for (let i = 0; i < 13; i++) { const ang = -Math.PI / 2 + (i - 6) * 0.2 + (pr() - 0.5) * 0.18, len = rr(pr, 60, 130) * sc * sz; const ex = px + Math.cos(ang) * len * 0.55, ey = py - 34 * sc * sz + Math.sin(ang) * len, cx2 = px + Math.cos(ang) * len * 0.15, cy2 = py - 34 * sc * sz + Math.sin(ang) * len * 0.55; const lg = g.createLinearGradient(px, py, ex, ey); lg.addColorStop(0, 'rgb(16,36,26)'); lg.addColorStop(1, rgb(mix([30, 66, 44], [64, 104, 64], pr()))); g.fillStyle = lg; g.beginPath(); g.moveTo(px, py - 34 * sc * sz); g.quadraticCurveTo(cx2 - 9 * sc, cy2, ex, ey); g.quadraticCurveTo(cx2 + 9 * sc, cy2, px, py - 34 * sc * sz); g.fill(); }
+        };
+        [0.26, 0.33, 0.41, 0.2, 0.47].forEach((fx, i) => plant(W * fx * (portrait ? 0.85 : 1), 0.8 + (i % 3) * 0.2));
+        [0.22, 0.3, 0.385, 0.44].forEach((fx, i) => { const lx = W * fx * (portrait ? 0.85 : 1) + 12 * sc, ly = gyB + H * (0.018 + (i % 2) * 0.012), lw = 22 * sc, lh = 32 * sc; g.fillStyle = 'rgb(30,28,26)'; g.fillRect(lx - lw / 2, ly - lh, lw, lh); g.fillStyle = 'rgba(255,190,110,.55)'; g.fillRect(lx - lw / 2 + 3, ly - lh + 6, lw - 6, lh - 10); g.strokeStyle = 'rgb(20,18,16)'; g.lineWidth = 2; g.strokeRect(lx - lw / 2, ly - lh, lw, lh); lanterns.push({ x: lx, y: ly - lh / 2, ph: i * 1.7 }); });
+        g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(8,8,12,.38)'; g.fillRect(0, 0, w, h); g.globalCompositeOperation = 'source-over';
+      }), 2.4 * sc);
       s.lanterns = lanterns; s.bulbs = bulbs; s.candles = candles;
       // light falls off like a photograph: the room is dark except around the fire, candles and lamps
       s.dark = a.lightmap(W, H, { color: [6, 5, 8], ambient: 0.7, holeA: 0.62, holes: [s.glass], lights: [
@@ -864,7 +868,7 @@
       ctx.drawImage(s.frost, 0, 0, W, H);
       ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.07 * fl; a.sprite(s.warm, gb.w * 0.62, gb.h * 0.62, H * 0.9); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
       ctx.restore();
-      a.put(s.room, 0, 0); ctx.drawImage(s.dark, 0, 0, W, H);
+      a.put(s.room, 0, 0); ctx.drawImage(s.dark, 0, 0, W, H); ctx.drawImage(s.plantL, 0, 0, W, H);
 
       // ---- the stove fire (flames stay behind the glass door) ----
       { const fg = ctx.createRadialGradient(dr.x + dr.w / 2, dr.y + dr.h, 0, dr.x + dr.w / 2, dr.y + dr.h, dr.h * 1.1); fg.addColorStop(0, `rgba(255,170,70,${0.55 * fl})`); fg.addColorStop(1, 'rgba(120,40,10,.25)'); ctx.fillStyle = fg; ctx.fillRect(dr.x, dr.y, dr.w, dr.h); }
@@ -1072,22 +1076,22 @@
         a.ridge(g, w, h, h * 0.62, h * 0.1, 91, [[186, 168, 208], [214, 190, 214]], { freq: 0.6 });
         const hz = g.createLinearGradient(0, h * 0.5, 0, h * 0.72); hz.addColorStop(0, 'rgba(255,226,226,0)'); hz.addColorStop(1, 'rgba(255,226,226,.5)'); g.fillStyle = hz; g.fillRect(0, h * 0.5, w, h * 0.22);
       }), 2 * sc);
-      const bl = a.glow([255, 190, 208], 64), bl2 = a.glow([255, 226, 232], 64), lf = a.glow([140, 170, 110], 64);
+      const bl = a.glow([255, 190, 208], 64), bl2 = a.glow([255, 230, 236], 64), bl3 = a.glow([214, 122, 160], 64), lf = a.glow([140, 170, 110], 64);
       // blossom trees: dark trunks with canopies built from hundreds of soft pink blobs, further trees paler and blurrier
       const tree = (g, x, base, hgt, sz, tone) => {
         g.strokeStyle = rgb(mix([74, 52, 58], [190, 160, 180], tone)); g.lineCap = 'round';
         const top = base - hgt, lean = (r() - 0.5) * hgt * 0.15;
-        g.lineWidth = Math.max(3, sz * 0.05); g.beginPath(); g.moveTo(x, base); g.quadraticCurveTo(x + lean, base - hgt * 0.5, x + lean * 1.4, top); g.stroke();
+        g.lineWidth = Math.max(4, sz * 0.075); g.beginPath(); g.moveTo(x, base); g.quadraticCurveTo(x + lean, base - hgt * 0.5, x + lean * 1.4, top); g.stroke();
         const cx0 = x + lean * 1.4, n = Math.round(sz * 2.4);
-        for (let b = 0; b < 5; b++) { const ang = -Math.PI / 2 + (b - 2) * 0.55, bx = cx0 + Math.cos(ang) * sz * 0.5, by = top + sz * 0.1 + Math.sin(ang) * sz * 0.25; g.lineWidth = Math.max(1.5, sz * 0.025); g.beginPath(); g.moveTo(cx0, top + sz * 0.25); g.lineTo(bx, by); g.stroke(); }
+        for (let b = 0; b < 5; b++) { const ang = -Math.PI / 2 + (b - 2) * 0.55, bx = cx0 + Math.cos(ang) * sz * 0.5, by = top + sz * 0.1 + Math.sin(ang) * sz * 0.25; g.lineWidth = Math.max(2, sz * 0.04); g.beginPath(); g.moveTo(cx0, top + sz * 0.25); g.lineTo(bx, by); g.stroke(); }
         for (let i = 0; i < n; i++) {
           const ang = r() * TAU, d = Math.sqrt(r()) * sz, px = cx0 + Math.cos(ang) * d * 1.15, py = top + sz * 0.05 + Math.sin(ang) * d * 0.68, pick = r();
-          g.globalAlpha = 0.55 + r() * 0.4; g.drawImage(pick < 0.08 ? lf : pick < 0.45 ? bl2 : bl, px - sz * 0.15, py - sz * 0.15, sz * 0.3, sz * 0.3);
+          const dk = clamp((py - (top - sz * 0.6)) / (sz * 1.3) + (r() - 0.5) * 0.25, 0, 1); g.globalAlpha = 0.5 + r() * 0.4; g.drawImage(pick < 0.07 ? lf : dk < 0.4 ? (pick < 0.55 ? bl2 : bl) : dk < 0.8 ? (pick < 0.7 ? bl : bl2) : (pick < 0.5 ? bl3 : bl), px - sz * 0.15, py - sz * 0.15, sz * 0.3, sz * 0.3);
         }
         g.globalAlpha = 1;
       };
       s.far = a.blur(a.layer(W, H, (g, w, h) => { [[0.1, 0.7, 0.3, 130], [0.36, 0.72, 0.36, 160], [0.62, 0.7, 0.3, 140], [0.88, 0.72, 0.34, 150]].forEach(([fx, fy, fh, sz]) => tree(g, w * fx, h * fy, h * fh, sz * sc, 0.5)); }), 4 * sc);
-      s.mid = a.blur(a.layer(W, H, (g, w, h) => { [[0.04, 0.9, 0.5, 190], [0.3, 0.93, 0.48, 210], [0.58, 0.92, 0.55, 230], [0.86, 0.94, 0.5, 200]].forEach(([fx, fy, fh, sz]) => tree(g, w * fx, h * fy, h * fh, sz * sc, 0.2)); }), 2 * sc);
+      s.mid = a.blur(a.layer(W, H, (g, w, h) => { [[0.04, 0.9, 0.5, 190], [0.3, 0.93, 0.48, 210], [0.58, 0.92, 0.55, 230], [0.86, 0.94, 0.5, 200]].forEach(([fx, fy, fh, sz]) => tree(g, w * fx, h * fy, h * fh, sz * sc, 0.2)); }), 1.3 * sc);
       // meadow with drifts of fallen petals
       s.ground = a.layer(W, H * 0.22, (g, w, h) => {
         a.vgrad(g, w, h, [[0, [168, 190, 130], 0], [0.25, [150, 178, 116], 0.9], [1, [86, 116, 82]]]);
@@ -1131,8 +1135,7 @@
       ctx.drawImage(s.hills, 0, 0, W, H);
       const sway = k => (wnd * 0.5 + gust * 0.5) * k;
       ctx.save(); ctx.transform(1, 0, sway(0.0015), 1, 0, 0); ctx.drawImage(s.far, 0, 0, W, H); ctx.restore();
-      ctx.fillStyle = 'rgba(255,226,230,.07)'; ctx.fillRect(0, H * 0.5, W, H * 0.4);
-      ctx.save(); ctx.transform(1, 0, sway(0.003), 1, 0, 0); ctx.drawImage(s.mid, 0, 0, W, H); ctx.restore();
+            ctx.save(); ctx.transform(1, 0, sway(0.003), 1, 0, 0); ctx.drawImage(s.mid, 0, 0, W, H); ctx.restore();
       ctx.drawImage(s.ground, 0, H * 0.8, W, H * 0.22);
       // light shafts through the blossom
       ctx.globalCompositeOperation = 'lighter';

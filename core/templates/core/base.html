@@ -12,7 +12,7 @@
     <link rel="icon" href="{% static 'images/favicon.ico' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4">
     <link rel="stylesheet" href="{% static 'css/alert.css' %}">
-    <link rel="stylesheet" href="{% static 'css/music_player.css' %}?v=5">
+    <link rel="stylesheet" href="{% static 'css/music_player.css' %}?v=6">
     <meta name="ss-page-css-start">
     {% block extra_css %}{% endblock %}
     <meta name="ss-page-css-end">
@@ -44,58 +44,49 @@
     </div>
 
 
-    <!-- Global Mini Music Player -->
+    <!-- Global sound mixer -->
     <div id="gmp-bar">
-      <div class="gmp-left">
-        <div class="gmp-eq">
+      <button id="gmp-play" class="gmp-play" type="button" aria-label="Play sounds">&#9654;</button>
+      <div class="gmp-left" id="gmp-left">
+        <div class="gmp-eq" aria-hidden="true">
+          <span class="gmp-eq-bar"></span>
           <span class="gmp-eq-bar"></span>
           <span class="gmp-eq-bar"></span>
           <span class="gmp-eq-bar"></span>
         </div>
         <div class="gmp-info">
-          <span id="gmp-name">Study Music</span>
-          <span class="gmp-sub">Choose a playlist</span>
+          <span id="gmp-name">Study sounds</span>
+          <span class="gmp-sub" id="gmp-sub">Tap play for a calm mix</span>
         </div>
       </div>
-      <button id="gmp-toggle" aria-label="Open music panel">&#9650;</button>
+      <input id="gmp-bar-vol" class="gmp-range gmp-bar-vol" type="range" min="0" max="100" value="80" aria-label="Master volume">
+      <button id="gmp-toggle" type="button" aria-label="Open sound mixer" aria-expanded="false">&#9650;</button>
     </div>
 
-    <div id="gmp-panel" class="hidden">
+    <div id="gmp-panel" class="hidden" role="dialog" aria-label="Sound mixer">
       <div class="gmp-panel-header">
-        <span class="gmp-panel-title">&#127925; Study Music</span>
-        <button id="gmp-close" aria-label="Close">&#10005;</button>
+        <span class="gmp-panel-title">Sound mixer</span>
+        <button id="gmp-close" type="button" aria-label="Close">&#10005;</button>
       </div>
-      <p class="gmp-section-label">Suggested Playlists</p>
-      <div class="gmp-chips">
-        <button class="gmp-chip" data-spotify="37i9dQZF1DX4sWSpwq3LiO" data-name="Peaceful Piano">Peaceful Piano</button>
-        <button class="gmp-chip" data-spotify="37i9dQZF1DWZeKCadgRdKQ" data-name="Deep Focus">Deep Focus</button>
-        <button class="gmp-chip" data-spotify="37i9dQZF1DWXLeA8Omikj7" data-name="Brain Food">Brain Food</button>
-        <button class="gmp-chip" data-spotify="37i9dQZF1DWWQRwui0ExPn" data-name="Lofi Beats">Lofi Beats</button>
-      </div>
-      <p class="gmp-section-label" style="margin-top:14px">Search</p>
-      <div class="gmp-search-row">
-        <input id="gmp-search-input" class="gmp-search-input" placeholder="Search songs, artists&#8230;" autocomplete="off" />
-        <button id="gmp-search-btn" class="gmp-search-btn">&#128269;</button>
-      </div>
-      <div id="gmp-search-results" class="gmp-search-results hidden"></div>
-
-      <details class="gmp-url-details">
-        <summary class="gmp-url-summary">Or paste a URL</summary>
-        <div class="gmp-url-row" style="margin-top:8px">
-          <input id="gmp-url-input" class="gmp-url-input" placeholder="YouTube or Spotify URL&#8230;" autocomplete="off" />
-          <button id="gmp-url-play" class="gmp-url-play">Play</button>
-        </div>
-      </details>
-
-      <div id="gmp-embed-wrap" class="hidden">
-        <div id="gmp-iframe"></div>
+      <p class="gmp-section-label">Mixes</p>
+      <div class="gmp-chips" id="gmp-presets"></div>
+      <button id="gmp-match" class="gmp-match" type="button" hidden></button>
+      <p class="gmp-section-label">Sounds <span class="gmp-hint">drag any slider up to blend it in</span></p>
+      <div class="gmp-grid" id="gmp-grid"></div>
+      <div class="gmp-foot">
+        <label class="gmp-foot-item">Master <input id="gmp-master" class="gmp-range" type="range" min="0" max="100" value="80"></label>
+        <label class="gmp-foot-item">Sleep timer
+          <select id="gmp-sleep" class="gmp-select"><option value="0">Off</option><option value="15">15 min</option><option value="30">30 min</option><option value="60">1 hour</option><option value="90">90 min</option></select>
+        </label>
+        <button id="gmp-save" class="gmp-btn" type="button">&#9733; Save mix</button>
+        <button id="gmp-silence" class="gmp-btn gmp-btn-quiet" type="button">Silence all</button>
       </div>
     </div>
 
     <!-- Global Alert -->
     <div id="global-toast" class="toast"></div>
     <script src="{% static 'js/alert.js' %}"></script>
-    <script src="{% static 'js/music_player.js' %}?v=11" defer></script>
+    <script src="{% static 'js/music_player.js' %}?v=12" defer></script>
     <script src="{% static 'js/global_ui.js' %}?v=1" defer></script>
     <script src="{% static 'js/tree_fx.js' %}?v=2" defer></script>
 

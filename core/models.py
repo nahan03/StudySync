@@ -66,6 +66,7 @@ class UserState(models.Model):
         'studySyncCustomNotes',
         'studySyncStudyPrefs',       # Study page: timer, break and alarm settings
         'studySyncTimerPresets',     # Study page: user-made timer presets
+        'studySyncMixer',            # sound mixer: volumes and saved mixes
         'studySyncStudyBgImage',     # Study page: user's custom background picture (data URL)
         'studySyncTree_daily',       # forest / tree progress
         'studySyncTree_custom',

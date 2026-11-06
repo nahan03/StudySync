@@ -156,3 +156,33 @@ class TimerCycleTests(TestCase):
         self.assertIn('run.cfg.rounds', js)
         import re
         self.assertIsNone(re.search(r'[\w)\]]\s*%\s*5(?!\d)(?!%)', re.sub(r"'[^']*'", "''", js)))
+
+
+@override_settings(STORAGES=STATIC_OVERRIDE)
+class SoundMixerTests(TestCase):
+    """The global music bar is a built-in sound mixer: no embeds, every sound is defined in the script."""
+
+    def setUp(self):
+        from django.contrib.auth.models import User
+        self.client.force_login(User.objects.create_user('mixer', password='x'))
+
+    def test_study_page_has_the_mixer_controls_and_no_embeds(self):
+        html = self.client.get(reverse('study')).content.decode()
+        for marker in ('id="gmp-play"', 'id="gmp-grid"', 'id="gmp-presets"', 'id="gmp-sleep"', 'id="gmp-save"', 'id="gmp-master"'):
+            self.assertIn(marker, html)
+        for gone in ('gmp-embed-wrap', 'gmp-url-input', 'open.spotify.com'):
+            self.assertNotIn(gone, html)
+
+    def test_every_sound_and_preset_is_defined_in_the_script(self):
+        import re
+        from pathlib import Path
+        js = (Path(__file__).parent / 'static' / 'js' / 'music_player.js').read_text(encoding='utf-8')
+        ids = re.findall(r"\{ id: '(\w+)', name: '[^']+', icon:", js)
+        self.assertEqual(len(ids), 13)
+        for preset in re.findall(r"vols: \{([^}]*)\}", js):
+            for sound in re.findall(r"(\w+):", preset):
+                self.assertIn(sound, ids)
+
+    def test_saved_mixes_sync_to_the_account(self):
+        from .models import UserState
+        self.assertIn('studySyncMixer', UserState.SYNCED_KEYS)

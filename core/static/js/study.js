@@ -106,6 +106,7 @@
     const soundId = kind === 'focus' ? c.focusSound : c.breakSound;
     const max = c.repeat === 'once' ? 1 : c.repeat === '3x' ? 3 : 30;
     stopRinging();
+    if (window.SSMixer && SSMixer.isPlaying()) SSMixer.duck(Math.min(8000, 3000 + (c.repeat === 'once' ? 0 : 3000)));
     if (c.repeat === 'until') $('st-ringing').hidden = false;
     (function ringOnce() {
       const len = playSound(soundId, c.volume);
