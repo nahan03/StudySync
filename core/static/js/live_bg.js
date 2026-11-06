@@ -1121,7 +1121,10 @@
       const sway = k => (wnd * 0.5 + gust * 0.5) * k;
       ctx.save(); ctx.transform(1, 0, sway(0.0012), 1, 0, 0); ctx.drawImage(s.far, 0, 0, W, H); ctx.restore();
       // the tree moves as one, pivoting from its trunk
-      ctx.save(); ctx.translate(W, H); ctx.rotate(sway(0.012) + (a.fbm(t * 0.2, 3, 2) - 0.45) * 0.01); ctx.translate(-W, -H); ctx.drawImage(s.tree, 0, 0, W, H); ctx.restore();
+      ctx.save(); ctx.translate(W, H * 0.05); ctx.rotate(sway(0.012) + (a.fbm(t * 0.2, 3, 2) - 0.45) * 0.01); ctx.scale(0.8, 0.8); ctx.translate(-W, -H * 0.05);
+      ctx.drawImage(s.tree, 0, 0, W, H); ctx.restore();
+      { const tg = ctx.createLinearGradient(W - 62, 0, W, 0); tg.addColorStop(0, 'rgb(58,38,36)'); tg.addColorStop(1, 'rgb(76,52,46)'); ctx.fillStyle = tg; ctx.fillRect(W - 58, H * 0.74, 58, H * 0.16); }   // the trunk carries on down to the veranda
+      ctx.fillStyle = 'rgba(176,172,190,.1)'; ctx.fillRect(0, 0, W, H);   // a little air between you and the tree
       s.petals.forEach(p => {
         const turb = (a.n2(p.x * 0.004 + t * 0.1, p.y * 0.004 + p.ph) - 0.5) * 60;
         p.y += p.v * (0.8 + 0.3 * a.n2(p.ph + t * 0.3, 2)) * dt; p.x += (-12 - gust * 50 + turb + wnd * 14) * dt * (0.5 + p.z); p.rot += p.spin * dt;
