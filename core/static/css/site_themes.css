@@ -1,0 +1,85 @@
+/* ═══════════════════════════════════════════════════
+   SITE THEMES — the theme chosen on the Study page colours the whole site.
+   html[data-theme] is set from the saved look (see base.html). Pages read these variables.
+   ═══════════════════════════════════════════════════ */
+:root {
+  --soil: #0E0A05; --bark: #1A1209; --moss: #1E2E1C; --canopy: #2E4A2C;
+  --leaf: #4E7A34; --sprout: #7DB54A; --lime: #A8D870; --gold: #C9952A; --amber: #E4B84A; --dawn: #F0D080;
+  --cream: #F6EDD8; --fog: #9A8870;
+  --accent-rgb: 125,181,74; --accent-dark-rgb: 78,122,52; --warm-rgb: 228,184,74; --gold-rgb: 201,149,42; --lime-rgb: 168,216,112;
+  --surf: 255,255,255; --on-accent: #0E1A08;
+}
+
+html[data-theme="ocean"] {
+  --soil: #04121A; --bark: #030B10; --moss: #0b2e3a; --canopy: #0f4a55;
+  --leaf: #1A9A8A; --sprout: #3AC8B8; --lime: #8FE8DC; --gold: #D8A94A; --amber: #E8C46A; --dawn: #F5DE9C;
+  --cream: #E8F6F5; --fog: #7FA3A6;
+  --accent-rgb: 58,200,184; --accent-dark-rgb: 26,154,138; --warm-rgb: 232,196,106; --gold-rgb: 216,169,74; --lime-rgb: 143,232,220; --on-accent: #04201F;
+}
+html[data-theme="sunset"] {
+  --soil: #1A0B10; --bark: #0E0508; --moss: #4a1d2a; --canopy: #7a3040;
+  --leaf: #C8562E; --sprout: #F08A5D; --lime: #FFC39A; --gold: #D99A2E; --amber: #F6C85A; --dawn: #FFE0A0;
+  --cream: #FBEFE6; --fog: #B39A8E;
+  --accent-rgb: 240,138,93; --accent-dark-rgb: 200,86,46; --warm-rgb: 246,200,90; --gold-rgb: 217,154,46; --lime-rgb: 255,195,154; --on-accent: #2A0E06;
+}
+html[data-theme="lavender"] {
+  --soil: #0E0A1C; --bark: #07050F; --moss: #261a4a; --canopy: #3a2a70;
+  --leaf: #7455C8; --sprout: #A98BE8; --lime: #D2C2FF; --gold: #D9A43A; --amber: #F0C46A; --dawn: #F8E2A8;
+  --cream: #F1ECFB; --fog: #9B93B5;
+  --accent-rgb: 169,139,232; --accent-dark-rgb: 116,85,200; --warm-rgb: 240,196,106; --gold-rgb: 217,164,58; --lime-rgb: 210,194,255; --on-accent: #150A2E;
+}
+html[data-theme="rose"] {
+  --soil: #1A0A12; --bark: #0E050A; --moss: #3d1426; --canopy: #6a2444;
+  --leaf: #C8467A; --sprout: #F07AA8; --lime: #FFB8D2; --gold: #D99A2E; --amber: #F6C85A; --dawn: #FFE0A0;
+  --cream: #FCEEF3; --fog: #B8939F;
+  --accent-rgb: 240,122,168; --accent-dark-rgb: 200,70,122; --warm-rgb: 246,200,90; --gold-rgb: 217,154,46; --lime-rgb: 255,184,210; --on-accent: #2A0716;
+}
+html[data-theme="slate"] {
+  --soil: #0F1217; --bark: #080A0D; --moss: #232a35; --canopy: #343d4c;
+  --leaf: #94A3B8; --sprout: #E2E8F0; --lime: #FFFFFF; --gold: #D9A43A; --amber: #FBBF24; --dawn: #FDE68A;
+  --cream: #F1F5F9; --fog: #94A3B8;
+  --accent-rgb: 226,232,240; --accent-dark-rgb: 148,163,184; --warm-rgb: 251,191,36; --gold-rgb: 217,164,58; --lime-rgb: 255,255,255; --on-accent: #0F172A;
+}
+html[data-theme="glass"] {
+  --soil: #10163a; --bark: #0a0d24; --moss: #232b5c; --canopy: #2f3a80;
+  --leaf: #5A8CE6; --sprout: #9CC4FF; --lime: #C9E0FF; --gold: #FFD58A; --amber: #FFD58A; --dawn: #FFE8B8;
+  --cream: #F4F7FF; --fog: #B4BFDA;
+  --accent-rgb: 156,196,255; --accent-dark-rgb: 90,140,230; --warm-rgb: 255,213,138; --gold-rgb: 255,213,138; --lime-rgb: 201,224,255; --on-accent: #0B1530;
+}
+/* light theme: the dark/cream variables swap roles, so every page that reads them turns light */
+html[data-theme="paper"] {
+  --soil: #F4F1E6; --bark: #E8E4D2; --moss: #DDE5C8; --canopy: #BCC9A0;
+  --leaf: #2F6A20; --sprout: #3C7A2B; --lime: #2F6A20; --gold: #B7791F; --amber: #B7791F; --dawn: #8a5a12;
+  --cream: #1F2A1A; --fog: #66705B;
+  --accent-rgb: 60,122,43; --accent-dark-rgb: 47,106,32; --warm-rgb: 183,121,31; --gold-rgb: 183,121,31; --lime-rgb: 47,106,32;
+  --surf: 0,0,0; --on-accent: #FFFFFF; color-scheme: light;
+}
+
+/* the page behind everything picks up the theme too */
+html[data-theme]:not([data-theme="forest"]) body:not(.study-page) {
+  background: radial-gradient(ellipse 90% 60% at 50% -8%, var(--moss), var(--soil) 62%) fixed, var(--soil);
+  color: var(--cream);
+}
+html[data-theme="glass"] body:not(.study-page) {
+  background:
+    radial-gradient(ellipse 50% 45% at 14% 18%, rgba(88,120,255,.55), transparent 70%) fixed,
+    radial-gradient(ellipse 46% 42% at 86% 14%, rgba(200,100,255,.45), transparent 70%) fixed,
+    radial-gradient(ellipse 52% 48% at 72% 90%, rgba(40,210,220,.4), transparent 70%) fixed,
+    radial-gradient(ellipse 40% 40% at 10% 88%, rgba(255,110,170,.32), transparent 70%) fixed,
+    linear-gradient(180deg, var(--soil), var(--bark)) fixed;
+}
+html[data-theme="glass"] body:not(.study-page) :is(.card, .panel, .tool-card, .stat-card, .stats-card, .sf-card, .fr-card, .sch-card, .planner-inner, .account-card, .auth-card) {
+  background: linear-gradient(135deg, rgba(255,255,255,.1), rgba(255,255,255,.02)) !important;
+  border: 1px solid rgba(255,255,255,.28) !important;
+  backdrop-filter: blur(10px) saturate(170%); -webkit-backdrop-filter: blur(10px) saturate(170%);
+}
+
+/* the music bar and panel follow the theme */
+html[data-theme] #gmp-bar { background: color-mix(in srgb, var(--bark) 88%, transparent); }
+html[data-theme] #gmp-panel { background: color-mix(in srgb, var(--soil) 90%, transparent); }
+html[data-theme="paper"] #gmp-bar, html[data-theme="paper"] #gmp-panel { border-color: rgba(0,0,0,.12); }
+html[data-theme="paper"] .gmp-chip, html[data-theme="paper"] .gmp-snd, html[data-theme="paper"] .gmp-tab { background: rgba(0,0,0,.05); border-color: rgba(0,0,0,.1); }
+html[data-theme="paper"] .gmp-range { background: linear-gradient(90deg, var(--sprout) var(--v), rgba(0,0,0,.16) var(--v)); }
+html[data-theme="paper"] .gmp-select option { background: #fff; color: #1F2A1A; }
+html[data-theme="paper"] .gmp-text { background: rgba(0,0,0,.05); border-color: rgba(0,0,0,.18); }
+html[data-theme="paper"] .gmp-tab.active { background: rgba(0,0,0,.1); }

@@ -14,7 +14,7 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(8, 6, 2, 0.82);
+  background: color-mix(in srgb, var(--bark) 82%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   animation: ob-fade-in 0.35s ease forwards;
@@ -67,13 +67,13 @@
   z-index: 1002;
   width: 100%;
   max-width: 480px;
-  background: rgba(18, 12, 6, 0.97);
+  background: color-mix(in srgb, var(--bark) 97%, transparent);
   border: 1.5px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
   padding: 44px 44px 40px;
   box-shadow:
     0 32px 80px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(78, 122, 52, 0.08),
+    0 0 0 1px rgba(var(--accent-dark-rgb), 0.08),
     0 0 60px rgba(46, 74, 44, 0.15);
   animation: ob-slide-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   overflow: hidden;
@@ -89,7 +89,7 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #4E7A34, #7DB54A, #A8D870);
+  background: linear-gradient(90deg, var(--leaf), var(--sprout), var(--lime));
   border-radius: 24px 24px 0 0;
 }
 
@@ -109,7 +109,7 @@
 }
 
 .ob-dot--active {
-  background: #7DB54A;
+  background: var(--sprout);
   transform: scale(1.25);
 }
 
@@ -123,7 +123,7 @@
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #7DB54A;
+  color: var(--sprout);
   margin-bottom: 16px;
   opacity: 0.85;
 }
@@ -132,7 +132,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #7DB54A;
+  background: var(--sprout);
   flex-shrink: 0;
 }
 
@@ -142,14 +142,14 @@
   font-size: clamp(32px, 6vw, 44px);
   font-weight: 800;
   line-height: 1.05;
-  color: #F6EDD8;
+  color: var(--cream);
   margin-bottom: 12px;
   letter-spacing: -0.02em;
 }
 
 .ob-heading-italic {
   font-style: italic;
-  background: linear-gradient(100deg, #7DB54A 0%, #A8D870 50%, #E4B84A 100%);
+  background: linear-gradient(100deg, var(--sprout) 0%, var(--lime) 50%, var(--amber) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -158,7 +158,7 @@
 .ob-sub {
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
-  color: #9A8870;
+  color: var(--fog);
   line-height: 1.7;
   margin-bottom: 32px;
 }
@@ -171,11 +171,11 @@
   border: 1px solid rgba(255,255,255,0.12);
   font-family: 'DM Sans', sans-serif;
   font-size: 12px;
-  color: #F6EDD8;
+  color: var(--cream);
 }
 
 .ob-sub strong {
-  color: #F6EDD8;
+  color: var(--cream);
   font-weight: 600;
 }
 
@@ -191,7 +191,7 @@
   gap: 28px;
   margin-bottom: 36px;
   padding: 28px 24px;
-  background: rgba(30, 20, 10, 0.7);
+  background: color-mix(in srgb, var(--bark) 70%, transparent);
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 16px;
 }
@@ -200,9 +200,9 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 1.5px solid rgba(78, 122, 52, 0.4);
-  background: rgba(78, 122, 52, 0.1);
-  color: #7DB54A;
+  border: 1.5px solid rgba(var(--accent-dark-rgb), 0.4);
+  background: rgba(var(--accent-dark-rgb), 0.1);
+  color: var(--sprout);
   font-size: 22px;
   font-weight: 700;
   line-height: 1;
@@ -215,8 +215,8 @@
 }
 
 .ob-grade-arrow:hover:not(:disabled) {
-  background: rgba(78, 122, 52, 0.22);
-  border-color: rgba(78, 122, 52, 0.7);
+  background: rgba(var(--accent-dark-rgb), 0.22);
+  border-color: rgba(var(--accent-dark-rgb), 0.7);
   transform: scale(1.08);
 }
 
@@ -235,7 +235,7 @@
   font-family: 'Playfair Display', serif;
   font-size: 56px;
   font-weight: 800;
-  color: #F0D080;
+  color: var(--dawn);
   line-height: 1;
   margin-bottom: 4px;
   letter-spacing: -0.02em;
@@ -244,7 +244,7 @@
 .ob-grade-label {
   font-family: 'DM Sans', sans-serif;
   font-size: 12px;
-  color: #9A8870;
+  color: var(--fog);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -258,11 +258,11 @@
 
 .ob-subject-input {
   flex: 1;
-  background: rgba(30, 20, 10, 0.8);
+  background: color-mix(in srgb, var(--bark) 80%, transparent);
   border: 1.5px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 12px 16px;
-  color: #F6EDD8;
+  color: var(--cream);
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   outline: none;
@@ -274,8 +274,8 @@
 }
 
 .ob-subject-input:focus {
-  border-color: rgba(125, 181, 74, 0.45);
-  box-shadow: 0 0 0 3px rgba(125, 181, 74, 0.08);
+  border-color: rgba(var(--accent-rgb), 0.45);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.08);
 }
 
 /* ── BUTTONS ── */
@@ -291,7 +291,7 @@
 .ob-btn-primary {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, #4E7A34, #7DB54A);
+  background: linear-gradient(135deg, var(--leaf), var(--sprout));
   color: #0E1A08;
   font-size: 15px;
   letter-spacing: 0.01em;
@@ -303,22 +303,22 @@
 
 .ob-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 36px rgba(78, 122, 52, 0.45), 0 0 50px rgba(125, 181, 74, 0.12);
+  box-shadow: 0 14px 36px rgba(var(--accent-dark-rgb), 0.45), 0 0 50px rgba(var(--accent-rgb), 0.12);
 }
 
 .ob-btn-add {
   padding: 12px 20px;
-  background: rgba(78, 122, 52, 0.15);
-  border: 1.5px solid rgba(78, 122, 52, 0.35);
-  color: #7DB54A;
+  background: rgba(var(--accent-dark-rgb), 0.15);
+  border: 1.5px solid rgba(var(--accent-dark-rgb), 0.35);
+  color: var(--sprout);
   font-size: 14px;
   border-radius: 12px;
   flex-shrink: 0;
 }
 
 .ob-btn-add:hover {
-  background: rgba(78, 122, 52, 0.25);
-  border-color: rgba(78, 122, 52, 0.6);
+  background: rgba(var(--accent-dark-rgb), 0.25);
+  border-color: rgba(var(--accent-dark-rgb), 0.6);
 }
 
 /* ── CHIPS ── */
@@ -329,7 +329,7 @@
   min-height: 36px;
   margin-bottom: 20px;
   padding: 12px 16px;
-  background: rgba(26, 18, 9, 0.6);
+  background: color-mix(in srgb, var(--bark) 60%, transparent);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
 }
@@ -346,13 +346,13 @@
   align-items: center;
   gap: 6px;
   padding: 5px 10px 5px 13px;
-  background: rgba(78, 122, 52, 0.18);
-  border: 1px solid rgba(78, 122, 52, 0.35);
+  background: rgba(var(--accent-dark-rgb), 0.18);
+  border: 1px solid rgba(var(--accent-dark-rgb), 0.35);
   border-radius: 999px;
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;
   font-weight: 500;
-  color: #A8D870;
+  color: var(--lime);
 }
 
 .ob-chip-remove {
@@ -363,8 +363,8 @@
   height: 18px;
   border-radius: 50%;
   border: none;
-  background: rgba(78, 122, 52, 0.25);
-  color: #7DB54A;
+  background: rgba(var(--accent-dark-rgb), 0.25);
+  color: var(--sprout);
   font-size: 14px;
   line-height: 1;
   cursor: pointer;

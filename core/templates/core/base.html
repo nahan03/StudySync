@@ -6,11 +6,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token }}">
+    <script>
+    /* the theme chosen on the Study page colours the whole site */
+    (function () {
+      function apply() {
+        try { var t = (JSON.parse(localStorage.getItem('studySyncStudyPrefs') || '{}')).theme; document.documentElement.setAttribute('data-theme', t || 'forest'); }
+        catch (e) { document.documentElement.setAttribute('data-theme', 'forest'); }
+      }
+      window.ssApplyTheme = apply; apply(); window.addEventListener('storage', apply);
+    })();
+    </script>
     <title>StudySync | {% block title %}{% endblock %}</title>
 
     {% load static %}
     <link rel="icon" href="{% static 'images/favicon.ico' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
+    <link rel="stylesheet" href="{% static 'css/site_themes.css' %}?v=1">
     <link rel="stylesheet" href="{% static 'css/alert.css' %}">
     <link rel="stylesheet" href="{% static 'css/music_player.css' %}?v=7">
     <meta name="ss-page-css-start">
@@ -27,6 +38,7 @@
     </script>
     {% if sync_payload %}{{ sync_payload|json_script:"server-session-history" }}{% endif %}
     <script src="{% static 'js/sync.js' %}?v=3"></script>
+    <script>window.ssApplyTheme && window.ssApplyTheme();</script>
     <script src="{% static 'js/tree_art.js' %}?v=2"></script>
     <script src="{% static 'js/tree_grow.js' %}?v=2"></script>
 

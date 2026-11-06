@@ -654,6 +654,7 @@
     let bg = BGS.some(b => b.id === prefs.bg) ? prefs.bg : 'theme';
     if (bg === 'image' && !bgImage) bg = 'theme'; // nothing chosen yet
     root.dataset.theme = theme;
+    document.documentElement.setAttribute('data-theme', theme); // the rest of the site follows
     root.dataset.bg = bg;
     root.dataset.ring = RINGS.some(r => r.id === prefs.ring) ? prefs.ring : 'classic';
     root.dataset.font = FONTS.some(f => f.id === prefs.font) ? prefs.font : 'serif';
