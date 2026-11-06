@@ -6,7 +6,7 @@
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Nunito:wght@600;800&family=Orbitron:wght@500;700&family=Roboto+Slab:wght@500;700&family=Outfit:wght@200;300;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/study.css' %}?v=15">
+<link rel="stylesheet" href="{% static 'css/study.css' %}?v=16">
 <link rel="stylesheet" href="{% static 'css/tree_overlay.css' %}?v=1">
 {% endblock %}
 
@@ -40,11 +40,25 @@
     <a href="/" class="st-logo"><span>Study</span>Sync</a>
   </div>
   <div class="st-nav-right">
+    <button class="st-back st-treebtn" id="st-tree-open" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="st-treepanel" title="Your growing tree" hidden>
+      <span class="st-treebtn-ico" aria-hidden="true">&#127793;</span><span class="st-treebtn-pct" id="st-tree-pct">0%</span>
+      <span class="st-treebtn-bar" aria-hidden="true"><span id="st-tree-minibar"></span></span>
+    </button>
     <a href="/forest/" class="st-nav-link">&#127794; My forest</a>
     <button class="st-back st-fs-btn" id="st-fullscreen" type="button" aria-pressed="false" title="Full screen (F)"><span class="st-fs-ico" aria-hidden="true">&#9974;</span> <span class="st-fs-label">Full screen</span></button>
     <button class="st-back st-appearance-btn" id="st-appearance-open" type="button" aria-haspopup="dialog" aria-controls="st-appearance">&#127912; Appearance</button>
   </div>
 </nav>
+<div class="st-treepanel" id="st-treepanel" role="dialog" aria-label="Your growing tree" hidden>
+    <div class="st-tree-card st-tree-card-nav">
+      <div class="st-tree-art" id="st-tree-art"></div>
+      <div class="st-tree-info">
+        <div class="st-tree-title" id="st-tree-title">Your next tree</div>
+        <div class="st-progress"><div class="st-progress-fill" id="st-progress-fill"></div></div>
+        <div class="st-tree-sub" id="st-tree-sub">0 / 5 sessions</div>
+      </div>
+    </div>
+</div>
 
 <div class="st-wrap">
 
@@ -193,14 +207,6 @@
       <button class="st-btn st-btn-ghost st-btn-danger" id="st-end" type="button">End session</button>
     </div>
 
-    <div class="st-tree-card">
-      <div class="st-tree-art" id="st-tree-art"></div>
-      <div class="st-tree-info">
-        <div class="st-tree-title" id="st-tree-title">Your next tree</div>
-        <div class="st-progress"><div class="st-progress-fill" id="st-progress-fill"></div></div>
-        <div class="st-tree-sub" id="st-tree-sub">0 / 5 sessions</div>
-      </div>
-    </div>
   </section>
 
   <!-- ═════════════ DONE ═════════════ -->
@@ -303,5 +309,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/study.js' %}?v=12"></script>
+<script src="{% static 'js/study.js' %}?v=13"></script>
 {% endblock %}

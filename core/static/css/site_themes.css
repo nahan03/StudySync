@@ -48,10 +48,10 @@ html[data-theme="glass"] {
 }
 /* light theme: the dark/cream variables swap roles, so every page that reads them turns light */
 html[data-theme="paper"] {
-  --soil: #F4F1E6; --bark: #E8E4D2; --moss: #DDE5C8; --canopy: #BCC9A0;
-  --leaf: #2F6A20; --sprout: #3C7A2B; --lime: #2F6A20; --gold: #B7791F; --amber: #B7791F; --dawn: #8a5a12;
-  --cream: #1F2A1A; --fog: #66705B;
-  --accent-rgb: 60,122,43; --accent-dark-rgb: 47,106,32; --warm-rgb: 183,121,31; --gold-rgb: 183,121,31; --lime-rgb: 47,106,32;
+  --soil: #F7F0E1; --bark: #EBDFC6; --moss: #E3D3B4; --canopy: #D4C09A;
+  --leaf: #8C4A22; --sprout: #B4592B; --lime: #8C4A22; --gold: #A8741A; --amber: #A8741A; --dawn: #7a5210;
+  --cream: #2B1D12; --fog: #7A6652;
+  --accent-rgb: 180,89,43; --accent-dark-rgb: 140,74,34; --warm-rgb: 168,116,26; --gold-rgb: 168,116,26; --lime-rgb: 140,74,34;
   --surf: 0,0,0; --on-accent: #FFFFFF; color-scheme: light;
 }
 
@@ -80,6 +80,6 @@ html[data-theme] #gmp-panel { background: color-mix(in srgb, var(--soil) 90%, tr
 html[data-theme="paper"] #gmp-bar, html[data-theme="paper"] #gmp-panel { border-color: rgba(0,0,0,.12); }
 html[data-theme="paper"] .gmp-chip, html[data-theme="paper"] .gmp-snd, html[data-theme="paper"] .gmp-tab { background: rgba(0,0,0,.05); border-color: rgba(0,0,0,.1); }
 html[data-theme="paper"] .gmp-range { background: linear-gradient(90deg, var(--sprout) var(--v), rgba(0,0,0,.16) var(--v)); }
-html[data-theme="paper"] .gmp-select option { background: #fff; color: #1F2A1A; }
+html[data-theme="paper"] .gmp-select option { background: #fff; color: #2B1D12; }
 html[data-theme="paper"] .gmp-text { background: rgba(0,0,0,.05); border-color: rgba(0,0,0,.18); }
 html[data-theme="paper"] .gmp-tab.active { background: rgba(0,0,0,.1); }

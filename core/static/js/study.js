@@ -355,9 +355,16 @@
   }
 
   /* ---------- views ---------- */
+  function openTreePanel(open) {
+    const p = $('st-treepanel'), b = $('st-tree-open'); if (!p || !b) return;
+    const show = open == null ? p.hidden : open;
+    p.hidden = !show; b.setAttribute('aria-expanded', String(show));
+  }
   function show(which) {
     $('st-setup').hidden = which !== 'setup';
     $('st-run').hidden = which !== 'run';
+    $('st-tree-open').hidden = which !== 'run';
+    if (which !== 'run') openTreePanel(false);
     $('st-done').hidden = which !== 'done';
     window.scrollTo(0, 0);
   }
@@ -421,6 +428,7 @@
     const kind = treeKind(), g = treeG(), c = run.cfg;
     $('st-tree-title').textContent = `Growing ${/^[aeiou]/i.test(kind.name) ? 'an' : 'a'} ${kind.name}`;
     $('st-progress-fill').style.width = (g * 100).toFixed(1) + '%';
+    $('st-tree-pct').textContent = Math.round(g * 100) + '%'; $('st-tree-minibar').style.width = (g * 100).toFixed(1) + '%';
     $('st-tree-sub').textContent = `${stageLabel(g)} · ${Math.min(run.focusDone, c.rounds)} of ${c.rounds} rounds done`;
   }
 
@@ -710,7 +718,13 @@
     });
   }
 
+  function initTreePanel() {
+    $('st-tree-open').addEventListener('click', e => { e.stopPropagation(); openTreePanel(); });
+    document.addEventListener('click', e => { const p = $('st-treepanel'); if (!p.hidden && !p.contains(e.target) && !$('st-tree-open').contains(e.target)) openTreePanel(false); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') openTreePanel(false); });
+  }
   function initAppearance() {
+    initTreePanel();
     $('st-themes').innerHTML = THEMES.map(t =>
       `<button type="button" class="st-theme" role="radio" data-id="${t.id}" aria-checked="false">` +
       `<span class="st-swatch" style="background:${t.swatch}"></span>${esc(t.name)}</button>`).join('');
