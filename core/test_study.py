@@ -196,7 +196,7 @@ class ToolPageTests(TestCase):
         self.client.force_login(User.objects.create_user('tools', password='x'))
 
     def test_library_and_flashcards_render_without_any_timer(self):
-        for name, marker in (('library', 'id="coach-toggle"'), ('flashcards', 'id="fc-deck"')):
+        for name, marker in (('library', 'id="coach-toggle"'), ('flashcards', 'id="fc-deck"'), ('practice', 'id="generate-questions-btn"')):
             html = self.client.get(reverse(name)).content.decode()
             self.assertIn(marker, html)
             for gone in ('timer-start-btn', 'focus-start', 'id="cp-overlay"', 'Daily Mode', 'Exam Mode', 'Custom Mode'):
@@ -211,3 +211,13 @@ class ToolPageTests(TestCase):
         html = self.client.get(reverse('study')).content.decode()
         for marker in ('id="st-rings"', 'id="st-fonts"', 'id="st-tsize"', 'id="st-minbar"', 'id="st-knob"'):
             self.assertIn(marker, html)
+
+    def test_flashcards_page_has_no_countdown_or_practice_questions(self):
+        html = self.client.get(reverse('flashcards')).content.decode()
+        for gone in ('id="ec-set-btn"', 'EXAM COUNTDOWN', 'id="generate-questions-btn"', 'id="practice-questions-list"'):
+            self.assertNotIn(gone, html)
+
+    def test_home_lists_the_tools_without_a_second_schedule_link(self):
+        html = self.client.get(reverse('home')).content.decode()
+        self.assertIn('href="/practice/"', html)
+        self.assertNotIn('class="tool-card" href="/schedule/"', html)

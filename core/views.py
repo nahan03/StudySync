@@ -149,8 +149,14 @@ def library(request):
 
 
 @login_required
+def practice(request):
+    """Practice questions generated from the user's own notes."""
+    return render(request, 'core/practice.html')
+
+
+@login_required
 def flashcards(request):
-    """Flashcards, practice questions and the exam countdown."""
+    """Flashcards: make, generate and drill them."""
     return render(request, 'core/flashcards.html')
 
 

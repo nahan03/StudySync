@@ -111,7 +111,7 @@ class AuthTests(TestCase):
         self.assertIn('next=/schedule/', r['Location'])
 
     def test_mode_pages_require_login(self):
-        for name in ('library', 'flashcards', 'schedule', 'forest', 'stats'):
+        for name in ('library', 'flashcards', 'practice', 'schedule', 'forest', 'stats'):
             self.assertEqual(self.client.get(reverse(name)).status_code, 302, name)
 
 

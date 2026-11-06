@@ -13,6 +13,7 @@ urlpatterns = [
     path('study/', views.study, name='study'),
     path('library/', views.library, name='library'),
     path('flashcards/', views.flashcards, name='flashcards'),
+    path('practice/', views.practice, name='practice'),
     # the old study "modes" no longer exist; keep their addresses working
     path('daily/', RedirectView.as_view(pattern_name='library', permanent=True)),
     path('exam/', RedirectView.as_view(pattern_name='flashcards', permanent=True)),

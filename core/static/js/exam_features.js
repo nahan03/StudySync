@@ -1,6 +1,6 @@
 /* exam_features.js — Flashcards and practice questions (the Flashcards page) */
 ssReady(function () {
-  if (!document.getElementById('fc-deck')) return;
+  if (!document.getElementById('fc-deck') && !document.getElementById('generate-questions-btn')) return;
 
   const $ = id => document.getElementById(id);
 
@@ -361,6 +361,7 @@ ssReady(function () {
   /* ══════════════════════════════════════════
      FLASHCARDS
   ══════════════════════════════════════════ */
+  if ($('fc-deck')) {
   const FLASHCARD_KEY = 'studySyncFlashcards';
   let flashcards  = JSON.parse(localStorage.getItem(FLASHCARD_KEY) || '[]');
   let studyQueue  = [];
@@ -635,6 +636,5 @@ ssReady(function () {
   $('fc-exit-study').addEventListener('click', () => { $('fc-study').classList.add('hidden'); $('fc-deck-section').classList.remove('hidden'); });
 
   renderDeck();
+  }
 });
-
-

@@ -1,0 +1,112 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Practice questions — StudySync{% endblock %}
+{% block body_class %}tool-page practice-page{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/study.css' %}?v=18">
+<link rel="stylesheet" href="{% static 'css/focus.css' %}?v=19">
+<link rel="stylesheet" href="{% static 'css/daily_mode.css' %}?v=48">
+<link rel="stylesheet" href="{% static 'css/tools.css' %}?v=1">
+{% endblock %}
+
+{% block content %}
+{% include 'core/partials/tool_shell_open.html' with active='practice' %}
+
+<div class="tool-head">
+  <div class="st-eyebrow">Practice questions</div>
+  <h1 class="st-title">Quiz <em>yourself</em></h1>
+  <p class="st-sub">Add your notes, PDFs or links and generate multiple choice, true or false, short answer and fill-in-the-blank questions, then check your score.</p>
+</div>
+
+<div class="em-page tool-em-page">
+  <div class="dm-main-grid" style="padding: 0 0 40px;">
+    <div class="dm-card tool-sources-card">
+      
+      <div class="dm-fc-sources-wrap" id="fc-sources-wrap">
+        <div class="dm-fc-sources-header">
+          <span class="dm-fc-sources-label">Sources</span>
+          <span class="dm-fc-sources-count" id="fc-sources-count">0 files · 0 URLs</span>
+        </div>
+        <div class="dm-upload-zone" id="practice-upload-zone">
+          <input type="file" id="practice-file-input" multiple accept=".txt,.md,.pdf,.docx" style="display:none">
+          <span class="dm-upload-icon">📎</span>
+          <p class="dm-upload-label">Drop files or <button type="button" class="dm-upload-browse-btn" id="practice-upload-btn">browse</button></p>
+          <p class="dm-upload-hint">Supports .txt · .md · .pdf · .docx</p>
+        </div>
+        <div class="dm-fc-url-row">
+          <input type="url" id="fc-src-url" class="dm-fc-input" placeholder="Or paste a URL as reference…" autocomplete="off" />
+          <button class="dm-btn dm-btn-ghost dm-btn-sm" id="fc-src-url-add">+ Add URL</button>
+        </div>
+        <div id="practice-file-list" class="dm-file-list"></div>
+        <div id="fc-url-list" class="dm-file-list"></div>
+      </div>
+    </div>
+
+    
+    <div class="dm-card dm-card-practice">
+      <div class="dm-panel-header">
+        <div class="dm-practice-header-left">
+          <h2 class="dm-panel-title"> PRACTICE</h2>
+          <span class="dm-practice-context" id="practice-context">0 files loaded</span>
+        </div>
+        <button class="dm-btn dm-btn-primary" id="generate-questions-btn">✦ Generate Questions</button>
+      </div>
+      <div class="dm-practice-controls">
+        <div class="dm-practice-control-group">
+          <label class="dm-field-label">Number of Questions</label>
+          <select id="practice-count" class="dm-select">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+        <div class="dm-practice-control-group">
+          <label class="dm-field-label">Question Types</label>
+          <div class="dm-practice-types">
+            <label class="dm-type-check"><input type="checkbox" value="mcq" checked> Multiple Choice</label>
+            <label class="dm-type-check"><input type="checkbox" value="truefalse" checked> True / False</label>
+            <label class="dm-type-check"><input type="checkbox" value="shortanswer" checked> Short Answer</label>
+            <label class="dm-type-check"><input type="checkbox" value="fillinblank" checked> Fill in Blank</label>
+          </div>
+        </div>
+      </div>
+      <p class="dm-fc-sources-note">Questions are made from the files and links you add above.</p>
+      <div class="dm-practice-loading hidden" id="practice-loading">
+        <div class="dm-spinner"></div>
+        <p>Generating your questions with AI…</p>
+      </div>
+      <div class="dm-questions-output hidden" id="practice-questions-output">
+        <div class="dm-questions-header">
+          <span class="dm-questions-meta" id="practice-q-count"></span>
+          <div class="dm-questions-actions">
+            <button class="dm-btn dm-btn-primary" id="practice-score-btn">Check Score</button>
+            <button class="dm-btn dm-btn-ghost" id="practice-retry-btn">↺ New Set</button>
+          </div>
+        </div>
+        <div id="practice-questions-list" class="dm-questions-list"></div>
+        <div class="dm-score-banner hidden" id="practice-score-banner"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% include 'core/partials/tool_shell_close.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/exam_features.js' %}?v=7" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+<script type="module">
+  import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+  window._pdfjsLib = pdfjsLib;
+</script>
+{% endblock %}

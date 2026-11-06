@@ -823,20 +823,45 @@
       s.coats = [[128, 44, 52], [44, 62, 112], [74, 74, 84], [166, 116, 66], [44, 98, 84], [196, 192, 208], [92, 50, 108]];
       s.hats = [[222, 220, 232], [160, 44, 56], [40, 40, 52], [226, 176, 80], [60, 110, 150]];
       s.drawPerson = (ctx, p, x, y, k) => {
-        const sw = Math.sin(p.ph), bob = Math.abs(Math.cos(p.ph)) * k * 0.014, hipY = -k * 0.38 - bob, shY = -k * 0.64 - bob;
-        const limb = (x0, y0, ang, len, wd, col) => { ctx.strokeStyle = col; ctx.lineWidth = wd; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0 + Math.sin(ang) * len, y0 + Math.cos(ang) * len); ctx.stroke(); };
-        const coat = rgb(p.coat), dark = rgb(mix(p.coat, [0, 0, 0], 0.4));
-        ctx.save(); ctx.translate(x, y); ctx.scale(p.dir, 1); ctx.rotate(0.03);
-        ctx.fillStyle = 'rgba(16,12,30,.34)'; ctx.beginPath(); ctx.ellipse(-k * 0.02, 0, k * 0.22, k * 0.05, 0, 0, TAU); ctx.fill();
-        limb(0, hipY, -sw * 0.55, k * 0.38, k * 0.08, 'rgb(22,20,30)'); limb(0, shY + k * 0.03, sw * 0.5, k * 0.3, k * 0.06, dark);
-        ctx.fillStyle = coat; ctx.beginPath(); ctx.moveTo(-k * 0.1, shY); ctx.lineTo(k * 0.1, shY); ctx.lineTo(k * 0.18, hipY + k * 0.16); ctx.lineTo(-k * 0.18, hipY + k * 0.16); ctx.closePath(); ctx.fill();
-        ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(-k * 0.18, hipY + k * 0.1, k * 0.36, k * 0.06);
-        limb(0, hipY + k * 0.06, sw * 0.55, k * 0.34, k * 0.082, 'rgb(14,12,22)'); limb(0, shY + k * 0.03, -sw * 0.5, k * 0.3, k * 0.062, coat);
-        ctx.fillStyle = rgb(p.scarf); ctx.fillRect(-k * 0.09, shY - k * 0.035, k * 0.18, k * 0.05);
-        ctx.fillStyle = 'rgb(226,190,170)'; ctx.beginPath(); ctx.arc(k * 0.012, shY - k * 0.1, k * 0.074, 0, TAU); ctx.fill();
-        ctx.fillStyle = rgb(p.hat); ctx.beginPath(); ctx.arc(k * 0.012, shY - k * 0.11, k * 0.082, Math.PI, TAU); ctx.fill(); ctx.fillRect(-k * 0.072, shY - k * 0.118, k * 0.168, k * 0.032);
-        ctx.fillStyle = 'rgba(238,234,252,.75)'; ctx.fillRect(-k * 0.1, shY - k * 0.008, k * 0.2, k * 0.018); ctx.beginPath(); ctx.arc(k * 0.012, shY - k * 0.19, k * 0.05, Math.PI, TAU); ctx.fill();
-        if (p.umb) { ctx.strokeStyle = 'rgb(26,22,32)'; ctx.lineWidth = Math.max(1, k * 0.012); ctx.beginPath(); ctx.moveTo(k * 0.07, shY + k * 0.06); ctx.lineTo(k * 0.07, shY - k * 0.36); ctx.stroke(); ctx.fillStyle = rgb(p.umb); ctx.beginPath(); ctx.ellipse(k * 0.07, shY - k * 0.36, k * 0.3, k * 0.15, 0, Math.PI, TAU); ctx.fill(); ctx.fillStyle = 'rgba(238,234,252,.88)'; ctx.beginPath(); ctx.ellipse(k * 0.07, shY - k * 0.385, k * 0.26, k * 0.07, 0, Math.PI, TAU); ctx.fill(); }
+        /* a walker in profile, ~9 heads tall: two-segment legs with a bending knee, long winter coat, swinging arms, scarf and hat,
+           lit warmly on the side that faces the lamp */
+        const ph = p.ph, hip = -0.5 * k, sh = -0.8 * k, bob = Math.abs(Math.sin(ph)) * k * 0.012;
+        const lampSide = Math.sign(s.lamp.x - x) * p.dir || 1, lampK = clamp(1 - Math.abs(s.lamp.x - x) / (W * 0.7), 0, 1);
+        const joint = (x0, y0, ang, len) => [x0 + Math.sin(ang) * len, y0 + Math.cos(ang) * len];
+        const leg = phi => {
+          const th = 0.46 * Math.sin(phi), bend = 0.12 + 0.75 * Math.max(0, Math.sin(phi + 1.15)), kn = joint(0, hip - bob, th, 0.25 * k), an = joint(kn[0], kn[1], th - bend, 0.25 * k);
+          return { kn, an, ang: th - bend };
+        };
+        const drawLeg = (L, col, wd) => {
+          ctx.strokeStyle = col; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = wd; ctx.beginPath(); ctx.moveTo(0, hip - bob); ctx.lineTo(L.kn[0], L.kn[1]); ctx.lineWidth = wd * 0.86; ctx.lineTo(L.an[0], L.an[1]); ctx.stroke();
+          ctx.fillStyle = 'rgb(14,12,18)'; ctx.beginPath(); ctx.ellipse(L.an[0] + k * 0.035, L.an[1] + k * 0.012, k * 0.058, k * 0.026, L.ang * 0.3, 0, TAU); ctx.fill();   // boot
+        };
+        const drawArm = (phi, col, glove) => {
+          const a1 = -0.42 * Math.sin(phi), el = joint(0, sh + k * 0.02 - bob, a1, 0.17 * k), a2 = a1 + 0.25 + 0.35 * Math.max(0, Math.sin(phi + 0.6)), hd = joint(el[0], el[1], a2, 0.16 * k);
+          ctx.strokeStyle = col; ctx.lineCap = 'round'; ctx.lineWidth = k * 0.062; ctx.beginPath(); ctx.moveTo(0, sh + k * 0.02 - bob); ctx.lineTo(el[0], el[1]); ctx.lineWidth = k * 0.054; ctx.lineTo(hd[0], hd[1]); ctx.stroke();
+          ctx.fillStyle = glove; ctx.beginPath(); ctx.arc(hd[0], hd[1], k * 0.03, 0, TAU); ctx.fill();
+        };
+        const coat = rgb(p.coat), coatDark = rgb(mix(p.coat, [0, 0, 8], 0.5)), coatLight = rgb(mix(p.coat, [255, 190, 130], 0.4));
+        ctx.save(); ctx.translate(x, y); ctx.scale(p.dir, 1); ctx.rotate(0.025);
+        // soft shadow stretched away from the lamp
+        ctx.fillStyle = 'rgba(14,10,28,.38)'; ctx.beginPath(); ctx.ellipse(-lampSide * p.dir * k * 0.12, 0, k * 0.26, k * 0.05, 0, 0, TAU); ctx.fill();
+        const far = leg(ph + Math.PI), near = leg(ph);
+        drawLeg(far, 'rgb(18,16,24)', k * 0.085); drawArm(ph, coatDark, 'rgb(26,22,30)');
+        // the coat: shoulders, a belted waist, a hem that swings with the stride
+        const sw = Math.sin(ph) * k * 0.025;
+        const body = new Path2D(); body.moveTo(-k * 0.085, sh - bob); body.quadraticCurveTo(-k * 0.115, sh + k * 0.16 - bob, -k * 0.1, hip - bob); body.quadraticCurveTo(-k * 0.16 - sw, hip + k * 0.12 - bob, -k * 0.17 - sw, -k * 0.27 - bob);
+        body.lineTo(k * 0.15 + sw, -k * 0.27 - bob); body.quadraticCurveTo(k * 0.15 + sw, hip + k * 0.1 - bob, k * 0.1, hip - bob); body.quadraticCurveTo(k * 0.115, sh + k * 0.16 - bob, k * 0.085, sh - bob); body.closePath();
+        ctx.fillStyle = coat; ctx.fill(body);
+        const side = ctx.createLinearGradient(lampSide * -k * 0.16, 0, lampSide * k * 0.16, 0); side.addColorStop(0, `rgba(255,176,104,${0.5 * lampK})`); side.addColorStop(0.45, 'rgba(255,176,104,0)'); side.addColorStop(1, 'rgba(10,8,24,.38)'); ctx.fillStyle = side; ctx.fill(body);
+        ctx.strokeStyle = coatDark; ctx.lineWidth = Math.max(1, k * 0.012); ctx.beginPath(); ctx.moveTo(-k * 0.1, hip - bob + k * 0.01); ctx.lineTo(k * 0.1, hip - bob + k * 0.01); ctx.stroke();   // belt
+        drawLeg(near, 'rgb(10,9,16)', k * 0.09); drawArm(ph + Math.PI, coat, 'rgb(30,26,34)');
+        // scarf, head and hat
+        ctx.fillStyle = rgb(p.scarf); ctx.beginPath(); ctx.ellipse(k * 0.01, sh - k * 0.012 - bob, k * 0.075, k * 0.036, 0, 0, TAU); ctx.fill(); ctx.fillRect(-k * 0.06, sh - k * 0.01 - bob, k * 0.04, k * 0.1);
+        ctx.fillStyle = 'rgb(222,184,164)'; ctx.beginPath(); ctx.ellipse(k * 0.022, sh - k * 0.085 - bob, k * 0.05, k * 0.058, 0, 0, TAU); ctx.fill();
+        ctx.fillStyle = 'rgba(210,150,130,.5)'; ctx.beginPath(); ctx.ellipse(k * 0.045, sh - k * 0.075 - bob, k * 0.016, k * 0.014, 0, 0, TAU); ctx.fill();
+        ctx.fillStyle = rgb(p.hat); ctx.beginPath(); ctx.ellipse(k * 0.012, sh - k * 0.105 - bob, k * 0.062, k * 0.052, 0, Math.PI * 0.95, TAU * 1.02); ctx.fill(); ctx.fillRect(-k * 0.05, sh - k * 0.112 - bob, k * 0.13, k * 0.026);
+        ctx.fillStyle = 'rgba(244,240,255,.85)'; ctx.beginPath(); ctx.ellipse(k * 0.012, sh - k * 0.15 - bob, k * 0.04, k * 0.014, 0, 0, TAU); ctx.fill(); ctx.fillRect(-k * 0.09, sh - k * 0.006 - bob, k * 0.17, k * 0.014);   // snow on hat and shoulders
+        if (p.umb) { ctx.strokeStyle = 'rgb(24,20,30)'; ctx.lineWidth = Math.max(1, k * 0.012); ctx.beginPath(); ctx.moveTo(k * 0.1, sh + k * 0.1 - bob); ctx.lineTo(k * 0.1, sh - k * 0.3 - bob); ctx.stroke(); ctx.fillStyle = rgb(p.umb); ctx.beginPath(); ctx.ellipse(k * 0.1, sh - k * 0.3 - bob, k * 0.3, k * 0.14, 0, Math.PI, TAU); ctx.fill(); ctx.fillStyle = 'rgba(240,236,252,.9)'; ctx.beginPath(); ctx.ellipse(k * 0.1, sh - k * 0.325 - bob, k * 0.26, k * 0.06, 0, Math.PI, TAU); ctx.fill(); }
         ctx.restore();
       };
       s.warm = a.glow([255, 170, 90], 256); s.win_g = a.glow([255, 200, 120], 32); s.flake = a.glow([255, 255, 255], 16); s.streak = a.glow([255, 168, 84], 32);

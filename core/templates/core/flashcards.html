@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 {% load static %}
-{% block title %}Flashcards &amp; practice — StudySync{% endblock %}
+{% block title %}Flashcards — StudySync{% endblock %}
 {% block body_class %}tool-page flashcards-page{% endblock %}
 
 {% block extra_css %}
@@ -16,59 +16,13 @@
 {% include 'core/partials/tool_shell_open.html' with active='flashcards' %}
 
 <div class="tool-head">
-  <div class="st-eyebrow">Flashcards &amp; practice</div>
+  <div class="st-eyebrow">Flashcards</div>
   <h1 class="st-title">Test <em>yourself</em></h1>
-  <p class="st-sub">Make flashcards by hand or generate them from your notes and PDFs, drill them with Guess It, then try practice questions. Set an exam countdown if you have a date to hit.</p>
+  <p class="st-sub">Make flashcards by hand or generate them from your notes and PDFs, then drill them with Guess It and spaced review.</p>
 </div>
 
 <div class="em-page tool-em-page">
-  <div class="em-top-row">
-    <!-- Exam Countdown -->
-    <div class="em-countdown-card" id="em-countdown-card">
-      <span class="em-card-label">// EXAM COUNTDOWN</span>
-
-      <!-- Setup form -->
-      <div id="ec-setup">
-        <p class="ec-hint">Set your exam date to track the countdown.</p>
-        <input id="ec-subject" type="text" class="ec-input" placeholder="Subject" autocomplete="off"/>
-        <input id="ec-date" type="date" class="ec-input"/>
-        <input id="ec-time" type="time" class="ec-input" value="09:00"/>
-        <p class="ec-error hidden" id="ec-error">Fill in subject and date.</p>
-        <button class="em-btn em-btn-primary" id="ec-set-btn">Set Countdown</button>
-      </div>
-
-      <!-- Display -->
-      <div id="ec-display" class="hidden">
-        <p class="ec-subject-name" id="ec-subject-display"></p>
-        <div class="ec-clock-grid">
-          <div class="ec-clock-box" id="ec-clock-days-box">
-            <span class="ec-clock-num" id="ec-clock-days">--</span>
-            <span class="ec-clock-label">DAYS</span>
-          </div>
-          <div class="ec-clock-box">
-            <span class="ec-clock-num" id="ec-clock-hours">--</span>
-            <span class="ec-clock-label">HOURS</span>
-          </div>
-          <div class="ec-clock-box">
-            <span class="ec-clock-num" id="ec-clock-mins">--</span>
-            <span class="ec-clock-label">MINS</span>
-          </div>
-          <div class="ec-clock-box">
-            <span class="ec-clock-num" id="ec-clock-secs">--</span>
-            <span class="ec-clock-label">SECS</span>
-          </div>
-        </div>
-        <div class="ec-meta">
-          <p class="ec-date-line" id="ec-date-line"></p>
-          <p class="ec-message" id="ec-message"></p>
-        </div>
-        <button class="em-btn em-btn-ghost ec-edit-btn" id="ec-edit-btn">✏ Edit</button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Flashcards + Practice -->
+  <!-- Flashcards -->
   <div class="dm-main-grid" style="padding: 0 0 40px;">
 
     <!-- FLASHCARDS CARD -->
@@ -187,56 +141,6 @@
       </div>
     </div>
 
-    <!-- PRACTICE CARD -->
-    <div class="dm-card dm-card-practice">
-      <div class="dm-panel-header">
-        <div class="dm-practice-header-left">
-          <h2 class="dm-panel-title"> PRACTICE</h2>
-          <span class="dm-practice-context" id="practice-context">0 files loaded</span>
-        </div>
-        <button class="dm-btn dm-btn-primary" id="generate-questions-btn">✦ Generate Questions</button>
-      </div>
-      <div class="dm-practice-controls">
-        <div class="dm-practice-control-group">
-          <label class="dm-field-label">Number of Questions</label>
-          <select id="practice-count" class="dm-select">
-            <option value="5">5</option>
-            <option value="10" selected>10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="30">30</option>
-            <option value="40">40</option>
-            <option value="50">50</option>
-          </select>
-        </div>
-        <div class="dm-practice-control-group">
-          <label class="dm-field-label">Question Types</label>
-          <div class="dm-practice-types">
-            <label class="dm-type-check"><input type="checkbox" value="mcq" checked> Multiple Choice</label>
-            <label class="dm-type-check"><input type="checkbox" value="truefalse" checked> True / False</label>
-            <label class="dm-type-check"><input type="checkbox" value="shortanswer" checked> Short Answer</label>
-            <label class="dm-type-check"><input type="checkbox" value="fillinblank" checked> Fill in Blank</label>
-          </div>
-        </div>
-      </div>
-      <p class="dm-fc-sources-note">Files uploaded in the Flashcards section are shared here.</p>
-      <div class="dm-practice-loading hidden" id="practice-loading">
-        <div class="dm-spinner"></div>
-        <p>Generating your questions with AI…</p>
-      </div>
-      <div class="dm-questions-output hidden" id="practice-questions-output">
-        <div class="dm-questions-header">
-          <span class="dm-questions-meta" id="practice-q-count"></span>
-          <div class="dm-questions-actions">
-            <button class="dm-btn dm-btn-primary" id="practice-score-btn">Check Score</button>
-            <button class="dm-btn dm-btn-ghost" id="practice-retry-btn">↺ New Set</button>
-          </div>
-        </div>
-        <div id="practice-questions-list" class="dm-questions-list"></div>
-        <div class="dm-score-banner hidden" id="practice-score-banner"></div>
-      </div>
-    </div>
-
   </div>
 </div>
 
@@ -274,8 +178,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/countdown.js' %}?v=1" defer></script>
-<script src="{% static 'js/exam_features.js' %}?v=6" defer></script>
+<script src="{% static 'js/exam_features.js' %}?v=7" defer></script>
 <script src="{% static 'js/exam_decks.js' %}?v=1" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 <script type="module">
