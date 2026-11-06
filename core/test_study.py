@@ -19,7 +19,8 @@ class StudyPageTests(TestCase):
     def test_page_has_appearance_controls(self):
         self.client.force_login(self.user)
         html = self.client.get(reverse('study')).content.decode()
-        for marker in ('id="st-root"', 'data-theme=', 'id="st-appearance"', 'id="st-themes"', 'id="st-bgs"', 'id="st-bgfile"'):
+        for marker in ('id="st-root"', 'data-theme=', 'id="st-appearance"', 'id="st-themes"', 'id="st-bgs"', 'id="st-bgfile"',
+                       'id="bg-canvas"', 'js/live_bg.js'):
             self.assertIn(marker, html, marker)
 
     def test_page_renders_setup_run_and_overlay(self):
@@ -57,3 +58,15 @@ class StudyPageTests(TestCase):
         self.assertEqual(r.json(), {'saved': 3})
         self.assertEqual(set(UserState.objects.values_list('key', flat=True)),
                          {'studySyncStudyPrefs', 'studySyncTimerPresets', 'studySyncStudyBgImage'})
+
+    def test_every_live_wallpaper_is_defined_and_selectable(self):
+        """Each id offered in the picker must exist in the engine, and vice versa."""
+        import re
+        from django.conf import settings
+        root = settings.BASE_DIR / 'core' / 'static' / 'js'
+        engine = (root / 'live_bg.js').read_text(encoding='utf-8')
+        study = (root / 'study.js').read_text(encoding='utf-8')
+        scenes = set(re.findall(r'^  scenes\.(\w+) = \{', engine, re.M))
+        offered = set(re.search(r"const SCENES = \[(.*?)\];", study).group(1).replace("'", '').replace(' ', '').split(','))
+        self.assertEqual(scenes, offered)
+        self.assertEqual(len(scenes), 8)

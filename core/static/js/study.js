@@ -43,7 +43,7 @@
     autoBreak: true, autoFocus: false,
     focusSound: 'chime', breakSound: 'bell', volume: 70, repeat: 'once', vibrate: true, notify: false,
     subject: '', goal: '',
-    theme: 'forest', bg: 'theme', bgDim: 35,
+    theme: 'forest', bg: 'theme', bgDim: 15,
   };
   let prefs = Object.assign({}, DEFAULTS, load(PREFS_KEY, {}));
   let userPresets = load(PRESETS_KEY, []);
@@ -524,39 +524,34 @@
     { id: 'paper',    name: 'Paper',    swatch: 'linear-gradient(135deg,#F4F1E6,#D8D3BC)' },
   ];
   const BGS = [
-    { id: 'theme',  name: 'Gradient',     prev: 'linear-gradient(180deg,#14301a,#050a04)' },
-    { id: 'forest', name: 'Forest hills', prev: 'linear-gradient(180deg,#0b1c0f 0%,#0b1c0f 45%,#1d4a24 46%,#14301a 100%)' },
-    { id: 'rain',   name: 'Rain',         prev: 'repeating-linear-gradient(100deg,#0a1420 0 5px,#16283a 5px 6px)' },
-    { id: 'stars',  name: 'Starry night', prev: 'radial-gradient(circle at 78% 28%,#E9EFFA 0 6px,transparent 7px),linear-gradient(180deg,#040a1c,#15284c)' },
-    { id: 'aurora', name: 'Aurora',       prev: 'radial-gradient(ellipse at 30% 40%,#2fb98f,transparent 60%),radial-gradient(ellipse at 75% 60%,#7c5cd6,transparent 60%),#06101c' },
-    { id: 'plain',  name: 'Plain',        prev: '#0b0f0a' },
-    { id: 'image',  name: 'My picture',   prev: 'linear-gradient(135deg,#444,#888)' },
+    { id: 'theme',    name: 'Gradient',        prev: 'linear-gradient(180deg,#14301a,#050a04)' },
+    { id: 'forest',   name: 'Enchanted forest', prev: 'radial-gradient(circle at 74% 14%,rgba(255,230,160,.55),transparent 42%),linear-gradient(180deg,#0d1c2e 0%,#1e3a34 55%,#0a1c10 56%,#050d08 100%)' },
+    { id: 'rain',     name: 'Rainstorm',       prev: 'repeating-linear-gradient(105deg,transparent 0 6px,rgba(190,210,235,.22) 6px 7px),linear-gradient(180deg,#0a101a,#1e2e3e)' },
+    { id: 'stars',    name: 'Starry night',    prev: 'radial-gradient(circle at 80% 20%,#E9EFFA 0 7px,rgba(200,215,255,.3) 8px,transparent 30px),linear-gradient(180deg,#02040e,#0b1636 60%,#1a2a55)' },
+    { id: 'aurora',   name: 'Aurora lake',     prev: 'radial-gradient(ellipse at 30% 40%,#2fe0a0,transparent 55%),radial-gradient(ellipse at 75% 55%,#9a5cf0,transparent 55%),linear-gradient(180deg,#02050e,#0a1c30 75%,#04101c 76%)' },
+    { id: 'ocean',    name: 'Sunset ocean',    prev: 'linear-gradient(180deg,#1a2260,#a85a8a 38%,#f08a6a 54%,#f6c47c 55%,#4a5a96 58%,#08224a)' },
+    { id: 'campfire', name: 'Campfire',        prev: 'radial-gradient(circle at 50% 82%,#ffcf6a,#e8641e 14%,rgba(232,80,20,.35) 30%,transparent 55%),linear-gradient(180deg,#03050e,#14122a)' },
+    { id: 'snow',     name: 'Snowy cabin',     prev: 'linear-gradient(180deg,#0e1c40,#6a7eb4 45%,#b49ac0 62%,#dfe8fa 63%,#f4f8ff)' },
+    { id: 'sakura',   name: 'Cherry blossom',  prev: 'radial-gradient(circle at 85% 8%,#f6a8c0,transparent 30%),linear-gradient(180deg,#1e1a46,#a8689a 55%,#f6b8c4)' },
+    { id: 'plain',    name: 'Plain',           prev: '#0b0f0a' },
+    { id: 'image',    name: 'My picture',      prev: 'linear-gradient(135deg,#444,#888)' },
   ];
+  const SCENES = ['forest', 'rain', 'stars', 'aurora', 'ocean', 'campfire', 'snow', 'sakura'];
+  let liveLoading = false;
+  function ensureLive(cb) {
+    if (window.LiveBG) { cb(); return; }
+    if (liveLoading) return;
+    liveLoading = true;
+    const sc = document.createElement('script');
+    sc.src = $('st-audio').dataset.livebg;
+    sc.onload = () => { liveLoading = false; cb(); };
+    sc.onerror = () => { liveLoading = false; };
+    document.head.appendChild(sc);
+  }
   const BG_IMAGE_KEY = 'studySyncStudyBgImage';
   const root = $('st-root');
   let bgImage = load(BG_IMAGE_KEY, '');
   if (typeof bgImage !== 'string') bgImage = '';
-
-  function buildBackgroundFx() {
-    // decorative particles are created once; CSS shows only the layer for the chosen background
-    const r = window.TreeArt ? window.TreeArt.rng(11) : Math.random;
-    const f = n => Math.round(n * 10) / 10;
-    if (!$('bgl-stars').querySelector('i')) {
-      let h = '';
-      for (let i = 0; i < 55; i++) h += `<i style="left:${f(r() * 100)}%;top:${f(r() * 70)}%;width:${r() > .85 ? 3 : 2}px;height:${r() > .85 ? 3 : 2}px;--tw:${f(2 + r() * 4)}s;--td:${f(-r() * 5)}s"></i>`;
-      $('bgl-stars').insertAdjacentHTML('afterbegin', h);
-    }
-    if (!$('bgl-rain').firstChild) {
-      let h = '';
-      for (let i = 0; i < 70; i++) h += `<i style="left:${f(r() * 100)}%;--dur:${f(0.7 + r() * 0.7)}s;--del:${f(-r() * 1.4)}s;opacity:${f(0.35 + r() * 0.65)}"></i>`;
-      $('bgl-rain').innerHTML = h;
-    }
-    if (!$('bgl-forest').querySelector('.bg-mote')) {
-      let h = '';
-      for (let i = 0; i < 16; i++) h += `<span class="bg-mote" style="left:${f(r() * 100)}%;top:${f(40 + r() * 55)}%;--dur:${f(7 + r() * 8)}s;--del:${f(-r() * 10)}s;--dx:${f((r() - .5) * 90)}px;--dy:${f(-20 - r() * 70)}px"></span>`;
-      $('bgl-forest').insertAdjacentHTML('beforeend', h);
-    }
-  }
 
   function applyAppearance() {
     const theme = THEMES.some(t => t.id === prefs.theme) ? prefs.theme : 'forest';
@@ -564,12 +559,19 @@
     if (bg === 'image' && !bgImage) bg = 'theme'; // nothing chosen yet
     root.dataset.theme = theme;
     root.dataset.bg = bg;
-    root.style.setProperty('--dim', num(prefs.bgDim, 0, 80, 35) / 100);
+    root.style.setProperty('--dim', num(prefs.bgDim, 0, 80, 15) / 100);
     $('bgl-image').style.backgroundImage = bgImage ? `url("${bgImage}")` : '';
-    $('st-dim').value = num(prefs.bgDim, 0, 80, 35);
+    $('st-dim').value = num(prefs.bgDim, 0, 80, 15);
     $('st-dim-out').textContent = $('st-dim').value;
-    $('st-dim-box').hidden = prefs.bg !== 'image';
+    const isScene = SCENES.includes(bg);
+    root.dataset.scene = isScene ? '1' : '0';
+    $('st-dim-box').hidden = !(isScene || prefs.bg === 'image');
     $('st-bgimage-box').hidden = prefs.bg !== 'image';
+    if (isScene) {
+      ensureLive(() => { const cur = root.dataset.bg; if (SCENES.includes(cur) && window.LiveBG) window.LiveBG.start(cur, root.dataset.theme); });
+    } else if (window.LiveBG) {
+      window.LiveBG.stop();
+    }
     $('st-bgremove').hidden = !bgImage;
     $('st-themes').querySelectorAll('.st-theme').forEach(b => b.setAttribute('aria-checked', String(b.dataset.id === theme)));
     $('st-bgs').querySelectorAll('.st-bgtile').forEach(b => b.setAttribute('aria-checked', String(b.dataset.id === prefs.bg)));
@@ -603,7 +605,6 @@
     $('st-bgs').innerHTML = BGS.map(b =>
       `<button type="button" class="st-bgtile" role="radio" data-id="${b.id}" aria-checked="false">` +
       `<span class="st-bgprev" style="background:${b.prev}"></span>${esc(b.name)}</button>`).join('');
-    buildBackgroundFx();
     applyAppearance();
 
     $('st-themes').addEventListener('click', e => {
@@ -615,7 +616,7 @@
       prefs.bg = b.dataset.id; saveAppearance();
       if (prefs.bg === 'image' && !bgImage) $('st-bgfile').click();
     });
-    $('st-dim').addEventListener('input', () => { prefs.bgDim = num($('st-dim').value, 0, 80, 35); saveAppearance(); });
+    $('st-dim').addEventListener('input', () => { prefs.bgDim = num($('st-dim').value, 0, 80, 15); saveAppearance(); });
     $('st-bgfile').addEventListener('change', async () => {
       const f = $('st-bgfile').files && $('st-bgfile').files[0];
       $('st-bgfile').value = '';
@@ -636,7 +637,7 @@
       if (prefs.bg === 'image') prefs.bg = 'theme';
       saveAppearance();
     });
-    $('st-appearance-reset').addEventListener('click', () => { prefs.theme = 'forest'; prefs.bg = 'theme'; prefs.bgDim = 35; saveAppearance(); });
+    $('st-appearance-reset').addEventListener('click', () => { prefs.theme = 'forest'; prefs.bg = 'theme'; prefs.bgDim = 15; saveAppearance(); });
 
     // drawer open/close
     const drawer = $('st-appearance'), scrim = $('st-scrim'), opener = $('st-appearance-open');

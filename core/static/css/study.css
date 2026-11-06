@@ -260,38 +260,25 @@ body.study-page #gmp-bar { z-index: 40; }
     linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
 }
 .st-root[data-bg="plain"] .bgl-base { background: var(--bg1); }
-.st-root[data-bg="forest"] .bgl-forest,
-.st-root[data-bg="rain"] .bgl-rain,
-.st-root[data-bg="stars"] .bgl-stars,
-.st-root[data-bg="aurora"] .bgl-aurora,
+.st-root[data-bg="forest"] .bg-canvas,
+.st-root[data-bg="rain"] .bg-canvas,
+.st-root[data-bg="stars"] .bg-canvas,
+.st-root[data-bg="aurora"] .bg-canvas,
+.st-root[data-bg="ocean"] .bg-canvas,
+.st-root[data-bg="campfire"] .bg-canvas,
+.st-root[data-bg="snow"] .bg-canvas,
+.st-root[data-bg="sakura"] .bg-canvas,
 .st-root[data-bg="image"] .bgl-image { display: block; }
-.bgl-dim { display: none; background: #000; opacity: var(--dim, .35); }
+.bgl-dim { display: none; background: #000; opacity: var(--dim, .15); }
+.st-root[data-bg="forest"] .bgl-dim,
+.st-root[data-bg="rain"] .bgl-dim,
+.st-root[data-bg="stars"] .bgl-dim,
+.st-root[data-bg="aurora"] .bgl-dim,
+.st-root[data-bg="ocean"] .bgl-dim,
+.st-root[data-bg="campfire"] .bgl-dim,
+.st-root[data-bg="snow"] .bgl-dim,
+.st-root[data-bg="sakura"] .bgl-dim,
 .st-root[data-bg="image"] .bgl-dim { display: block; }
-
-/* forest hills + drifting motes */
-.bgl-forest svg { position: absolute; left: 0; bottom: 0; width: 100%; height: 55%; }
-.bgl-forest .h1 { fill: var(--hill1); } .bgl-forest .h2 { fill: var(--hill2); } .bgl-forest .h3 { fill: var(--hill3); }
-.bg-mote { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: rgba(var(--accent-rgb), .85); box-shadow: 0 0 9px 3px rgba(var(--accent-rgb), .55); animation: bg-drift var(--dur, 9s) ease-in-out var(--del, 0s) infinite, bg-blink 3.6s ease-in-out var(--del, 0s) infinite; }
-@keyframes bg-drift { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(var(--dx, 30px), var(--dy, -40px)); } }
-@keyframes bg-blink { 0%, 100% { opacity: .15; } 50% { opacity: 1; } }
-
-/* rain */
-.bgl-rain i { position: absolute; top: -12%; width: 1.5px; height: 70px; border-radius: 2px; background: linear-gradient(to bottom, transparent, rgba(var(--surf), .32)); animation: bg-rain var(--dur, .9s) linear var(--del, 0s) infinite; }
-@keyframes bg-rain { to { transform: translateY(125vh); } }
-
-/* stars + moon */
-.bgl-stars i { position: absolute; border-radius: 50%; background: #fff; animation: bg-twinkle var(--tw, 3s) ease-in-out var(--td, 0s) infinite; }
-.st-root[data-theme="paper"] .bgl-stars i { background: #4a5a40; }
-@keyframes bg-twinkle { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
-.bg-moon { position: absolute; top: 12%; right: 12%; width: 70px; height: 70px; border-radius: 50%; background: #E9EFFA; box-shadow: 0 0 60px 16px rgba(200,215,255,.28), inset -16px -7px 0 0 rgba(120,135,170,.28); }
-
-/* aurora */
-.bgl-aurora { filter: blur(60px); opacity: .85; }
-.bgl-aurora b { position: absolute; width: 60vmax; height: 40vmax; border-radius: 50%; animation: bg-aurora 22s ease-in-out infinite alternate; }
-.bgl-aurora b:nth-child(1) { left: -10%; top: 5%;  background: rgba(var(--accent-rgb), .35); }
-.bgl-aurora b:nth-child(2) { right: -15%; top: 30%; background: rgba(var(--warm-rgb), .22); animation-duration: 28s; animation-delay: -8s; }
-.bgl-aurora b:nth-child(3) { left: 20%; bottom: -15%; background: rgba(var(--accent-dark-rgb), .4); animation-duration: 34s; animation-delay: -15s; }
-@keyframes bg-aurora { from { transform: translate(-6%, -4%) scale(1); } to { transform: translate(8%, 6%) scale(1.25); } }
 
 /* user image */
 .bgl-image { background: center / cover no-repeat; }
@@ -353,7 +340,7 @@ body.study-page #gmp-bar { z-index: 40; }
   .st-nav-link { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .bg-mote, .bgl-rain i, .bgl-stars i, .bgl-aurora b { animation: none; }
+   { animation: none; }
   .st-drawer { animation: none; }
 }
 
@@ -361,3 +348,38 @@ body.study-page #gmp-bar { z-index: 40; }
 .st-field[hidden], .st-btn[hidden] { display: none; }
 .st-drawer input[type="range"], .st-wrap input[type="range"] { accent-color: var(--sprout); }
 .st-appearance-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; line-height: normal; }
+
+/* live wallpaper canvas */
+.bg-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: none; }
+
+/* the light theme over a dark live wallpaper: keep text readable by borrowing the dark palette */
+.st-root[data-theme="paper"][data-bg="forest"],
+.st-root[data-theme="paper"][data-bg="rain"],
+.st-root[data-theme="paper"][data-bg="stars"],
+.st-root[data-theme="paper"][data-bg="aurora"],
+.st-root[data-theme="paper"][data-bg="ocean"],
+.st-root[data-theme="paper"][data-bg="campfire"],
+.st-root[data-theme="paper"][data-bg="snow"],
+.st-root[data-theme="paper"][data-bg="sakura"] {
+  --cream: #F6EDD8; --fog: #B8B09C; --surf: 255,255,255; --scheme: dark; --nav-bg: rgba(7,10,8,.72); --opt-bg: #14200f;
+  --leaf: #4E7A34; --sprout: #7DB54A; --lime: #A8D870; --amber: #E4B84A; --on-accent: #0E1A08;
+  --accent-rgb: 125,181,74; --accent-dark-rgb: 78,122,52; --warm-rgb: 228,184,74; --bg1: #070E06;
+}
+.st-root[data-theme="paper"][data-bg="forest"] .st-card,
+.st-root[data-theme="paper"][data-bg="forest"] .st-tree-card,
+.st-root[data-theme="paper"][data-bg="rain"] .st-card,
+.st-root[data-theme="paper"][data-bg="rain"] .st-tree-card,
+.st-root[data-theme="paper"][data-bg="stars"] .st-card,
+.st-root[data-theme="paper"][data-bg="stars"] .st-tree-card,
+.st-root[data-theme="paper"][data-bg="aurora"] .st-card,
+.st-root[data-theme="paper"][data-bg="aurora"] .st-tree-card,
+.st-root[data-theme="paper"][data-bg="ocean"] .st-card,
+.st-root[data-theme="paper"][data-bg="ocean"] .st-tree-card,
+.st-root[data-theme="paper"][data-bg="campfire"] .st-card,
+.st-root[data-theme="paper"][data-bg="campfire"] .st-tree-card,
+.st-root[data-theme="paper"][data-bg="snow"] .st-card,
+.st-root[data-theme="paper"][data-bg="snow"] .st-tree-card,
+.st-root[data-theme="paper"][data-bg="sakura"] .st-card,
+.st-root[data-theme="paper"][data-bg="sakura"] .st-tree-card {
+  background: rgba(0,0,0,.32); border-color: rgba(255,255,255,.12);
+}
