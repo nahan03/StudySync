@@ -269,6 +269,141 @@ body.forest-page {
 @media (max-width: 420px) {
   .stats-row { grid-template-columns: 1fr 1fr; }
 }
+/* ══════════════════════════════════════════
+   FOREST SCENE
+══════════════════════════════════════════ */
+.fscene {
+  --u: 1;
+  position: relative; height: 400px; margin: 0 0 40px;
+  border-radius: 24px; overflow: hidden; isolation: isolate;
+  border: 1.5px solid rgba(255,255,255,.08);
+  box-shadow: 0 18px 60px rgba(0,0,0,.45);
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-bot));
+  user-select: none;
+}
+.fscene[data-time="day"]   { --sky-top:#4FA3E0; --sky-bot:#D2EBF7; --h3:#7DB57A; --h2:#5A9C58; --h1:#3F8644; --orb:#FFE27A; --glow:255,226,122; }
+.fscene[data-time="dusk"]  { --sky-top:#2E2A5E; --sky-bot:#F29066; --h3:#6B5A86; --h2:#4A4A62; --h1:#2F4234; --orb:#FFB070; --glow:255,176,112; }
+.fscene[data-time="night"] { --sky-top:#040A1C; --sky-bot:#15284C; --h3:#17304A; --h2:#112638; --h1:#0C1C24; --orb:#E9EFFA; --glow:200,215,255; }
+
+.fs-sky { position: absolute; inset: 0; z-index: 0; }
+.fs-orb {
+  position: absolute; top: 12%; right: 15%; width: 62px; height: 62px; border-radius: 50%;
+  background: var(--orb); box-shadow: 0 0 70px 24px rgba(var(--glow), .45);
+}
+.fscene[data-time="dusk"] .fs-orb  { top: 40%; right: 20%; }
+.fscene[data-time="night"] .fs-orb { box-shadow: 0 0 50px 14px rgba(var(--glow), .3), inset -14px -6px 0 0 rgba(120,135,170,.28); }
+
+.fs-stars { position: absolute; inset: 0; opacity: 0; transition: opacity .6s; }
+.fscene[data-time="night"] .fs-stars { opacity: 1; }
+.fs-stars i { position: absolute; border-radius: 50%; background: #fff; animation: fs-twinkle var(--tw, 3s) ease-in-out var(--td, 0s) infinite; }
+@keyframes fs-twinkle { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+
+.fs-cloud { position: absolute; left: -160px; height: 24px; border-radius: 30px; background: rgba(255,255,255,.8); opacity: 0; animation: fs-cloud 90s linear infinite; }
+.fs-cloud::before, .fs-cloud::after { content: ''; position: absolute; background: inherit; border-radius: 50%; }
+.fs-cloud::before { width: 42%; height: 150%; left: 14%; top: -70%; }
+.fs-cloud::after  { width: 32%; height: 120%; left: 50%; top: -50%; }
+.fs-cloud.c1 { top: 14%; width: 110px; }
+.fs-cloud.c2 { top: 28%; width: 78px; animation-duration: 120s; animation-delay: -60s; }
+.fs-cloud.c3 { top: 7%;  width: 140px; animation-duration: 150s; animation-delay: -100s; }
+.fscene[data-time="day"]  .fs-cloud { opacity: .9; }
+.fscene[data-time="dusk"] .fs-cloud { opacity: .32; background: #FFC0A0; }
+@keyframes fs-cloud { to { transform: translateX(calc(100vw + 340px)); } }
+
+.fs-hills { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+.fs-hills .h3 { fill: var(--h3); } .fs-hills .h2 { fill: var(--h2); } .fs-hills .h1 { fill: var(--h1); }
+
+.fs-trees { position: absolute; inset: 0; z-index: 2; }
+.ft {
+  position: absolute; bottom: var(--b);
+  width: calc(100px * var(--s) * var(--u)); height: calc(140px * var(--s) * var(--u));
+  margin-left: calc(-50px * var(--s) * var(--u));
+  cursor: pointer; outline: none; transform-origin: 50% 100%;
+}
+.ft::after {
+  content: ''; position: absolute; left: 6%; right: 6%; bottom: -2px; height: 7%;
+  border-radius: 50%; background: rgba(0,0,0,.32); filter: blur(3px); z-index: -1;
+}
+.ft svg {
+  display: block; width: 100%; height: 100%; overflow: visible; transform-origin: 50% 100%;
+  animation: ft-sway var(--sw, 6s) ease-in-out var(--sd, 0s) infinite alternate;
+  filter: drop-shadow(0 4px 5px rgba(0,0,0,.22));
+  transition: filter .5s;
+}
+.ft[data-row="0"] svg { filter: saturate(.8) brightness(.9) drop-shadow(0 3px 4px rgba(0,0,0,.18)); }
+.fscene[data-time="dusk"]  .ft svg { filter: brightness(.78) saturate(.9) drop-shadow(0 4px 5px rgba(0,0,0,.3)); }
+.fscene[data-time="night"] .ft svg { filter: brightness(.55) saturate(.75) drop-shadow(0 4px 5px rgba(0,0,0,.4)); }
+.fscene[data-time="night"] .ft svg.t-cyber { filter: brightness(1.1) drop-shadow(0 0 9px rgba(24,196,196,.85)); }
+.ft:hover svg, .ft:focus-visible svg { animation-play-state: paused; }
+.ft:focus-visible { outline: 2px solid rgba(255,255,255,.75); outline-offset: 4px; border-radius: 10px; }
+@keyframes ft-sway { from { transform: rotate(-1.4deg); } to { transform: rotate(1.4deg); } }
+
+.ft.is-new { animation: ft-grow 1.7s cubic-bezier(.34,1.56,.64,1) var(--gd, 0s) both; }
+@keyframes ft-grow {
+  0%   { transform: scale(0);   opacity: 0; filter: brightness(2.4); }
+  55%  { opacity: 1; }
+  100% { transform: scale(1);   opacity: 1; filter: none; }
+}
+.ft-next::before {
+  content: ''; position: absolute; left: -35%; right: -35%; bottom: -7px; height: 16px;
+  border: 1.5px dashed rgba(255,255,255,.5); border-radius: 50%;
+}
+
+.fs-fx { position: absolute; inset: 0; z-index: 90; pointer-events: none; }
+.fs-mote { position: absolute; border-radius: 50%; width: 3px; height: 3px; animation: fs-drift var(--dur, 8s) ease-in-out var(--del, 0s) infinite; }
+.fs-mote-pollen { background: rgba(255,255,225,.85); box-shadow: 0 0 5px rgba(255,255,225,.7); }
+.fs-mote-ember  { background: #FFC27A; box-shadow: 0 0 7px 1px rgba(255,170,90,.8); }
+.fs-mote-fly {
+  width: 4px; height: 4px; background: #E4FF8A; box-shadow: 0 0 9px 3px rgba(210,255,120,.8);
+  animation: fs-drift var(--dur, 8s) ease-in-out var(--del, 0s) infinite, fs-blink 3.4s ease-in-out var(--del, 0s) infinite;
+}
+@keyframes fs-drift { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(var(--dx, 30px), var(--dy, -30px)); } }
+@keyframes fs-blink { 0%, 100% { opacity: .1; } 50% { opacity: 1; } }
+
+.fs-ring {
+  position: absolute; z-index: 95; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%;
+  border: 2px solid rgba(168,216,112,.9); box-shadow: 0 0 16px rgba(168,216,112,.6); pointer-events: none;
+  animation: fs-ring 1.2s ease-out forwards;
+}
+@keyframes fs-ring { from { transform: scale(.3); opacity: .95; } to { transform: scale(5.5); opacity: 0; } }
+.fs-spark { position: absolute; z-index: 95; width: 5px; height: 5px; border-radius: 50%; background: #F6E27A; box-shadow: 0 0 8px #F6E27A; pointer-events: none; }
+
+.fs-tip {
+  position: absolute; z-index: 100; pointer-events: none; display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 12px; border-radius: 12px; white-space: nowrap;
+  background: rgba(10,14,8,.93); border: 1px solid rgba(125,181,74,.35); box-shadow: 0 8px 24px rgba(0,0,0,.5);
+}
+.fs-tip[hidden] { display: none; }
+.fs-tip strong { font-size: 12px; color: var(--lime); }
+.fs-tip span { font-size: 11px; color: var(--fog); }
+
+.fs-sky-btn {
+  position: absolute; top: 12px; right: 12px; z-index: 60; width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.28); backdrop-filter: blur(6px);
+  color: #fff; font-size: 17px; line-height: 1; cursor: pointer; transition: transform .2s, background .2s;
+}
+.fs-sky-btn:hover { transform: scale(1.1); background: rgba(0,0,0,.42); }
+.fs-caption {
+  position: absolute; left: 14px; bottom: 12px; z-index: 60; padding: 5px 13px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; color: rgba(255,255,255,.9);
+  background: rgba(0,0,0,.38); backdrop-filter: blur(6px);
+}
+
+/* artwork in the collection grid + legend */
+.tree-art { display: block; width: 62px; height: 87px; margin: 0 auto 10px; }
+.tree-art svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.legend-tree { display: inline-block; width: 17px; height: 24px; }
+.legend-tree svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+@media (max-width: 700px) {
+  .fscene { height: 330px; --u: .78; border-radius: 18px; }
+  .fs-orb { width: 46px; height: 46px; }
+}
+@media (max-width: 420px) { .fscene { height: 290px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ft svg, .ft.is-new, .fs-cloud, .fs-mote, .fs-stars i { animation: none !important; }
+  .fs-cloud { left: 20%; }
+}
 </style>
 
 <!-- NAVBAR -->
@@ -376,6 +511,25 @@ body.forest-page {
     <div class="next-tree-emoji" id="nextTreeEmoji">🌱</div>
   </div>
 
+  <!-- FOREST SCENE -->
+  <div class="fscene" id="fscene" data-time="day" role="group" aria-label="Your forest">
+    <div class="fs-sky">
+      <div class="fs-stars"></div>
+      <div class="fs-orb"></div>
+      <span class="fs-cloud c1"></span><span class="fs-cloud c2"></span><span class="fs-cloud c3"></span>
+    </div>
+    <svg class="fs-hills" viewBox="0 0 1000 400" preserveAspectRatio="none" aria-hidden="true">
+      <path class="h3" d="M0 250 C120 190 250 200 380 235 C520 270 640 170 780 190 C880 205 950 230 1000 215 L1000 400 L0 400Z"/>
+      <path class="h2" d="M0 300 C140 250 280 285 420 300 C560 315 700 250 840 270 C920 281 970 290 1000 285 L1000 400 L0 400Z"/>
+      <path class="h1" d="M0 345 C160 320 300 340 460 350 C620 360 760 325 900 338 C950 343 980 346 1000 344 L1000 400 L0 400Z"/>
+    </svg>
+    <div class="fs-trees" id="fsTrees"></div>
+    <div class="fs-fx" id="fsFx"></div>
+    <div class="fs-tip" id="fsTip" hidden></div>
+    <button class="fs-sky-btn" id="fsSkyBtn" type="button" aria-label="Change time of day">🌤</button>
+    <div class="fs-caption" id="fsCaption"></div>
+  </div>
+
   <!-- FOREST -->
   <div id="forestSection">
     <!-- Populated by JS -->
@@ -384,42 +538,185 @@ body.forest-page {
 </div>
 
 <script>
+/* Wrapped in a function: this script is re-run on every in-page navigation, so top-level
+   const/let would otherwise be redeclared and throw on the second visit. */
+(function () {
+'use strict';
+
 /* ══════════════════════════════════════════
-   TREE TYPE MAP — subject keyword → emoji
+   TREE TYPES — subject keyword → look
 ══════════════════════════════════════════ */
 const TREE_MAP = [
-  { keywords: ['math', 'calc', 'algebra', 'geometry', 'statistic', 'number'],  emoji: '🌲', name: 'Pine'     },
-  { keywords: ['bio', 'life', 'ecology', 'genetics', 'anatomy', 'botany'],      emoji: '🌳', name: 'Oak'      },
-  { keywords: ['chem', 'periodic', 'molecule', 'reaction', 'element'],          emoji: '🎋', name: 'Bamboo'   },
-  { keywords: ['phys', 'mechanics', 'force', 'quantum', 'optic', 'wave'],       emoji: '🌴', name: 'Palm'     },
-  { keywords: ['history', 'histor', 'civil', 'war', 'ancient', 'medieval'],     emoji: '🍂', name: 'Maple'    },
-  { keywords: ['english', 'literature', 'writing', 'essay', 'grammar', 'lang'], emoji: '🌿', name: 'Fern'     },
-  { keywords: ['geo', 'earth', 'climate', 'plate', 'volcano', 'ocean'],         emoji: '🌵', name: 'Cactus'   },
-  { keywords: ['art', 'design', 'draw', 'paint', 'creative', 'visual'],         emoji: '🌸', name: 'Blossom'  },
-  { keywords: ['music', 'theory', 'harmony', 'rhythm', 'instrument'],           emoji: '🎍', name: 'Bamboo Grove' },
-  { keywords: ['computer', 'coding', 'program', 'software', 'data', 'cs'],      emoji: '🌐', name: 'Cyber Tree'},
-  { keywords: ['economics', 'econom', 'finance', 'market', 'business'],         emoji: '🍁', name: 'Autumn Oak'},
-  { keywords: ['psychology', 'psych', 'mind', 'behaviour', 'cognitive'],        emoji: '🌺', name: 'Lotus'    },
+  { keywords: ['math', 'calc', 'algebra', 'geometry', 'statistic', 'number'],  kind: 'conifer',   name: 'Pine'         },
+  { keywords: ['bio', 'life', 'ecology', 'genetics', 'anatomy', 'botany'],      kind: 'oak',       name: 'Oak'          },
+  { keywords: ['chem', 'periodic', 'molecule', 'reaction', 'element'],          kind: 'bamboo',    name: 'Bamboo'       },
+  { keywords: ['phys', 'mechanics', 'force', 'quantum', 'optic', 'wave'],       kind: 'palm',      name: 'Palm'         },
+  { keywords: ['history', 'histor', 'civil', 'war', 'ancient', 'medieval'],     kind: 'maple',     name: 'Maple'        },
+  { keywords: ['english', 'literature', 'writing', 'essay', 'grammar', 'lang'], kind: 'fern',      name: 'Fern'         },
+  { keywords: ['geo', 'earth', 'climate', 'plate', 'volcano', 'ocean'],         kind: 'cactus',    name: 'Cactus'       },
+  { keywords: ['art', 'design', 'draw', 'paint', 'creative', 'visual'],         kind: 'blossom',   name: 'Blossom'      },
+  { keywords: ['music', 'theory', 'harmony', 'rhythm', 'instrument'],           kind: 'bamboo',    name: 'Bamboo Grove' },
+  { keywords: ['computer', 'coding', 'program', 'software', 'data', 'cs'],      kind: 'cyber',     name: 'Cyber Tree'   },
+  { keywords: ['economics', 'econom', 'finance', 'market', 'business'],         kind: 'autumn',    name: 'Autumn Oak'   },
+  { keywords: ['psychology', 'psych', 'mind', 'behaviour', 'cognitive'],        kind: 'lotus',     name: 'Lotus'        },
 ];
-
-const DEFAULT_TREE = { emoji: '🌱', name: 'Sprout' };
+const DEFAULT_TREE = { kind: 'oak', name: 'Oak' };
 
 function getTreeForSubject(subject) {
   if (!subject) return DEFAULT_TREE;
-  const s = subject.toLowerCase();
-  for (const t of TREE_MAP) {
-    if (t.keywords.some(k => s.includes(k))) return t;
-  }
+  const s = String(subject).toLowerCase();
+  for (const t of TREE_MAP) if (t.keywords.some(k => s.includes(k))) return t;
   return DEFAULT_TREE;
 }
 
-const STAGE_NAMES = ['Seedling', 'Sapling', 'Young Tree', 'Grown Tree', 'Ancient Tree'];
+/* ══════════════════════════════════════════
+   TREE ARTWORK (SVG, viewBox 0 0 100 140, ground at y=136)
+══════════════════════════════════════════ */
+function rng(seed) { // mulberry32
+  let a = seed >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+const f1 = n => Math.round(n * 10) / 10;
+
+const PAL = {
+  oak:     { trunk: '#6B4423', leaves: ['#2F6B2A', '#3F8A35', '#6BBA52'] },
+  maple:   { trunk: '#6A3A2A', leaves: ['#B83A1E', '#E0592A', '#F5964A'] },
+  autumn:  { trunk: '#6B4423', leaves: ['#B8741E', '#D8942E', '#F2C25A'] },
+  blossom: { trunk: '#7A4A38', leaves: ['#D86A90', '#F090B0', '#FFD0DE'] },
+  lotus:   { trunk: '#5A4A30', leaves: ['#2F7A3A', '#4AA050', '#7CC86A'], flowers: ['#B05AD0', '#E08AF0'] },
+  cyber:   { trunk: '#16323C', leaves: ['#0F7E80', '#18C4C4', '#8CFAF2'] },
+  conifer: { trunk: '#5A3A22', leaves: ['#1F5A3A', '#2A7A4E', '#46A874'] },
+  fern:    { trunk: '#5A4A30', leaves: ['#2F7A3A', '#4AA050', '#86D072'] },
+};
+
+function broadleaf(kind, r) {
+  const p = PAL[kind] || PAL.oak, L = p.leaves, j = () => (r() - 0.5) * 6;
+  const blobs = [[50, 58, 34], [29, 74, 22], [71, 74, 22], [38, 42, 20], [62, 40, 20], [50, 28, 17]];
+  let s = `<path d="M45 136 C47 112 45 96 43 84 L57 84 C55 96 53 112 55 136 Z" fill="${p.trunk}"/>` +
+          `<path d="M50 96 L36 80 M50 90 L65 76" stroke="${p.trunk}" stroke-width="3.2" stroke-linecap="round" fill="none"/>`;
+  blobs.forEach(([x, y, rad]) => { s += `<circle cx="${f1(x + j())}" cy="${f1(y + j())}" r="${f1(rad)}" fill="${L[0]}"/>`; });
+  blobs.forEach(([x, y, rad]) => { s += `<circle cx="${f1(x - 4 + j() * .4)}" cy="${f1(y - 5)}" r="${f1(rad * .66)}" fill="${L[1]}"/>`; });
+  [[40, 36, 9], [58, 34, 8], [32, 62, 8], [66, 58, 7], [50, 50, 8]].forEach(([x, y, rad]) => {
+    s += `<circle cx="${f1(x + j() * .5)}" cy="${f1(y)}" r="${rad}" fill="${L[2]}" opacity=".85"/>`;
+  });
+  if (kind === 'blossom') {
+    for (let i = 0; i < 14; i++) s += `<circle cx="${f1(18 + r() * 64)}" cy="${f1(16 + r() * 66)}" r="${f1(1.6 + r() * 1.6)}" fill="#FFF0F5" opacity=".9"/>`;
+  }
+  if (kind === 'cyber') {
+    s += `<g fill="none" stroke="#B8FFF8" stroke-width="1" opacity=".75"><path d="M34 70 H48 V52 H62"/><path d="M42 40 V54"/><path d="M60 72 H70 V60"/></g>`;
+    [[34, 70], [62, 52], [42, 40], [70, 60]].forEach(([x, y]) => { s += `<circle cx="${x}" cy="${y}" r="2.2" fill="#E8FFFC"/>`; });
+  }
+  return s;
+}
+
+function conifer(r) {
+  const L = PAL.conifer.leaves;
+  let s = `<rect x="46" y="112" width="8" height="24" rx="1.5" fill="${PAL.conifer.trunk}"/>`;
+  const tiers = [[8, 44, 24], [34, 70, 31], [58, 96, 38], [82, 120, 45]];
+  tiers.forEach(([top, base, w], i) => {
+    const wob = (r() - 0.5) * 3;
+    s += `<polygon points="50,${top} ${f1(50 - w + wob)},${base} ${f1(50 + w + wob)},${base}" fill="${L[0]}"/>` +
+         `<polygon points="50,${top} 50,${base} ${f1(50 + w + wob)},${base}" fill="${L[1]}" opacity=".85"/>` +
+         `<polygon points="50,${top + 6} ${f1(50 + w * .45)},${base - 6} 50,${base - 6}" fill="${L[2]}" opacity=".35"/>`;
+  });
+  return s;
+}
+
+function palm(r) {
+  const lean = 6 + r() * 6;
+  let s = `<path d="M47 136 Q${f1(42)} 90 ${f1(50 + lean)} 44" stroke="#8A6A3A" stroke-width="8" fill="none" stroke-linecap="round"/>` +
+          `<path d="M47 136 Q${f1(42)} 90 ${f1(50 + lean)} 44" stroke="#6E5230" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="2 6" opacity=".7"/>`;
+  const hx = 50 + lean, hy = 44;
+  [[-46, -6, 12], [-34, -26, -2], [-12, -34, -8], [14, -34, -8], [36, -24, -2], [48, -4, 10], [-30, 6, 22], [30, 8, 22]].forEach(([dx, dy, droop], i) => {
+    s += `<path d="M${hx} ${hy} Q${f1(hx + dx * .5)} ${f1(hy + dy - 8)} ${f1(hx + dx)} ${f1(hy + dy + droop)}" stroke="${i % 2 ? '#2F8A3A' : '#4AAA4A'}" stroke-width="5.5" fill="none" stroke-linecap="round"/>`;
+  });
+  s += `<circle cx="${hx - 3}" cy="${hy + 5}" r="4" fill="#6A4A22"/><circle cx="${hx + 4}" cy="${hy + 6}" r="4" fill="#7A5A2A"/>`;
+  return s;
+}
+
+function bamboo(r) {
+  let s = '';
+  [[36, 38, 5], [50, 14, 6], [64, 30, 5]].forEach(([x, top, w]) => {
+    s += `<rect x="${x - w / 2}" y="${top}" width="${w}" height="${136 - top}" rx="2" fill="#8DB84A"/>` +
+         `<rect x="${x - w / 2}" y="${top}" width="${w * .35}" height="${136 - top}" rx="1" fill="#B8DC6E" opacity=".7"/>`;
+    for (let y = top + 16; y < 134; y += 18) s += `<rect x="${x - w / 2 - 1}" y="${y}" width="${w + 2}" height="2.4" rx="1" fill="#5E8A2A"/>`;
+    for (let k = 0; k < 3; k++) {
+      const ly = top + 8 + k * 14, dir = (k + x) % 2 ? 1 : -1;
+      s += `<ellipse cx="${x + dir * 9}" cy="${ly}" rx="9" ry="2.6" transform="rotate(${dir * -28} ${x + dir * 9} ${ly})" fill="${k % 2 ? '#7DC04A' : '#5FA83A'}"/>`;
+    }
+  });
+  return s;
+}
+
+function cactus(r) {
+  return `<rect x="42" y="36" width="16" height="100" rx="8" fill="#3F8A52"/><rect x="42" y="36" width="6" height="100" rx="3" fill="#5BB06E" opacity=".7"/>` +
+    `<rect x="24" y="86" width="22" height="9" rx="4.5" fill="#3F8A52"/><rect x="24" y="62" width="9" height="33" rx="4.5" fill="#3F8A52"/><rect x="24" y="62" width="3.5" height="33" rx="1.7" fill="#5BB06E" opacity=".7"/>` +
+    `<rect x="54" y="74" width="22" height="9" rx="4.5" fill="#3F8A52"/><rect x="67" y="50" width="9" height="33" rx="4.5" fill="#3F8A52"/><rect x="67" y="50" width="3.5" height="33" rx="1.7" fill="#5BB06E" opacity=".7"/>` +
+    `<circle cx="50" cy="34" r="5.5" fill="#F06A9A"/><circle cx="50" cy="34" r="2.2" fill="#FFD84A"/>` +
+    [[46, 60], [54, 82], [47, 104], [53, 118], [28, 78], [72, 62]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1" fill="#E8F5D0" opacity=".8"/>`).join('');
+}
+
+function fern(kind, r) {
+  const L = PAL.fern.leaves;
+  let s = '';
+  for (let i = 0; i < 11; i++) {
+    const ang = -74 + i * 14.8 + (r() - 0.5) * 6, len = 30 + r() * 22;
+    s += `<ellipse cx="50" cy="${f1(136 - len)}" rx="${f1(6 + r() * 3)}" ry="${f1(len)}" transform="rotate(${f1(ang)} 50 136)" fill="${L[i % 3]}" opacity=".95"/>`;
+  }
+  return s;
+}
+
+function lotus(r) {
+  const p = PAL.lotus;
+  let s = fern('fern', r);
+  [[34, 70], [58, 54], [70, 84], [44, 92], [52, 38]].forEach(([x, y], i) => {
+    const c1 = p.flowers[i % 2], c2 = p.flowers[(i + 1) % 2];
+    s += `<g><circle cx="${x - 4}" cy="${y}" r="5" fill="${c1}"/><circle cx="${x + 4}" cy="${y}" r="5" fill="${c1}"/><circle cx="${x}" cy="${y - 4}" r="5" fill="${c2}"/><circle cx="${x}" cy="${y}" r="3" fill="#FFE27A"/></g>`;
+  });
+  return s;
+}
+
+function sprout() {
+  return `<path d="M50 136 Q49 118 50 100" stroke="#5BAA45" stroke-width="3.2" fill="none" stroke-linecap="round"/>` +
+         `<ellipse cx="40" cy="104" rx="11" ry="6" transform="rotate(-28 40 104)" fill="#7DC04A"/><ellipse cx="60" cy="98" rx="11" ry="6" transform="rotate(28 60 98)" fill="#5FA83A"/>`;
+}
+
+function treeSvg(kind, seed) {
+  const r = rng(seed);
+  let body;
+  switch (kind) {
+    case 'conifer': body = conifer(r); break;
+    case 'palm':    body = palm(r); break;
+    case 'bamboo':  body = bamboo(r); break;
+    case 'cactus':  body = cactus(r); break;
+    case 'fern':    body = fern(kind, r); break;
+    case 'lotus':   body = lotus(r); break;
+    case 'sprout':  body = sprout(); break;
+    default:        body = broadleaf(kind, r);
+  }
+  return `<svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" class="t-${kind}">${body}</svg>`;
+}
+
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function prettyDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  return isNaN(dt) ? '' : dt.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
 /* ══════════════════════════════════════════
    LOAD DATA
 ══════════════════════════════════════════ */
-const history    = JSON.parse(localStorage.getItem('studySyncSessionHistory') || '[]');
-const streakData = JSON.parse(localStorage.getItem('studySyncStreak') || '{"count":0}');
+const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? d; } catch (e) { return d; } };
+const history    = read('studySyncSessionHistory', []);
+const streakData = read('studySyncStreak', { count: 0 });
 const sessions   = history.length;
 const hours      = history.reduce((s, h) => s + (h.hours || 0), 0);
 const streak     = streakData.count || 0;
@@ -431,38 +728,231 @@ for (let i = 0; i + 5 <= sessions; i += 5) {
   const counts = {};
   group.forEach(h => { if (h.subject) counts[h.subject] = (counts[h.subject] || 0) + 1; });
   const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
-  trees.push({ subject: top ? top[0] : 'General', date: group[group.length - 1]?.date || '' });
+  trees.push({ subject: top ? top[0] : 'General', date: (group[group.length - 1] || {}).date || '' });
 }
 const treesCount = trees.length;
+const sessionsIntoNextTree = sessions % 5;
 
 /* ── Stats cards ── */
-document.getElementById('statStreak').textContent   = streak;
-document.getElementById('statSessions').textContent = sessions;
-document.getElementById('statHours').textContent    = hours.toFixed(1);
-document.getElementById('statTrees').textContent    = treesCount;
+const $ = id => document.getElementById(id);
+$('statStreak').textContent   = streak;
+$('statSessions').textContent = sessions;
+$('statHours').textContent    = hours.toFixed(1);
+$('statTrees').textContent    = treesCount;
 
 /* ── Progress bar ── */
-const sessionsIntoNextTree = sessions % 5;
-const pct = (sessionsIntoNextTree / 5) * 100;
-document.getElementById('progressFill').style.width = pct + '%';
-document.getElementById('nextTreeSessions').innerHTML =
-  '<strong>' + sessionsIntoNextTree + ' / 5</strong> sessions toward your next tree';
-
-const nextEmojis = ['🌱','🌿','🌳','🌲','🎋'];
-document.getElementById('nextTreeEmoji').textContent = nextEmojis[sessionsIntoNextTree] || '🌱';
-
-const titles = [
+$('progressFill').style.width = (sessionsIntoNextTree / 5 * 100) + '%';
+$('nextTreeSessions').innerHTML = '<strong>' + sessionsIntoNextTree + ' / 5</strong> sessions toward your next tree';
+$('nextTreeEmoji').textContent = ['🌱', '🌿', '🌳', '🌲', '🎋'][sessionsIntoNextTree] || '🌱';
+$('nextTreeTitle').textContent = [
   'Plant your first tree — start a session!',
   'One session down, four to go 🌱',
   'Halfway there, keep growing 🌿',
   'Almost there, one more push 💪',
   'One session away from a new tree! 🌳',
-];
-document.getElementById('nextTreeTitle').textContent = titles[sessionsIntoNextTree] || titles[0];
+][sessionsIntoNextTree] || 'Keep going';
 
-/* ── Forest ── */
-const forestSection = document.getElementById('forestSection');
+/* ══════════════════════════════════════════
+   FOREST SCENE
+══════════════════════════════════════════ */
+const scene   = $('fscene');
+const treesEl = $('fsTrees');
+const fxEl    = $('fsFx');
+const tipEl   = $('fsTip');
+const MAX_VISIBLE = 45;
 
+function loadSeen() { try { const v = parseInt(localStorage.getItem('studySyncForestSeen'), 10); return isNaN(v) ? null : v; } catch (e) { return null; } }
+function saveSeen(n) { try { localStorage.setItem('studySyncForestSeen', String(n)); } catch (e) { /* storage unavailable */ } }
+
+const seenBefore = loadSeen();
+const newCount = seenBefore === null ? 0 : Math.max(0, treesCount - seenBefore);
+const firstNewIndex = treesCount - newCount;
+
+function layout(n) {
+  // returns [{row, x}] for n trees. Rows: 0 back, 1 middle, 2 front.
+  const out = [];
+  if (n <= 5) {
+    for (let i = 0; i < n; i++) out.push({ row: 2, x: 12 + (n === 1 ? 38 : i * (62 / (n - 1))) });
+    return out;
+  }
+  const rows = n > 14 ? 3 : 2;
+  const perRow = Array.from({ length: rows }, () => []);
+  for (let i = 0; i < n; i++) perRow[i % rows].push(i);
+  perRow.forEach((idxs, ri) => {
+    const row = rows === 3 ? ri : ri + 1;
+    idxs.forEach((treeIdx, k) => {
+      const m = idxs.length, rr = rng(treeIdx * 7919 + 17);
+      out[treeIdx] = { row, x: 5 + (k + 0.5) / m * 82 + (rr() - 0.5) * (62 / m) };
+    });
+  });
+  return out;
+}
+
+const ROW = [ { s: 0.56, b: 0.40 }, { s: 0.78, b: 0.22 }, { s: 1, b: 0.04 } ]; // scale, bottom (fraction of scene)
+
+function addTree(opts) {
+  const el = document.createElement('div');
+  el.className = 'ft' + (opts.isNew ? ' is-new' : '') + (opts.className ? ' ' + opts.className : '');
+  el.style.left = opts.x + '%';
+  el.style.setProperty('--s', opts.scale);
+  el.style.setProperty('--b', (opts.bottom * 100) + '%');
+  el.style.zIndex = String(10 + opts.row * 10 + Math.round(opts.x / 10));
+  el.style.setProperty('--sw', (5 + (opts.seed % 40) / 10) + 's');
+  el.style.setProperty('--sd', (-(opts.seed % 70) / 10) + 's');
+  if (opts.isNew) el.style.setProperty('--gd', opts.delay + 's');
+  el.dataset.row = opts.row;
+  el.tabIndex = 0;
+  el.setAttribute('role', 'img');
+  el.setAttribute('aria-label', opts.label);
+  el.dataset.tip = opts.tip;
+  el.innerHTML = opts.svg;
+  treesEl.appendChild(el);
+  return el;
+}
+
+function buildScene() {
+  treesEl.innerHTML = '';
+  const start = Math.max(0, treesCount - MAX_VISIBLE);
+  const shown = trees.slice(start);
+  const pos = layout(shown.length);
+  shown.forEach((t, k) => {
+    const idx = start + k, kind = getTreeForSubject(t.subject);
+    const seed = hashStr(t.subject + ':' + idx);
+    const rowDef = ROW[pos[k].row];
+    const isNew = idx >= firstNewIndex && newCount > 0;
+    const date = prettyDate(t.date);
+    addTree({
+      x: pos[k].x, row: pos[k].row, scale: rowDef.s, bottom: rowDef.b + (rng(seed)() - 0.5) * 0.03,
+      seed, isNew, delay: 0.5 + (idx - firstNewIndex) * 0.7,
+      svg: treeSvg(kind.kind, seed),
+      label: `Tree ${idx + 1}: ${t.subject}, ${kind.name}`,
+      tip: `<strong>${esc(t.subject)}</strong><span>${esc(kind.name)} · tree #${idx + 1}${date ? ' · ' + esc(date) : ''}</span>`,
+    });
+  });
+
+  // The sapling for the next tree: grows with the sessions completed towards it.
+  const k = sessionsIntoNextTree;
+  const stageKind = k <= 1 ? 'sprout' : 'oak';
+  const sc = [0.34, 0.4, 0.5, 0.62, 0.78][k];
+  addTree({
+    x: 92, row: 2, scale: sc, bottom: ROW[2].b, seed: 99, className: 'ft-next',
+    svg: treeSvg(stageKind, 4242),
+    label: `Next tree: ${k} of 5 sessions`,
+    tip: `<strong>Next tree</strong><span>${k} / 5 sessions · ${5 - k} to go</span>`,
+  });
+
+  const caption = $('fsCaption');
+  if (treesCount === 0) caption.textContent = 'Your first tree grows after 5 sessions';
+  else if (newCount > 0) caption.textContent = `${treesCount} tree${treesCount === 1 ? '' : 's'} · ${newCount} new since your last visit ✨`;
+  else caption.textContent = `${treesCount} tree${treesCount === 1 ? '' : 's'}` + (treesCount > MAX_VISIBLE ? ` · showing the latest ${MAX_VISIBLE}` : '');
+}
+
+/* ── time of day ── */
+const SKY_ORDER = ['auto', 'day', 'dusk', 'night'];
+const SKY_ICON  = { auto: '🌤', day: '☀️', dusk: '🌅', night: '🌙' };
+function autoSky() { const h = new Date().getHours(); return h >= 6 && h < 17 ? 'day' : h >= 17 && h < 20 ? 'dusk' : 'night'; }
+let skyMode = 'auto';
+try { skyMode = localStorage.getItem('studySyncForestSky') || 'auto'; } catch (e) { /* ignore */ }
+if (!SKY_ORDER.includes(skyMode)) skyMode = 'auto';
+
+function rebuildFx(time) {
+  fxEl.innerHTML = '';
+  const stars = scene.querySelector('.fs-stars');
+  stars.innerHTML = '';
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (time === 'night') {
+    const r = rng(7);
+    for (let i = 0; i < 46; i++) {
+      const s = document.createElement('i');
+      s.style.cssText = `left:${f1(r() * 100)}%;top:${f1(r() * 55)}%;--tw:${f1(2 + r() * 4)}s;--td:${f1(-r() * 5)}s;` +
+                        `width:${r() > .85 ? 3 : 2}px;height:${r() > .85 ? 3 : 2}px;`;
+      stars.appendChild(s);
+    }
+  }
+  if (reduce) return;
+  const r = rng(time.length * 31);
+  const count = time === 'night' ? 18 : time === 'dusk' ? 12 : 9;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('span');
+    p.className = 'fs-mote fs-mote-' + (time === 'night' ? 'fly' : time === 'dusk' ? 'ember' : 'pollen');
+    p.style.cssText = `left:${f1(r() * 100)}%;top:${f1(35 + r() * 55)}%;--dur:${f1(6 + r() * 8)}s;--del:${f1(-r() * 12)}s;` +
+                      `--dx:${f1((r() - 0.5) * 80)}px;--dy:${f1(-20 - r() * 60)}px;`;
+    fxEl.appendChild(p);
+  }
+}
+
+function applySky() {
+  const time = skyMode === 'auto' ? autoSky() : skyMode;
+  scene.dataset.time = time;
+  $('fsSkyBtn').textContent = SKY_ICON[skyMode];
+  $('fsSkyBtn').title = 'Time of day: ' + skyMode + ' (click to change)';
+  rebuildFx(time);
+}
+$('fsSkyBtn').addEventListener('click', () => {
+  skyMode = SKY_ORDER[(SKY_ORDER.indexOf(skyMode) + 1) % SKY_ORDER.length];
+  try { localStorage.setItem('studySyncForestSky', skyMode); } catch (e) { /* ignore */ }
+  applySky();
+});
+
+/* ── tooltip ── */
+let tipFor = null;
+function showTip(el) {
+  tipFor = el;
+  tipEl.innerHTML = el.dataset.tip;
+  tipEl.hidden = false;
+  const s = scene.getBoundingClientRect(), r = el.getBoundingClientRect();
+  const w = tipEl.offsetWidth;
+  let left = r.left - s.left + r.width / 2 - w / 2;
+  left = Math.max(8, Math.min(left, s.width - w - 8));
+  tipEl.style.left = left + 'px';
+  tipEl.style.top = Math.max(8, r.top - s.top - tipEl.offsetHeight - 6) + 'px';
+}
+function hideTip() { tipFor = null; tipEl.hidden = true; }
+treesEl.addEventListener('pointerover', e => { const t = e.target.closest('.ft'); if (t) showTip(t); });
+treesEl.addEventListener('pointerout', e => { if (!e.relatedTarget || !e.relatedTarget.closest || !e.relatedTarget.closest('.ft')) hideTip(); });
+treesEl.addEventListener('focusin', e => { const t = e.target.closest('.ft'); if (t) showTip(t); });
+treesEl.addEventListener('focusout', hideTip);
+treesEl.addEventListener('click', e => { const t = e.target.closest('.ft'); if (t) (tipFor === t ? hideTip() : showTip(t)); });
+scene.addEventListener('click', e => { if (!e.target.closest('.ft')) hideTip(); });
+
+/* ── welcome burst for newly earned trees ── */
+function celebrateNew() {
+  if (newCount <= 0) return;
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+  treesEl.querySelectorAll('.ft.is-new').forEach((el, i) => {
+    setTimeout(() => {
+      const s = scene.getBoundingClientRect(), r = el.getBoundingClientRect();
+      const cx = r.left - s.left + r.width / 2, cy = r.bottom - s.top - 6;
+      const ring = document.createElement('span');
+      ring.className = 'fs-ring'; ring.style.left = cx + 'px'; ring.style.top = cy + 'px';
+      ring.addEventListener('animationend', () => ring.remove());
+      scene.appendChild(ring);
+      for (let n = 0; n < 12; n++) {
+        const sp = document.createElement('span');
+        sp.className = 'fs-spark';
+        const ang = Math.random() * Math.PI * 2, d = 30 + Math.random() * 60;
+        sp.style.cssText = `left:${cx}px;top:${cy - r.height * .4}px;`;
+        scene.appendChild(sp);
+        const a = sp.animate([
+          { transform: 'translate(0,0) scale(1)', opacity: 1 },
+          { transform: `translate(${Math.cos(ang) * d}px,${Math.sin(ang) * d - 30}px) scale(.3)`, opacity: 0 },
+        ], { duration: 900 + Math.random() * 600, easing: 'cubic-bezier(.15,.8,.3,1)', fill: 'forwards' });
+        a.onfinish = () => sp.remove();
+      }
+    }, 600 + i * 700 + 900);
+  });
+}
+
+buildScene();
+applySky();
+celebrateNew();
+saveSeen(treesCount);
+
+/* ══════════════════════════════════════════
+   LEGEND + COLLECTION GRID
+══════════════════════════════════════════ */
+const forestSection = $('forestSection');
 if (trees.length === 0) {
   forestSection.innerHTML = `
     <div class="forest-empty">
@@ -472,55 +962,53 @@ if (trees.length === 0) {
       <a href="/" class="forest-empty-btn">🌿 Start a session</a>
     </div>`;
 } else {
-  /* Legend */
   const subjectsSeen = [...new Set(trees.map(t => t.subject))];
   const legendHtml = subjectsSeen.map(sub => {
     const tree = getTreeForSubject(sub);
-    return `<div class="legend-item"><span class="legend-emoji">${tree.emoji}</span>${sub} — ${tree.name}</div>`;
+    return `<div class="legend-item"><span class="legend-tree">${treeSvg(tree.kind, hashStr(sub))}</span>${esc(sub)} — ${esc(tree.name)}</div>`;
   }).join('');
-
-  /* Grid */
   const gridHtml = trees.map((t, i) => {
-    const tree  = getTreeForSubject(t.subject);
-    const stage = STAGE_NAMES[Math.min(Math.floor(i / 5), STAGE_NAMES.length - 1)];
+    const tree = getTreeForSubject(t.subject), date = prettyDate(t.date);
     return `
-      <div class="tree-card" style="animation-delay:${i * 0.06}s">
+      <div class="tree-card" style="animation-delay:${Math.min(i, 20) * 0.05}s">
         <span class="tree-num">#${i + 1}</span>
-        <span class="tree-emoji">${tree.emoji}</span>
-        <div class="tree-subject">${t.subject || 'General'}</div>
-        <div class="tree-stage">${stage}</div>
+        <span class="tree-art">${treeSvg(tree.kind, hashStr(t.subject + ':' + i))}</span>
+        <div class="tree-subject">${esc(t.subject || 'General')}</div>
+        <div class="tree-stage">${esc(tree.name)}${date ? ' · ' + esc(date) : ''}</div>
       </div>`;
   }).join('');
-
   forestSection.innerHTML = `
     <div class="forest-section-title">🌲 Your trees (${trees.length})</div>
     <div class="legend">${legendHtml}</div>
     <div class="forest-grid">${gridHtml}</div>`;
 }
-/* ── AVATAR DROPDOWN ── */
-const avWrap = document.getElementById('ss-av-wrap');
-const avBtn  = document.getElementById('ss-avatar');
-const avMenu = document.getElementById('ss-av-dropdown');
 
-function ssAvOpen(open) {
-  avMenu.classList.toggle('open', open);
-  avBtn.setAttribute('aria-expanded', open);
-}
+/* ══════════════════════════════════════════
+   AVATAR DROPDOWN
+══════════════════════════════════════════ */
+const avWrap = $('ss-av-wrap'), avBtn = $('ss-avatar'), avMenu = $('ss-av-dropdown');
+function ssAvOpen(open) { avMenu.classList.toggle('open', open); avBtn.setAttribute('aria-expanded', open); }
 avBtn.addEventListener('click', e => { e.stopPropagation(); ssAvOpen(!avMenu.classList.contains('open')); });
-avBtn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ssAvOpen(!avMenu.classList.contains('open')); }});
-document.addEventListener('click', e => { if (!avWrap.contains(e.target)) ssAvOpen(false); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') ssAvOpen(false); });
+avBtn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ssAvOpen(!avMenu.classList.contains('open')); } });
+// Document-level handlers outlive this page's DOM, so replace the ones from a previous visit.
+if (window.__forestDocHandlers) {
+  document.removeEventListener('click', window.__forestDocHandlers.click);
+  document.removeEventListener('keydown', window.__forestDocHandlers.key);
+}
+window.__forestDocHandlers = {
+  click: e => { if (avWrap.isConnected && !avWrap.contains(e.target)) ssAvOpen(false); },
+  key:   e => { if (e.key === 'Escape' && avWrap.isConnected) ssAvOpen(false); },
+};
+document.addEventListener('click', window.__forestDocHandlers.click);
+document.addEventListener('keydown', window.__forestDocHandlers.key);
 
-const prof = JSON.parse(localStorage.getItem('studySyncProfile') || 'null');
+const prof = read('studySyncProfile', null);
 if (prof) {
-  const subjects = Array.isArray(prof.subjects) ? prof.subjects.slice(0,2).join(' & ') : '';
-  document.getElementById('ss-av-meta').textContent =
-    'Grade ' + prof.grade + (subjects ? ' · ' + subjects : '');
+  const subjects = Array.isArray(prof.subjects) ? prof.subjects.slice(0, 2).join(' & ') : '';
+  $('ss-av-meta').textContent = 'Grade ' + prof.grade + (subjects ? ' · ' + subjects : '');
 }
-/* streak is already loaded above as `streak` */
-if (streak) {
-  document.getElementById('ss-av-streak').textContent = streak + ' day' + (streak !== 1 ? 's' : '');
-}
+if (streak) $('ss-av-streak').textContent = streak + ' day' + (streak !== 1 ? 's' : '');
+})();
 </script>
 
 {% endblock %}
