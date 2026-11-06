@@ -19,6 +19,11 @@ class StudySession(models.Model):
     subject = models.CharField(max_length=120, default='Study')
     hours = models.FloatField(default=0)
     mode = models.CharField(max_length=10, choices=MODE_CHOICES, default='daily')
+    # A tree grows over one run of the user's timer: `rounds` focus rounds planned,
+    # this entry is round number `round` of run `run`. Older entries have run == ''.
+    run = models.CharField(max_length=40, blank=True, default='')
+    round = models.PositiveSmallIntegerField(default=0)
+    rounds = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -29,12 +34,15 @@ class StudySession(models.Model):
         return f'{self.user} {self.date} {self.subject} ({self.hours:.2f}h, {self.mode})'
 
     def as_dict(self):
-        return {
+        d = {
             'date': self.date.isoformat(),
             'subject': self.subject,
             'hours': self.hours,
             'mode': self.mode,
         }
+        if self.run:
+            d.update({'run': self.run, 'round': self.round, 'rounds': self.rounds})
+        return d
 
 
 class UserState(models.Model):

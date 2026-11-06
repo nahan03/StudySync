@@ -6,7 +6,7 @@
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/study.css' %}?v=6">
+<link rel="stylesheet" href="{% static 'css/study.css' %}?v=8">
 <link rel="stylesheet" href="{% static 'css/tree_overlay.css' %}?v=1">
 {% endblock %}
 
@@ -38,6 +38,7 @@
   </div>
   <div class="st-nav-right">
     <a href="/forest/" class="st-nav-link">&#127794; My forest</a>
+    <button class="st-back st-fs-btn" id="st-fullscreen" type="button" aria-pressed="false" title="Full screen (F)"><span class="st-fs-ico" aria-hidden="true">&#9974;</span> <span class="st-fs-label">Full screen</span></button>
     <button class="st-back st-appearance-btn" id="st-appearance-open" type="button" aria-haspopup="dialog" aria-controls="st-appearance">&#127912; Appearance</button>
   </div>
 </nav>
@@ -213,16 +214,10 @@
       <p class="tg-goal-label">Your goal was:</p>
       <p class="tg-goal-text" id="tg-goal-text"></p>
     </div>
-    <div id="tg-tree-svg" class="tg-tree-svg"></div>
+    <canvas id="tg-canvas" class="tree-growth-canvas" width="260" height="300"></canvas>
     <p class="tree-growth-stage" id="tg-stage"></p>
     <p class="tree-growth-fact" id="tg-fact"></p>
-    <div class="tree-growth-progress">
-      <div class="tree-growth-pip" data-s="1"></div>
-      <div class="tree-growth-pip" data-s="2"></div>
-      <div class="tree-growth-pip" data-s="3"></div>
-      <div class="tree-growth-pip" data-s="4"></div>
-      <div class="tree-growth-pip" data-s="5"></div>
-    </div>
+    <div class="tree-growth-progress" id="tg-pips"></div>
     <button class="st-btn st-btn-primary" id="tg-continue-btn" type="button">Continue &rarr;</button>
   </div>
 </div>
@@ -274,11 +269,11 @@
      data-start="{% static 'audio/start.mp3' %}"
      data-start1="{% static 'audio/start1.mp3' %}"
      data-wallpapers="{% url 'wallpaper_list' %}"
-     data-livebg="{% static 'js/live_bg.js' %}?v=19"></div>
+     data-livebg="{% static 'js/live_bg.js' %}?v=22"></div>
 
 </div><!-- /.st-root -->
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/study.js' %}?v=5"></script>
+<script src="{% static 'js/study.js' %}?v=7"></script>
 {% endblock %}

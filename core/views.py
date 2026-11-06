@@ -194,7 +194,16 @@ def _clean_session(item):
     if mode not in dict(StudySession.MODE_CHOICES):
         mode = 'daily'
     subject = str(item.get('subject') or 'Study')[:120]
-    return {'date': day, 'subject': subject, 'hours': hours, 'mode': mode}
+    out = {'date': day, 'subject': subject, 'hours': hours, 'mode': mode}
+    run = str(item.get('run') or '')[:40]
+    if run:
+        try:
+            rounds = max(1, min(int(item.get('rounds', 1)), 99))
+            rnd = max(1, min(int(item.get('round', 1)), rounds))
+        except (ValueError, TypeError):
+            rounds, rnd = 1, 1
+        out.update({'run': run, 'round': rnd, 'rounds': rounds})
+    return out
 
 
 @login_required

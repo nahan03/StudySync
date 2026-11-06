@@ -288,7 +288,7 @@
     syncPrefsFromForm();
     const t = readTimer();
     return {
-      v: 1, phase: 'focus', round: 1, total: t.focus * 60, remaining: t.focus * 60, endAt: null, running: false,
+      v: 1, id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), phase: 'focus', round: 1, total: t.focus * 60, remaining: t.focus * 60, endAt: null, running: false,
       subject: F.subject.value.trim() || 'Study', goal: F.goal.value.trim(), focusDone: 0, focusMins: 0, startedAt: Date.now(),
       cfg: Object.assign({}, t, {
         autoBreak: F.autoBreak.checked, autoFocus: F.autoFocus.checked,
@@ -308,7 +308,7 @@
   }
 
   function recordSession(minutes) {
-    const entry = { date: new Date().toISOString().split('T')[0], subject: run.subject, hours: minutes / 60, mode: 'study' };
+    const entry = { date: new Date().toISOString().split('T')[0], subject: run.subject, hours: minutes / 60, mode: 'study', run: run.id, round: run.focusDone, rounds: run.cfg.rounds };
     const hist = load(HIST_KEY, []);
     hist.push(entry);
     save(HIST_KEY, hist);
@@ -364,15 +364,35 @@
   function treeKind() {
     return window.TreeArt ? window.TreeArt.getTreeForSubject(run ? run.subject : prefs.subject) : { kind: 'oak', name: 'Oak' };
   }
+  // growth of this run's tree: finished rounds plus the part of the current focus round already done
+  function treeG() {
+    if (!run) return 0;
+    if (run.phase === 'done') return 1;
+    let g = run.focusDone;
+    if (run.phase === 'focus') g += Math.max(0, Math.min(1, 1 - remainingSecs() / (run.total || 1)));
+    return Math.max(0, Math.min(1, g / run.cfg.rounds));
+  }
+  const stageLabel = g => (g >= 1 ? 'Full canopy' : g > 0.75 ? 'Mature tree' : g > 0.5 ? 'Young tree' : g > 0.28 ? 'Sapling' : g > 0.1 ? 'Sprout' : 'Seed');
+  let treeMount = null, treeMountKey = '';
   function renderTreeCard() {
-    if (!window.TreeArt) return;
-    const n = load(HIST_KEY, []).length, k = n % 5, kind = treeKind();
-    const sc = [0.5, 0.58, 0.68, 0.8, 0.92][k];
-    $('st-tree-art').innerHTML = window.TreeArt.treeSvg(k <= 1 ? 'sprout' : kind.kind, window.TreeArt.hashStr(run.subject + ':card'));
-    $('st-tree-art').firstChild.style.transform = `scale(${sc})`;
+    if (!window.TreeGrow || !run) return;
+    const kind = treeKind(), key = run.id + kind.kind, holder = $('st-tree-art');
+    if (treeMountKey !== key || !holder.firstChild || !holder.firstChild.isConnected) {
+      if (treeMount) treeMount.stop();
+      holder.innerHTML = '';
+      const cv = document.createElement('canvas'); cv.width = 110; cv.height = 150; holder.appendChild(cv);
+      const seed = window.TreeArt ? window.TreeArt.hashStr(run.id) % 997 : 1;
+      treeMount = window.TreeGrow.mount(cv, () => ({ kind: kind.kind, g: Math.max(0.05, treeG()), seed, detail: 0.5 }), { W: 110, H: 150 });
+      treeMountKey = key;
+    }
+    updateTreeText();
+  }
+  function updateTreeText() {
+    if (!run || !$('st-tree-title')) return;
+    const kind = treeKind(), g = treeG(), c = run.cfg;
     $('st-tree-title').textContent = `Growing ${/^[aeiou]/i.test(kind.name) ? 'an' : 'a'} ${kind.name}`;
-    $('st-progress-fill').style.width = (k / 5 * 100) + '%';
-    $('st-tree-sub').textContent = `${k} / 5 sessions until this tree is fully grown`;
+    $('st-progress-fill').style.width = (g * 100).toFixed(1) + '%';
+    $('st-tree-sub').textContent = `${stageLabel(g)} · ${Math.min(run.focusDone, c.rounds)} of ${c.rounds} rounds done`;
   }
 
   function render() {
@@ -400,13 +420,14 @@
     $('st-toggle').textContent = run.running ? 'Pause' : (fresh ? (run.phase === 'focus' ? 'Start focus' : 'Start break') : 'Resume');
     $('st-skip').textContent = run.phase === 'focus' ? 'Finish early' : 'Skip break →';
     document.title = `${mmss(secs)} · ${LABELS[run.phase] || ''} — StudySync`;
+    updateTreeText();
   }
 
   function showDone() {
     const c = run.cfg;
     $('st-done-text').textContent =
       `${run.focusDone} focus round${run.focusDone === 1 ? '' : 's'} · ${fmtMins(run.focusMins)} of focus on ${run.subject}. ` +
-      `Every round counts toward your next tree.`;
+      (run.focusDone >= run.cfg.rounds ? 'Your tree is fully grown and planted in your forest.' : 'Your tree keeps what it grew so far.');
     show('done');
     stopTick();
     document.title = 'Session complete — StudySync';
@@ -471,44 +492,39 @@
   });
 
   /* ---------- tree growth overlay ---------- */
-  const STAGE_LABELS = ['The Seed', 'Sprout', 'Sapling', 'Young Tree', 'Grown Tree', 'Full Canopy'];
-  const STAGE_FACTS = [
-    '', 'A seed of knowledge planted. Your tree just sprouted its first leaves.',
-    'Two sessions strong: your sapling is reaching for the light.',
-    'Three sessions in. Roots are spreading and the trunk is thickening.',
-    'One more to go. Your tree is nearly fully grown.',
+  const FACTS = [
+    'A seed of knowledge, planted.',
+    'Your tree has sprouted its first leaves.',
+    'A sapling, reaching for the light.',
+    'Roots are spreading and the trunk is thickening.',
+    'Branches are filling out and leaves are coming in.',
     'Fully grown! Your forest just got a new tree.',
   ];
-  function showGrowth(sessionNum) {
+  const factFor = g => FACTS[g >= 1 ? 5 : g > 0.75 ? 4 : g > 0.5 ? 3 : g > 0.28 ? 2 : g > 0.1 ? 1 : 0];
+  let overlayMount = null;
+  function showGrowth() {
     const overlay = $('tree-growth-overlay');
-    if (!overlay || !window.TreeArt) return;
-    const stage = ((sessionNum - 1) % 5) + 1, kind = treeKind();
-    $('tg-title').textContent = stage >= 5 ? `Session ${sessionNum} complete! Tree fully grown!` : `Session ${sessionNum} complete!`;
+    if (!overlay || !window.TreeGrow || !run) return;
+    const rounds = run.cfg.rounds, round = Math.min(run.focusDone, rounds), gFrom = (round - 1) / rounds, gTo = round / rounds, kind = treeKind();
+    $('tg-title').textContent = round >= rounds ? 'Tree fully grown! 🌳' : `Round ${round} of ${rounds} complete!`;
     $('tg-fact').textContent = '';
-    $('tg-stage').textContent = '';
+    $('tg-stage').textContent = stageLabel(gFrom);
     const goalBox = $('tg-goal-reflect');
     goalBox.classList.toggle('hidden', !run.goal);
     $('tg-goal-text').textContent = run.goal || '';
-    overlay.querySelectorAll('.tree-growth-pip').forEach(p => p.classList.toggle('done', +p.dataset.s <= stage));
+    $('tg-pips').innerHTML = Array.from({ length: rounds }, (_, i) => `<div class="tree-growth-pip${i < round ? ' done' : ''}" data-s="${i + 1}"></div>`).join('');
     overlay.classList.remove('hidden');
-
-    const holder = $('tg-tree-svg');
-    holder.innerHTML = '';
-    const seed = window.TreeArt.hashStr(run.subject + ':' + sessionNum);
-    let s = 0;
-    (function step() {
-      const k = s <= 1 ? 'sprout' : kind.kind;
-      const svg = window.TreeArt.treeSvg(k, seed);
-      holder.innerHTML = svg;
-      const scale = s === 0 ? 0.5 : s === 1 ? 0.8 : 0.5 + (s - 2) * 0.17;
-      holder.firstChild.style.width = '200px'; holder.firstChild.style.height = '220px';
-      holder.firstChild.style.transform = `scale(${Math.min(1, scale)})`;
-      $('tg-stage').textContent = STAGE_LABELS[s];
-      if (s < stage) { s++; setTimeout(step, 520); }
-      else setTimeout(() => { $('tg-fact').textContent = STAGE_FACTS[stage] || ''; }, 300);
-    })();
+    if (overlayMount) overlayMount.stop();
+    const t0 = performance.now(), dur = 2400, seed = window.TreeArt ? window.TreeArt.hashStr(run.id) % 997 : 1;
+    overlayMount = window.TreeGrow.mount($('tg-canvas'), () => {
+      const k = Math.max(0, Math.min(1, (performance.now() - t0 - 350) / dur)), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      return { kind: kind.kind, g: Math.max(0.05, gFrom + (gTo - gFrom) * e), seed, detail: 0.85, crown: gTo >= 1, wind: 0.6 };
+    }, { W: 260, H: 300 });
+    setTimeout(() => { $('tg-stage').textContent = stageLabel(gTo); }, 350 + dur * 0.55);
+    setTimeout(() => { $('tg-fact').textContent = factFor(gTo); }, 350 + dur + 200);
   }
   $('tg-continue-btn').addEventListener('click', () => {
+    if (overlayMount) { overlayMount.stop(); overlayMount = null; }
     $('tree-growth-overlay').classList.add('hidden');
     if (run && run.phase === 'done') showDone();
   });
@@ -526,12 +542,12 @@
   const BGS = [
     { id: 'theme',    name: 'Gradient',        prev: 'linear-gradient(180deg,#14301a,#050a04)' },
     { id: 'forest',   name: 'Enchanted forest', prev: 'radial-gradient(circle at 74% 14%,rgba(255,230,160,.55),transparent 42%),linear-gradient(180deg,#0d1c2e 0%,#1e3a34 55%,#0a1c10 56%,#050d08 100%)' },
-    { id: 'rain',     name: 'Rainstorm',       prev: 'repeating-linear-gradient(105deg,transparent 0 6px,rgba(190,210,235,.22) 6px 7px),linear-gradient(180deg,#0a101a,#1e2e3e)' },
+    { id: 'rain',     name: 'Rainy cabin window', prev: 'radial-gradient(ellipse at 78% 92%,rgba(255,170,90,.6),transparent 42%),repeating-linear-gradient(105deg,transparent 0 6px,rgba(190,210,235,.22) 6px 7px),linear-gradient(180deg,#0a101a,#1e2e3e)' },
     { id: 'stars',    name: 'Starry night',    prev: 'radial-gradient(circle at 80% 20%,#E9EFFA 0 7px,rgba(200,215,255,.3) 8px,transparent 30px),linear-gradient(180deg,#02040e,#0b1636 60%,#1a2a55)' },
     { id: 'aurora',   name: 'Aurora lake',     prev: 'radial-gradient(ellipse at 30% 40%,#2fe0a0,transparent 55%),radial-gradient(ellipse at 75% 55%,#9a5cf0,transparent 55%),linear-gradient(180deg,#02050e,#0a1c30 75%,#04101c 76%)' },
     { id: 'ocean',    name: 'Sunset ocean',    prev: 'linear-gradient(180deg,#1a2260,#a85a8a 38%,#f08a6a 54%,#f6c47c 55%,#4a5a96 58%,#08224a)' },
     { id: 'campfire', name: 'Campfire',        prev: 'radial-gradient(circle at 50% 82%,#ffcf6a,#e8641e 14%,rgba(232,80,20,.35) 30%,transparent 55%),linear-gradient(180deg,#03050e,#14122a)' },
-    { id: 'snow',     name: 'Snowy cabin',     prev: 'linear-gradient(180deg,#0e1c40,#6a7eb4 45%,#b49ac0 62%,#dfe8fa 63%,#f4f8ff)' },
+    { id: 'snow',     name: 'Cabin fireside',  prev: 'radial-gradient(circle at 86% 78%,#ffb060,rgba(255,140,60,.4) 18%,transparent 40%),linear-gradient(180deg,#0e1c40,#6a7eb4 55%,#dfe8fa)' },
     { id: 'sakura',   name: 'Cherry blossom',  prev: 'radial-gradient(circle at 85% 8%,#f6a8c0,transparent 30%),linear-gradient(180deg,#1e1a46,#a8689a 55%,#f6b8c4)' },
     { id: 'plain',    name: 'Plain',           prev: '#0b0f0a' },
     { id: 'image',    name: 'My picture',      prev: 'linear-gradient(135deg,#444,#888)' },
@@ -713,8 +729,35 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !drawer.hidden && drawer.isConnected) setOpen(false); });
   }
 
+  /* ---------- full screen: one button (or the F key); the controls fade away when the mouse is still ---------- */
+  function initFullscreen() {
+    const btn = $('st-fullscreen'), docEl = document.documentElement;
+    const request = docEl.requestFullscreen || docEl.webkitRequestFullscreen, exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (!btn || !request) { if (btn) btn.hidden = true; return; }
+    const isFs = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+    let idleTimer = null;
+    const nav = () => document.querySelector('.st-nav');
+    function wake() { const n = nav(); if (n) n.classList.remove('st-idle'); clearTimeout(idleTimer); if (isFs() && $('st-appearance').hidden) idleTimer = setTimeout(() => { const n2 = nav(); if (n2 && isFs()) n2.classList.add('st-idle'); }, 3000); }
+    function sync() {
+      const on = isFs();
+      btn.setAttribute('aria-pressed', String(on)); btn.querySelector('.st-fs-label').textContent = on ? 'Exit full screen' : 'Full screen';
+      root.dataset.fs = on ? '1' : '0'; wake();
+    }
+    function toggle() { try { const r = isFs() ? exit.call(document) : request.call(docEl); if (r && r.catch) r.catch(() => {}); } catch (e) { /* not allowed here */ } }
+    btn.addEventListener('click', toggle);
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(ev => document.addEventListener(ev, () => { if (root.isConnected) sync(); }));
+    ['mousemove', 'pointerdown', 'touchstart', 'keydown'].forEach(ev => document.addEventListener(ev, () => { if (root.isConnected && isFs()) wake(); }, { passive: true }));
+    document.addEventListener('keydown', e => {
+      if (!root.isConnected || e.key.toLowerCase() !== 'f' || e.ctrlKey || e.metaKey || e.altKey) return;
+      const tag = (e.target.tagName || '').toLowerCase(); if (['input', 'select', 'textarea'].includes(tag)) return;
+      e.preventDefault(); toggle();
+    });
+    sync();
+  }
+
   /* ---------- boot ---------- */
   initSetup();
+  initFullscreen();
   initAppearance();
   const saved = load(RUN_KEY, null);
   if (saved && saved.v === 1 && saved.cfg) {

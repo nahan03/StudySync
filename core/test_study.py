@@ -109,3 +109,50 @@ class FootageTests(TestCase):
         html = self.client.get(reverse('study')).content.decode()
         for marker in ('id="bg-video"', 'id="st-footage"', 'id="st-videofile"', 'data-wallpapers='):
             self.assertIn(marker, html, marker)
+
+
+@override_settings(STORAGES=STATIC_OVERRIDE)
+class TimerCycleTests(TestCase):
+    """A tree grows over one run of the timer the user chose, not a fixed number of sessions."""
+
+    def setUp(self):
+        self.user = User.objects.create_user('alice', password='pw12345!')
+        self.client.force_login(self.user)
+
+    def record(self, payload):
+        return self.client.post(reverse('record_sessions'), json.dumps(payload), content_type='application/json')
+
+    def test_rounds_of_a_run_are_stored_and_returned(self):
+        self.record({'sessions': [
+            {'date': '2026-11-06', 'hours': 0.4, 'mode': 'study', 'run': 'rabc', 'round': 1, 'rounds': 3},
+            {'date': '2026-11-06', 'hours': 0.4, 'mode': 'study', 'run': 'rabc', 'round': 2, 'rounds': 3},
+        ]})
+        sessions = self.client.get(reverse('list_sessions')).json()['sessions']
+        self.assertEqual([(s['run'], s['round'], s['rounds']) for s in sessions], [('rabc', 1, 3), ('rabc', 2, 3)])
+
+    def test_round_numbers_are_clamped_and_old_entries_have_no_run(self):
+        self.record({'date': '2026-11-06', 'hours': 1, 'mode': 'study', 'run': 'r1', 'round': 50, 'rounds': 4})
+        self.record({'date': '2026-11-06', 'hours': 1, 'mode': 'daily'})
+        a, b = StudySession.objects.order_by('id')
+        self.assertEqual((a.round, a.rounds), (4, 4))
+        self.assertEqual(b.run, '')
+        self.assertNotIn('run', b.as_dict())
+
+    def test_garbage_cycle_values_do_not_break_saving(self):
+        r = self.record({'date': '2026-11-06', 'hours': 1, 'run': 'r2', 'round': 'x', 'rounds': None})
+        self.assertEqual(r.json(), {'saved': 1})
+        self.assertEqual((StudySession.objects.get().round, StudySession.objects.get().rounds), (1, 1))
+
+    def test_study_page_uses_the_tree_canvas_and_has_fullscreen(self):
+        html = self.client.get(reverse('study')).content.decode()
+        for marker in ('id="tg-canvas"', 'id="tg-pips"', 'id="st-fullscreen"'):
+            self.assertIn(marker, html, marker)
+        self.assertNotIn('tg-tree-svg', html)
+        self.assertIn('js/tree_grow.js', html)
+
+    def test_cycle_length_is_not_hardcoded_to_five(self):
+        from django.conf import settings
+        js = (settings.BASE_DIR / 'core' / 'static' / 'js' / 'study.js').read_text(encoding='utf-8')
+        self.assertIn('run.cfg.rounds', js)
+        import re
+        self.assertIsNone(re.search(r'[\w)\]]\s*%\s*5(?!\d)(?!%)', re.sub(r"'[^']*'", "''", js)))

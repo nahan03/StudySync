@@ -398,3 +398,18 @@ body.study-page #gmp-bar { z-index: 40; }
 .st-footage-x { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border: none; border-radius: 50%; background: rgba(0,0,0,.6); color: #fff; font-size: 13px; line-height: 1; cursor: pointer; }
 .st-bgtile { position: relative; }
 @media (prefers-reduced-motion: reduce) { .bg-video { display: none !important; } }
+
+/* trees drawn by tree_grow.js */
+.st-root .st-tree-art { width: 110px; height: 150px; }
+.st-root .st-tree-art canvas { display: block; width: 100%; height: 100%; }
+.st-root .tree-growth-canvas { display: block; margin: 0 auto 10px; background: transparent; border-radius: 0; width: 260px; height: 300px; max-width: 100%; }
+.st-root .tree-growth-box { max-width: 420px; }
+.st-tree-card { gap: 22px; }
+
+/* full screen */
+.st-fs-btn { cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; line-height: normal; }
+.st-fs-ico { font-size: 15px; line-height: 1; }
+.st-nav { transition: opacity .45s ease; }
+.st-nav.st-idle { opacity: 0; pointer-events: none; }
+.st-root[data-fs="1"] .st-wrap { padding-top: 56px; }
+@media (max-width: 640px) { .st-fs-label { display: none; } }

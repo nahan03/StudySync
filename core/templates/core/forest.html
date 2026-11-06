@@ -323,15 +323,15 @@ body.forest-page {
   content: ''; position: absolute; left: 6%; right: 6%; bottom: -2px; height: 7%;
   border-radius: 50%; background: rgba(0,0,0,.32); filter: blur(3px); z-index: -1;
 }
-.ft svg {
+.ft canvas, .ft svg {
   display: block; width: 100%; height: 100%; overflow: visible; transform-origin: 50% 100%;
   animation: ft-sway var(--sw, 6s) ease-in-out var(--sd, 0s) infinite alternate;
   filter: drop-shadow(0 4px 5px rgba(0,0,0,.22));
   transition: filter .5s;
 }
 .ft[data-row="0"] svg { filter: saturate(.8) brightness(.9) drop-shadow(0 3px 4px rgba(0,0,0,.18)); }
-.fscene[data-time="dusk"]  .ft svg { filter: brightness(.78) saturate(.9) drop-shadow(0 4px 5px rgba(0,0,0,.3)); }
-.fscene[data-time="night"] .ft svg { filter: brightness(.55) saturate(.75) drop-shadow(0 4px 5px rgba(0,0,0,.4)); }
+.fscene[data-time="dusk"]  .ft canvas, .fscene[data-time="dusk"]  .ft svg { filter: brightness(.78) saturate(.9) drop-shadow(0 4px 5px rgba(0,0,0,.3)); }
+.fscene[data-time="night"] .ft canvas, .fscene[data-time="night"] .ft svg { filter: brightness(.55) saturate(.75) drop-shadow(0 4px 5px rgba(0,0,0,.4)); }
 .fscene[data-time="night"] .ft svg.t-cyber { filter: brightness(1.1) drop-shadow(0 0 9px rgba(24,196,196,.85)); }
 .ft:hover svg, .ft:focus-visible svg { animation-play-state: paused; }
 .ft:focus-visible { outline: 2px solid rgba(255,255,255,.75); outline-offset: 4px; border-radius: 10px; }
@@ -390,9 +390,9 @@ body.forest-page {
 
 /* artwork in the collection grid + legend */
 .tree-art { display: block; width: 62px; height: 87px; margin: 0 auto 10px; }
-.tree-art svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.tree-art svg, .tree-art canvas { display: block; width: 100%; height: 100%; overflow: visible; }
 .legend-tree { display: inline-block; width: 17px; height: 24px; }
-.legend-tree svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.legend-tree svg, .legend-tree canvas { display: block; width: 100%; height: 100%; overflow: visible; }
 
 @media (max-width: 700px) {
   .fscene { height: 330px; --u: .78; border-radius: 18px; }
@@ -401,7 +401,7 @@ body.forest-page {
 @media (max-width: 420px) { .fscene { height: 290px; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .ft svg, .ft.is-new, .fs-cloud, .fs-mote, .fs-stars i { animation: none !important; }
+  .ft canvas, .ft svg, .ft.is-new, .fs-cloud, .fs-mote, .fs-stars i { animation: none !important; }
   .fs-cloud { left: 20%; }
 }
 </style>
@@ -566,17 +566,37 @@ const sessions   = history.length;
 const hours      = history.reduce((s, h) => s + (h.hours || 0), 0);
 const streak     = streakData.count || 0;
 
-// Every 5 completed sessions plants one tree; subject = most common in that group
+// A tree grows over one run of the timer the user chose: its size is rounds finished / rounds planned.
+// Sessions saved before runs existed are grouped five at a time, as they used to be.
+const topSubject = counts => { const e = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]; return e ? e[0] : 'General'; };
+const activeRun = (() => { const r = read('studySyncStudyRun', null); return r && r.cfg && r.phase && r.phase !== 'done' ? r : null; })();
+const legacy = [], runMap = new Map();
+history.forEach(h => {
+  if (!h) return;
+  if (h.run) {
+    let r = runMap.get(h.run);
+    if (!r) { r = { id: h.run, subjects: {}, done: 0, rounds: h.rounds || 1, date: h.date }; runMap.set(h.run, r); }
+    r.done++; r.rounds = Math.max(r.rounds, h.rounds || 1); r.date = h.date || r.date;
+    if (h.subject) r.subjects[h.subject] = (r.subjects[h.subject] || 0) + 1;
+  } else legacy.push(h);
+});
 const trees = [];
-for (let i = 0; i + 5 <= sessions; i += 5) {
-  const group = history.slice(i, i + 5);
-  const counts = {};
+for (let i = 0; i + 5 <= legacy.length; i += 5) {
+  const group = legacy.slice(i, i + 5), counts = {};
   group.forEach(h => { if (h.subject) counts[h.subject] = (counts[h.subject] || 0) + 1; });
-  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
-  trees.push({ subject: top ? top[0] : 'General', date: (group[group.length - 1] || {}).date || '' });
+  trees.push({ id: 'legacy' + i, subject: topSubject(counts), date: (group[group.length - 1] || {}).date || '', growth: 1, complete: true, done: 5, rounds: 5 });
 }
-const treesCount = trees.length;
-const sessionsIntoNextTree = sessions % 5;
+if (legacy.length % 5) {
+  const rest = legacy.slice(legacy.length - legacy.length % 5), counts = {};
+  rest.forEach(h => { if (h.subject) counts[h.subject] = (counts[h.subject] || 0) + 1; });
+  trees.push({ id: 'legacyrest', subject: topSubject(counts), date: (rest[rest.length - 1] || {}).date || '', growth: rest.length / 5, complete: false, done: rest.length, rounds: 5 });
+}
+runMap.forEach(r => {
+  if (activeRun && activeRun.id === r.id) return; // the run in progress is the sapling at the edge of the scene
+  trees.push({ id: r.id, subject: topSubject(r.subjects), date: r.date, growth: Math.min(1, r.done / r.rounds), complete: r.done >= r.rounds, done: r.done, rounds: r.rounds });
+});
+const treesCount = trees.filter(t => t.complete).length, growingCount = trees.length - treesCount;
+const progDone = activeRun ? (activeRun.focusDone || 0) : 0, progTotal = activeRun ? activeRun.cfg.rounds : 0;
 
 /* ── Stats cards ── */
 const $ = id => document.getElementById(id);
@@ -585,17 +605,17 @@ $('statSessions').textContent = sessions;
 $('statHours').textContent    = hours.toFixed(1);
 $('statTrees').textContent    = treesCount;
 
-/* ── Progress bar ── */
-$('progressFill').style.width = (sessionsIntoNextTree / 5 * 100) + '%';
-$('nextTreeSessions').innerHTML = '<strong>' + sessionsIntoNextTree + ' / 5</strong> sessions toward your next tree';
-$('nextTreeEmoji').textContent = ['🌱', '🌿', '🌳', '🌲', '🎋'][sessionsIntoNextTree] || '🌱';
-$('nextTreeTitle').textContent = [
-  'Plant your first tree — start a session!',
-  'One session down, four to go 🌱',
-  'Halfway there, keep growing 🌿',
-  'Almost there, one more push 💪',
-  'One session away from a new tree! 🌳',
-][sessionsIntoNextTree] || 'Keep going';
+/* ── Progress bar: the run in progress ── */
+const progPct = progTotal ? Math.min(100, progDone / progTotal * 100) : 0;
+$('progressFill').style.width = progPct + '%';
+$('nextTreeSessions').innerHTML = progTotal
+  ? '<strong>' + progDone + ' / ' + progTotal + '</strong> rounds of your current timer'
+  : 'A tree grows over one full run of your timer';
+$('nextTreeEmoji').textContent = !progTotal ? '🌱' : progPct < 34 ? '🌱' : progPct < 67 ? '🌿' : '🌳';
+$('nextTreeTitle').textContent = !progTotal ? 'Start a study session to plant a tree'
+  : progDone >= progTotal ? 'Your tree is fully grown! 🌳'
+  : progDone === 0 ? 'Your tree is a seed — finish a focus round to grow it'
+  : (progTotal - progDone) === 1 ? 'One more round and this tree is fully grown 🌳' : (progTotal - progDone) + ' more rounds to a fully grown tree 🌿';
 
 /* ══════════════════════════════════════════
    FOREST SCENE
@@ -611,7 +631,8 @@ function saveSeen(n) { try { localStorage.setItem('studySyncForestSeen', String(
 
 const seenBefore = loadSeen();
 const newCount = seenBefore === null ? 0 : Math.max(0, treesCount - seenBefore);
-const firstNewIndex = treesCount - newCount;
+const completeIdx = []; trees.forEach((t, i) => { if (t.complete) completeIdx.push(i); });
+const newSet = new Set(completeIdx.slice(Math.max(0, completeIdx.length - newCount)));
 
 function layout(n) {
   // returns [{row, x}] for n trees. Rows: 0 back, 1 middle, 2 front.
@@ -650,46 +671,46 @@ function addTree(opts) {
   el.setAttribute('role', 'img');
   el.setAttribute('aria-label', opts.label);
   el.dataset.tip = opts.tip;
-  el.innerHTML = opts.svg;
+  if (opts.node) { el.appendChild(opts.node); el.classList.add('has-canvas'); } else el.innerHTML = opts.svg || '';
   treesEl.appendChild(el);
   return el;
 }
 
 function buildScene() {
   treesEl.innerHTML = '';
-  const start = Math.max(0, treesCount - MAX_VISIBLE);
+  const start = Math.max(0, trees.length - MAX_VISIBLE);
   const shown = trees.slice(start);
   const pos = layout(shown.length);
   shown.forEach((t, k) => {
     const idx = start + k, kind = getTreeForSubject(t.subject);
-    const seed = hashStr(t.subject + ':' + idx);
+    const seed = hashStr(t.id + ':' + t.subject);
     const rowDef = ROW[pos[k].row];
-    const isNew = idx >= firstNewIndex && newCount > 0;
+    const isNew = newSet.has(idx);
     const date = prettyDate(t.date);
+    const status = t.complete ? `${t.rounds} rounds · fully grown` : `${t.done} of ${t.rounds} rounds`;
     addTree({
       x: pos[k].x, row: pos[k].row, scale: rowDef.s, bottom: rowDef.b + (rng(seed)() - 0.5) * 0.03,
-      seed, isNew, delay: 0.5 + (idx - firstNewIndex) * 0.7,
-      svg: treeSvg(kind.kind, seed),
-      label: `Tree ${idx + 1}: ${t.subject}, ${kind.name}`,
-      tip: `<strong>${esc(t.subject)}</strong><span>${esc(kind.name)} · tree #${idx + 1}${date ? ' · ' + esc(date) : ''}</span>`,
+      seed, isNew, delay: 0.5 + [...newSet].indexOf(idx) * 0.7,
+      node: window.TreeGrow.canvas(200, 280, { kind: kind.kind, g: t.growth, seed: seed % 997, detail: 0.5, crown: t.complete }),
+      label: `${t.subject}, ${kind.name}, ${status}`,
+      tip: `<strong>${esc(t.subject)}</strong><span>${esc(kind.name)} · ${esc(status)}${date ? ' · ' + esc(date) : ''}</span>`,
     });
   });
 
-  // The sapling for the next tree: grows with the sessions completed towards it.
-  const k = sessionsIntoNextTree;
-  const stageKind = k <= 1 ? 'sprout' : 'oak';
-  const sc = [0.34, 0.4, 0.5, 0.62, 0.78][k];
+  // The sapling at the edge of the scene is the run in progress: it is exactly as grown as that run.
+  const sk = activeRun ? getTreeForSubject(activeRun.subject) : getTreeForSubject(''), sg = progTotal ? Math.min(1, progDone / progTotal) : 0;
   addTree({
-    x: 92, row: 2, scale: sc, bottom: ROW[2].b, seed: 99, className: 'ft-next',
-    svg: treeSvg(stageKind, 4242),
-    label: `Next tree: ${k} of 5 sessions`,
-    tip: `<strong>Next tree</strong><span>${k} / 5 sessions · ${5 - k} to go</span>`,
+    x: 92, row: 2, scale: 0.55 + 0.45 * sg, bottom: ROW[2].b, seed: 99, className: 'ft-next',
+    node: window.TreeGrow.canvas(200, 280, { kind: sk.kind, g: Math.max(0.05, sg), seed: 42, detail: 0.5 }),
+    label: progTotal ? `Growing now: ${progDone} of ${progTotal} rounds` : 'Next tree: not started',
+    tip: progTotal ? `<strong>Growing now</strong><span>${progDone} / ${progTotal} rounds of your timer</span>` : '<strong>Next tree</strong><span>Start a study session to plant it</span>',
   });
 
   const caption = $('fsCaption');
-  if (treesCount === 0) caption.textContent = 'Your first tree grows after 5 sessions';
-  else if (newCount > 0) caption.textContent = `${treesCount} tree${treesCount === 1 ? '' : 's'} · ${newCount} new since your last visit ✨`;
-  else caption.textContent = `${treesCount} tree${treesCount === 1 ? '' : 's'}` + (treesCount > MAX_VISIBLE ? ` · showing the latest ${MAX_VISIBLE}` : '');
+  const grow = growingCount ? ` · ${growingCount} still growing` : '';
+  if (treesCount === 0 && !growingCount) caption.textContent = 'Finish a full timer run to plant your first tree';
+  else if (newCount > 0) caption.textContent = `${treesCount} tree${treesCount === 1 ? '' : 's'}${grow} · ${newCount} new since your last visit ✨`;
+  else caption.textContent = `${treesCount} tree${treesCount === 1 ? '' : 's'}${grow}` + (trees.length > MAX_VISIBLE ? ` · showing the latest ${MAX_VISIBLE}` : '');
 }
 
 /* ── time of day ── */
@@ -803,29 +824,31 @@ if (trees.length === 0) {
     <div class="forest-empty">
       <span class="forest-empty-icon">🌱</span>
       <div class="forest-empty-title">Your forest is empty</div>
-      <p class="forest-empty-sub">Complete 5 study sessions to plant your first tree. Every subject grows a different kind.</p>
+      <p class="forest-empty-sub">Finish a full run of your study timer to plant your first tree. The more rounds you plan, the longer it takes to grow, and every subject grows a different kind.</p>
       <a href="/" class="forest-empty-btn">🌿 Start a session</a>
     </div>`;
 } else {
   const subjectsSeen = [...new Set(trees.map(t => t.subject))];
   const legendHtml = subjectsSeen.map(sub => {
     const tree = getTreeForSubject(sub);
-    return `<div class="legend-item"><span class="legend-tree">${treeSvg(tree.kind, hashStr(sub))}</span>${esc(sub)} — ${esc(tree.name)}</div>`;
+    return `<div class="legend-item"><span class="legend-tree" data-kind="${tree.kind}"></span>${esc(sub)} — ${esc(tree.name)}</div>`;
   }).join('');
   const gridHtml = trees.map((t, i) => {
     const tree = getTreeForSubject(t.subject), date = prettyDate(t.date);
     return `
       <div class="tree-card" style="animation-delay:${Math.min(i, 20) * 0.05}s">
         <span class="tree-num">#${i + 1}</span>
-        <span class="tree-art">${treeSvg(tree.kind, hashStr(t.subject + ':' + i))}</span>
+        <span class="tree-art" data-i="${i}"></span>
         <div class="tree-subject">${esc(t.subject || 'General')}</div>
-        <div class="tree-stage">${esc(tree.name)}${date ? ' · ' + esc(date) : ''}</div>
+        <div class="tree-stage">${esc(tree.name)} · ${t.complete ? 'fully grown' : t.done + '/' + t.rounds + ' rounds'}${date ? ' · ' + esc(date) : ''}</div>
       </div>`;
   }).join('');
   forestSection.innerHTML = `
     <div class="forest-section-title">🌲 Your trees (${trees.length})</div>
     <div class="legend">${legendHtml}</div>
     <div class="forest-grid">${gridHtml}</div>`;
+  forestSection.querySelectorAll('.tree-art').forEach(el => { const t = trees[+el.dataset.i], kind = getTreeForSubject(t.subject); el.appendChild(window.TreeGrow.canvas(124, 174, { kind: kind.kind, g: t.growth, seed: hashStr(t.id) % 997, detail: 0.4 })); });
+  forestSection.querySelectorAll('.legend-tree').forEach(el => el.appendChild(window.TreeGrow.canvas(60, 84, { kind: el.dataset.kind, g: 1, seed: 7, detail: 0.35 })));
 }
 
 /* ══════════════════════════════════════════
