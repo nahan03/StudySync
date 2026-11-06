@@ -819,16 +819,24 @@
       s.skins = [[255, 226, 200], [241, 200, 164], [214, 164, 122], [176, 123, 84], [128, 84, 56], [88, 56, 40]];   // very fair .. deep brown
       s.hats = [[222, 220, 232], [160, 44, 56], [40, 40, 52], [226, 176, 80], [60, 110, 150]];
       const pk = arr => arr[Math.floor(r() * arr.length)];
-      s.skaters = [[0.5, 0.2, -1], [0.78, 0.55, 1], [0.9, 0.38, -1], [0.62, 0.72, 1], [0.3, 0.45, 1]].map(([fx, f, dir], i) => ({ skin: s.skins[[1, 4, 0, 5, 3][i]], bare: r() < 0.4, helper: null, target: null, reach: 0, side: 1, aided: false, slide: 0, k: 30, skate: true, near: false, dir, x: W * fx, f, v: 26 + r() * 22, ph: r() * 6, st: 'skate', fall: 0, t: 6 + r() * 26, coat: pk(s.coats), hat: pk(s.hats), scarf: pk(s.coats) }));
+      s.skaters = [[0.5, 0.2, -1], [0.78, 0.55, 1], [0.9, 0.38, -1], [0.62, 0.72, 1], [0.3, 0.45, 1]].map(([fx, f, dir], i) => ({ skin: s.skins[[1, 4, 0, 5, 3][i]], bare: r() < 0.4, helper: null, target: null, reach: 0, side: 1, aided: false, slide: 0, k: 30, skate: true, near: false, dir, x: W * fx, f, v: 26 + r() * 22, ph: r() * 6, talk: 0, sayPh: r() * 6, mission: 'help', st: 'skate', fall: 0, t: 6 + r() * 26, coat: pk(s.coats), hat: pk(s.hats), scarf: pk(s.coats) }));
+      s.talkers = []; s.puffs = []; s.chatT = 14 + r() * 10;
+      { const mkT = (near, x, dir, sayPh) => ({ talk: 1, near, dir, x, ph: r() * 6, sayPh, coat: pk(s.coats), hat: pk(s.hats), scarf: pk(s.coats), skin: pk(s.skins), bare: r() < 0.35, puffT: r() * 2 });
+        const ux = u => W * (0.19 + 0.85 * u), kk = u => (96 + 150 * u) * sc;
+        s.talkers.push(mkT(true, ux(0.55), 1, 0), mkT(true, ux(0.55) + kk(0.58) * 0.62, -1, Math.PI), mkT(false, W * 0.43, 1, 0), mkT(false, W * 0.43 + 22 * sc, -1, Math.PI)); }
+      s.breath = (p, x, y, k, dt) => {   // a little cloud of cold breath while someone is talking
+        if ((p.talk || 0) < 0.8) return; p.puffT = (p.puffT || 0) - dt;
+        if (p.puffT <= 0) { p.puffT = 1.4 + Math.random() * 1.8; s.puffs.push({ x: x + p.dir * k * 0.08, y: y - k * 0.9, vx: p.dir * k * 0.12, vy: -k * 0.1, life: 1.6, max: 1.6, sz: k * 0.1 }); }
+      };
       s.drawPerson = (ctx, p, x, y, k) => {
         /* a walker in profile, ~9 heads tall: two-segment legs with a bending knee, long winter coat, swinging arms, scarf and hat,
            lit warmly on the side that faces the lamp */
-        const LB = 0.45, ph = p.ph, hip = -0.5 * k, sh = -0.8 * k, bob = p.skate ? 0 : Math.abs(Math.sin(ph)) * k * 0.012;
+        const LB = 0.45, tk = p.talk || 0, ph = p.ph, hip = -0.5 * k, sh = -0.8 * k, bob = p.skate || tk ? 0 : Math.abs(Math.sin(ph)) * k * 0.012;
         const lampSide = Math.sign(s.lamp.x - x) * p.dir || 1, lampK = clamp(1 - Math.abs(s.lamp.x - x) / (W * 0.7), 0, 1);
         const joint = (x0, y0, ang, len) => [x0 + Math.sin(ang) * len, y0 + Math.cos(ang) * len];
         const leg = (phi, isNear) => {
           const pu = Math.max(0, Math.sin(phi));   // skating: one leg glides, the other pushes out behind and lifts
-          const th = p.skate ? 0.16 - 0.8 * pu : 0.46 * Math.sin(phi), bend = p.skate ? 0.42 * (1 - pu) + 0.08 * pu : 0.12 + 0.75 * Math.max(0, Math.sin(phi + 1.15)), ang0 = th - bend;
+          const th0 = p.skate ? 0.16 - 0.8 * pu : 0.46 * Math.sin(phi), bend0 = p.skate ? 0.42 * (1 - pu) + 0.08 * pu : 0.12 + 0.75 * Math.max(0, Math.sin(phi + 1.15)), th = th0 + ((isNear ? 0.1 : -0.06) - th0) * tk, bend = bend0 + (0.06 - bend0) * tk, ang0 = th - bend;
           const thE = th + ((isNear ? 2.0 : 1.5) - LB - th) * fa, saE = ang0 + ((isNear ? 1.2 : 1.5) - LB - ang0) * fa;   // seated: thigh forward, shin out or down
           const kn = joint(0, hip - bob, thE, 0.25 * k), an = joint(kn[0], kn[1], saE, 0.25 * k);
           return { kn, an, ang: saE };
@@ -840,7 +848,9 @@
         };
         const drawArm = (phi, col, glove) => {
           const a1b = p.skate ? (0.8 * Math.sin(phi)) * (1 - fa) - 0.8 * fa + fw * 1.5 * Math.sin(phi * 1.7 + 1) : -0.42 * Math.sin(phi),
-              a1 = p.reach ? a1b * (1 - p.reach) + (1.3 * (p.side || 1) + 0.1 * Math.sin(phi)) * p.reach : a1b, el = joint(0, sh + k * 0.02 - bob, a1, 0.17 * k), a2 = a1 + (p.skate ? 0.15 * (1 - fa) - 0.05 * fa : 0.25 + 0.35 * Math.max(0, Math.sin(phi + 0.6))), hd = joint(el[0], el[1], a2, 0.16 * k);
+              a1r = p.reach ? a1b * (1 - p.reach) + (1.3 * (p.side || 1) + 0.1 * Math.sin(phi)) * p.reach : a1b,
+              say = clamp(0.5 + 0.9 * Math.sin(ph * 0.33 + (p.sayPh || 0)), 0, 1), gest = 0.25 + 0.95 * say * Math.abs(Math.sin(phi * 1.7 + 0.4)),   // talking: the hands come up while they speak
+              a1 = a1r + (gest - a1r) * tk, el = joint(0, sh + k * 0.02 - bob, a1, 0.17 * k), a2 = a1 + (p.skate ? 0.15 * (1 - fa) - 0.05 * fa : 0.25 + 0.35 * Math.max(0, Math.sin(phi + 0.6))) + tk * (0.3 + 0.6 * say), hd = joint(el[0], el[1], a2, 0.16 * k);
           ctx.strokeStyle = col; ctx.lineCap = 'round'; ctx.lineWidth = k * 0.062; ctx.beginPath(); ctx.moveTo(0, sh + k * 0.02 - bob); ctx.lineTo(el[0], el[1]); ctx.lineWidth = k * 0.054; ctx.lineTo(hd[0], hd[1]); ctx.stroke();
           ctx.fillStyle = p.bare ? rgb(p.skin || [222, 184, 164]) : glove; ctx.beginPath(); ctx.arc(hd[0], hd[1], k * 0.03, 0, TAU); ctx.fill();
         };
@@ -848,7 +858,7 @@
         ctx.save(); ctx.translate(x, y); ctx.scale(p.dir, 1);
         if (p.skate) { const rg = ctx.createLinearGradient(0, 0, 0, k * 0.55); rg.addColorStop(0, rgb(p.coat, 0.3)); rg.addColorStop(1, rgb(p.coat, 0)); ctx.fillStyle = rg; ctx.fillRect(-k * 0.12, 0, k * 0.24, k * 0.55); }   // coat colour mirrored in the ice
         const fl = p.skate ? clamp(p.fall || 0, 0, 1) : 0, fa = fl * fl * (3 - 2 * fl), fw = p.skate ? 4 * fl * (1 - fl) : 0;   // fa: 0 upright .. 1 sitting on the ice; fw: arm-flailing, strongest mid-fall
-        ctx.translate(0, k * 0.46 * fa); ctx.rotate(p.skate ? 0.13 * (1 - fa) : 0.025);
+        ctx.translate(0, k * 0.46 * fa); ctx.rotate(p.skate ? 0.13 * (1 - fa) * (1 - tk) : 0.025);
         if (fa > 0) { ctx.translate(0, hip); ctx.rotate(-LB * fa); ctx.translate(0, -hip); }   // lean back from the hips
         // soft shadow stretched away from the lamp
         ctx.fillStyle = 'rgba(14,10,28,.38)'; ctx.beginPath(); ctx.ellipse(-lampSide * p.dir * k * 0.12, 0, k * 0.26, k * 0.05, 0, 0, TAU); ctx.fill();
@@ -879,6 +889,7 @@
       a.put(s.back, 0, 0);
       ctx.drawImage(s.shore, 0, 0, W, H);
       // ---- walkers: spawn now and then, move along their lane, swing their legs ----
+      s.talkers.forEach(p => { p.ph += dt * 1.2; });
       s.nextPerson -= dt;
       if (s.nextPerson <= 0 && s.people.length < 5) {
         s.nextPerson = 9 + Math.random() * 16; const near = Math.random() < 0.72, dir = Math.random() < 0.5 ? 1 : -1, pair = near && Math.random() < 0.45, pick = arr => arr[Math.floor(Math.random() * arr.length)];
@@ -888,7 +899,7 @@
       }
       s.people.forEach(p => { p.x += p.dir * p.v * dt * (p.near ? 0.4 + 0.9 * clamp((p.x / W - 0.19) / 0.85, 0, 1) : 1); p.ph += dt * (p.near ? 5.2 : 3.4); });
       s.people = s.people.filter(p => p.dir > 0 ? p.x < (p.near ? W * 1.14 : W * 0.6) : p.x > (p.near ? W * 0.16 : W * 0.14));
-      s.people.filter(p => !p.near).forEach(p => s.drawPerson(ctx, p, p.x, shoreY + 4 * sc, 26 * sc));
+      s.people.filter(p => !p.near).concat(s.talkers.filter(p => !p.near)).forEach(p => { s.drawPerson(ctx, p, p.x, shoreY + 4 * sc, 26 * sc); s.breath(p, p.x, shoreY + 4 * sc, 26 * sc, dt); });
       a.put(s.river, 0, 0);
       // reflections: soft vertical smears that wobble sideways, stronger near the surface
       ctx.globalCompositeOperation = 'lighter';
@@ -896,6 +907,12 @@
       for (let k = 0; k < 8; k++) { const ry = shoreY + 6 * sc + k * (H * 0.034), off = (a.n2(ry * 0.03, t * 0.5) - 0.5) * 4 * sc; ctx.globalAlpha = 0.22 * (1 - k / 9); ctx.drawImage(s.streak, W * 0.36 + off - 12 * sc, ry - H * 0.014, 26 * sc, H * 0.06); }
       s.win.forEach(wd => { ctx.globalAlpha = 0.5 + 0.2 * a.n2(t * 0.4 + wd.ph, 4); a.sprite(s.win_g, wd.x, wd.y, 38 * sc); });
       ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+      s.chatT -= dt;       // now and then two skaters stop to have a chat
+      if (s.chatT <= 0) {
+        s.chatT = 18 + Math.random() * 30;
+        const free = s.skaters.filter(q => q.st === 'skate' && q.t > 12);
+        if (free.length >= 2) { const A = free[Math.floor(Math.random() * free.length)], B = free.filter(q => q !== A).sort((m, n) => Math.abs(m.x - A.x) - Math.abs(n.x - A.x))[0]; A.st = 'wait'; A.t = 40; A.slide = 1; B.st = 'go'; B.target = A; B.t = 40; B.mission = 'chat'; }
+      }
       s.skaters.forEach(p => {
         const u0 = clamp((p.x / W - 0.19) / 0.85, 0, 1), top = shoreY + 14 * sc, bottom = s.edge(u0).y - 12 * sc;
         p.y = top + p.f * Math.max(8 * sc, bottom - top); p.k = (22 + 120 * clamp((p.y - shoreY) / (H * 0.3), 0, 1.1)) * sc;
@@ -907,7 +924,7 @@
           if (p.t <= 0) {                                    // trips; the nearest skater who is gliding comes to help
             p.st = 'fall'; p.t = 0.75; p.helper = null; p.slide = 0.7;
             const h = s.skaters.filter(q => q !== p && q.st === 'skate' && q.t > 4).sort((m, n) => Math.abs(m.x - p.x) - Math.abs(n.x - p.x))[0];
-            if (h && Math.random() < 0.85) { h.st = 'go'; h.target = p; h.t = 30; p.helper = h; }
+            if (h && Math.random() < 0.85) { h.st = 'go'; h.target = p; h.t = 30; h.mission = 'help'; p.helper = h; }
           }
         } else if (p.st === 'fall') {
           glide = p.slide; spin = 7; p.fall = Math.min(1, p.fall + dt / 0.75);
@@ -920,25 +937,32 @@
           if (p.t <= 0) { p.st = 'skate'; p.fall = 0; p.aided = false; p.t = 16 + Math.random() * 30; }
         } else if (p.st === 'go') {                           // skate over to the person on the ice
           const A = p.target;
-          if (!A || A.st === 'skate' || A.st === 'rise') { p.st = 'skate'; p.target = null; p.t = 10 + Math.random() * 10; }
+          if (!A || (p.mission === 'chat' ? A.st !== 'wait' && A.st !== 'chat' : A.st === 'skate' || A.st === 'rise')) { p.st = 'skate'; p.target = null; p.t = 10 + Math.random() * 10; }
           else {
-            const dx = A.x - p.x, gap = Math.max(A.k || 30, 30 * sc) * 0.78;
+            const dx = A.x - p.x, gap = Math.max(A.k || 30, 30 * sc) * (p.mission === 'chat' ? 0.62 : 0.78);
             p.dir = dx >= 0 ? 1 : -1; p.f += (A.f - p.f) * Math.min(1, dt * 0.9);
             glide = Math.abs(dx) <= gap ? 0 : Math.abs(dx) < gap * 3 ? 1.2 : 3.4;
-            if (Math.abs(dx) <= gap && A.st === 'down') { p.st = 'assist'; p.t = 2; A.st = 'rise'; A.t = 1.5; A.helper = null; A.aided = true; A.side = (p.x >= A.x ? 1 : -1) * A.dir; }
+            if (Math.abs(dx) <= gap && p.mission === 'chat' && A.st === 'wait') { p.st = 'chat'; p.t = A.t = 7 + Math.random() * 6; A.st = 'chat'; A.dir = p.x >= A.x ? 1 : -1; p.sayPh = 0; A.sayPh = Math.PI; }
+            else if (Math.abs(dx) <= gap && p.mission !== 'chat' && A.st === 'down') { p.st = 'assist'; p.t = 2; A.st = 'rise'; A.t = 1.5; A.helper = null; A.aided = true; A.side = (p.x >= A.x ? 1 : -1) * A.dir; }
           }
+        } else if (p.st === 'wait') {                         // slows to a stop and waits for a friend
+          p.slide *= Math.pow(0.2, dt); glide = p.slide; spin = 1;
+          if (p.t <= 0) { p.st = 'skate'; p.t = 14 + Math.random() * 20; }
+        } else if (p.st === 'chat') {                         // stand face to face and talk, then skate off together or apart
+          glide = 0; spin = 1.1;
+          if (p.t <= 0) { const o = s.skaters.find(q => q !== p && q.st === 'chat' && Math.abs(q.x - p.x) < 4 * (p.k || 30)), d = Math.sign(p.x - (o ? o.x : 0)) || 1, together = Math.random() < 0.5; p.st = 'skate'; p.t = 14 + Math.random() * 30; p.dir = d; if (o) { o.st = 'skate'; o.t = 14 + Math.random() * 30; o.dir = together ? d : -d; } }
         } else if (p.st === 'assist') {                      // stands there with a hand out until they are back on their feet
           glide = 0; spin = 0.3; want = 1; p.side = 1;
           if (p.t <= 0) { const A = p.target; p.st = 'skate'; p.t = 14 + Math.random() * 30; p.target = null; const d = Math.sign(p.x - (A ? A.x : 0)) || 1; p.dir = d; if (A) A.dir = d; }
         }
-        p.reach += (want - p.reach) * Math.min(1, dt * 6);
+        p.reach += (want - p.reach) * Math.min(1, dt * 6); p.talk += ((p.st === 'chat' ? 1 : 0) - p.talk) * Math.min(1, dt * 4);
         p.x = clamp(p.x + p.dir * p.v * sc * dep * dt * glide, W * 0.03, W * 1.0); p.ph += dt * spin;
         if (p.st === 'skate' && ((p.dir > 0 && p.x > W * 0.97) || (p.dir < 0 && p.x < W * 0.1))) p.dir = -p.dir;
       });
-      s.skaters.slice().sort((m, n) => (m.y - n.y) || ((m.st === 'assist') - (n.st === 'assist'))).forEach(p => s.drawPerson(ctx, p, p.x, p.y, p.k));
+      s.skaters.slice().sort((m, n) => (m.y - n.y) || ((m.st === 'assist') - (n.st === 'assist'))).forEach(p => { s.drawPerson(ctx, p, p.x, p.y, p.k); s.breath(p, p.x, p.y, p.k, dt); });
       ctx.drawImage(s.ground, 0, 0, W, H);
       ctx.drawImage(s.fence, 0, 0, W, H);
-      s.people.filter(p => p.near).sort((m, n) => m.x - n.x).forEach(p => { const u = clamp((p.x / W - 0.19) / 0.85, -0.2, 1.2), e = s.edge(u), k = (96 + 150 * u) * sc; s.drawPerson(ctx, p, p.x, e.y + (46 + 70 * u) * sc, k); });
+      s.people.filter(p => p.near).concat(s.talkers.filter(p => p.near)).sort((m, n) => m.x - n.x).forEach(p => { const u = clamp((p.x / W - 0.19) / 0.85, -0.2, 1.2), e = s.edge(u), k = (96 + 150 * u) * sc, y = e.y + (46 + 70 * u) * sc; s.drawPerson(ctx, p, p.x, y, k); s.breath(p, p.x, y, k, dt); });
       ctx.drawImage(s.lampArt, 0, 0, W, H);
       ctx.drawImage(s.bench, 0, 0, W, H);
       const fl = clamp(0.92 + 0.08 * (a.n2(t * 2.2, 5) - 0.5) * 2, 0.78, 1);
@@ -947,6 +971,9 @@
       ctx.globalAlpha = 0.34 * fl; a.sprite(s.warm, L.x, L.top + 10 * sc, 120 * sc);
       ctx.globalAlpha = 0.26 * fl; a.sprite(s.warm, L.x + W * 0.04, L.base - 40 * sc, H * 0.9);
       ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+      s.puffs = s.puffs.filter(q => (q.life -= dt) > 0);
+      s.puffs.forEach(q => { const u = 1 - q.life / q.max; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= 0.985; ctx.globalAlpha = 0.34 * Math.sin(Math.min(1, u * 1.6) * Math.PI * 0.5) * (1 - u); a.sprite(s.flake, q.x, q.y, q.sz * (1 + u * 2.4) * 2); });
+      ctx.globalAlpha = 1;
       // snow in three depths; the nearest flakes are big, soft and stretched by their speed
       s.flakes.forEach((layer, li) => layer.forEach(p => {
         const turb = (a.n2(p.x * 0.004 + t * 0.12, p.y * 0.004) - 0.5) * [40, 80, 140][li], vx = -[10, 20, 36][li] - gust * [30, 60, 110][li] + turb + wnd * 10;
