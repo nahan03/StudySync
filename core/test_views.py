@@ -219,3 +219,38 @@ class ProductionSettingsTests(TestCase):
         r = self.run_manage('check', DJANGO_DEBUG='False', DJANGO_ALLOWED_HOSTS='example.com')
         self.assertNotEqual(r.returncode, 0)
         self.assertIn('DJANGO_SECRET_KEY', r.stderr)
+
+
+class CleanQuestionsTests(TestCase):
+    """Questions that cannot be answered as written are removed; fill-in-the-blanks keep their word bank."""
+
+    def test_blank_that_points_at_a_missing_list_is_dropped(self):
+        from core.views import _clean_questions
+        qs = [
+            {'type': 'fillinblank', 'question': 'Which language among these is not listed: _____', 'answer': 'Go'},
+            {'type': 'fillinblank', 'question': 'Python is a _____ language.', 'answer': 'high-level'},
+        ]
+        out = _clean_questions(qs)
+        self.assertEqual([q['answer'] for q in out], ['high-level'])
+
+    def test_word_bank_is_kept_and_always_contains_the_answer(self):
+        from core.views import _clean_questions
+        out = _clean_questions([{'type': 'fillinblank', 'question': 'Pick one of the following: _____', 'options': ['Python', 'Java', 'C'], 'answer': 'Rust'}])
+        self.assertEqual(len(out), 1)
+        self.assertIn('Rust', out[0]['options'])
+        self.assertEqual(len(out[0]['options']), 4)
+
+    def test_broken_mcq_and_empty_answers_are_dropped(self):
+        from core.views import _clean_questions
+        out = _clean_questions([
+            {'type': 'mcq', 'question': 'q', 'options': ['only one'], 'answer': 'only one'},
+            {'type': 'truefalse', 'question': 'q', 'answer': ''},
+            {'type': 'truefalse', 'question': 'The sky is blue.', 'answer': 'True'},
+            'junk',
+        ])
+        self.assertEqual(len(out), 1)
+
+    def test_prompt_demands_options_for_blanks_that_use_a_list(self):
+        from core.views import _build_prompt
+        p = _build_prompt('notes', 5, ['fillinblank'])
+        self.assertIn('MUST give that set as "options"', p)

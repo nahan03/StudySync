@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from functools import wraps
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
@@ -342,7 +343,7 @@ def generate_questions(request):
             if raw.startswith('json'):
                 raw = raw[4:]
             raw = raw.rsplit('```', 1)[0]
-        questions = json.loads(raw)
+        questions = _clean_questions(json.loads(raw))
         return JsonResponse({'questions': questions})
     except Exception as e:
         return _groq_error(e)
@@ -522,6 +523,35 @@ def pdf_summary(request):
         return _groq_error(e)
 
 
+_POINTS_AT_A_LIST = re.compile(r"\b(among|from the following|of the following|these|those listed|listed|below|above|choose|which of)\b", re.I)
+
+
+def _clean_questions(questions):
+    """Drop questions that cannot be answered as written: a fill-in-the-blank that points at a list it never gives,
+    a multiple choice with fewer than two options, or one with no answer."""
+    if not isinstance(questions, list):
+        return []
+    out = []
+    for q in questions:
+        if not isinstance(q, dict) or not str(q.get('question', '')).strip() or not str(q.get('answer', '')).strip():
+            continue
+        opts = q.get('options')
+        opts = [str(o).strip() for o in opts if str(o).strip()] if isinstance(opts, list) else []
+        t = q.get('type')
+        if t == 'mcq' and len(opts) < 2:
+            continue
+        if t == 'fillinblank':
+            if not opts and _POINTS_AT_A_LIST.search(str(q['question'])):
+                continue
+            if opts and str(q['answer']).strip().lower() not in [o.lower() for o in opts]:
+                opts.append(str(q['answer']).strip())      # the answer must always be one of the choices
+        q['options'] = opts if t in ('mcq', 'fillinblank') and opts else None
+        if q['options'] is None:
+            q.pop('options')
+        out.append(q)
+    return out
+
+
 def _build_prompt(context, n, types):
     type_rules = {
         'mcq': (
@@ -539,8 +569,12 @@ def _build_prompt(context, n, types):
             '"answer" is a concise model answer. Omit "options".'
         ),
         'fillinblank': (
-            'Fill in the Blank: take a key sentence from the material and replace the most important term with _____. '
-            '"answer" is the exact word or phrase that fills the blank. Omit "options".'
+            'Fill in the Blank: take a key sentence from the material and replace the most important term with _____ (a run of underscores). '
+            '"answer" is the exact word or phrase that fills the blank. '
+            'IMPORTANT: if the question asks the learner to pick from a set (it says "among these", "from the following", "listed", "which of", etc.), '
+            'you MUST give that set as "options": an array of 3 to 6 short strings that includes the answer, and the question must make sense with those choices. '
+            'Never write a fill-in-the-blank question that refers to a list of items without supplying the items in "options". '
+            'If no set is involved, omit "options".'
         ),
     }
 
@@ -565,7 +599,7 @@ Return ONLY a valid JSON array. No markdown, no code fences, no explanation — 
 Each element must have:
   "type"        : one of {type_values}
   "question"    : the question text
-  "options"     : array of 4 strings (MCQ only — omit for all other types)
+  "options"     : array of 4 strings for MCQ; array of 3-6 choices for a fill-in-the-blank that picks from a set; omit otherwise
   "answer"      : the correct answer string
   "explanation" : one concise sentence explaining why the answer is correct
 

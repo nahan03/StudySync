@@ -237,7 +237,7 @@ ssReady(function () {
           <span class="dm-q-num">Q${i + 1}</span>
           <span class="dm-q-type-badge">${typeLabel(q.type)}</span>
         </div>
-        <p class="dm-q-text">${escHtml(q.question)}</p>
+        <p class="dm-q-text">${questionHtml(q)}</p>
         ${renderAnswerArea(q, i)}
       `;
       list.appendChild(card);
@@ -278,49 +278,91 @@ ssReady(function () {
         showExplanation(card, q);
       });
     });
+    // a word bank: tap a choice to put it in the blank
+    list.querySelectorAll('.dm-wordbank button').forEach(chip => {
+      chip.addEventListener('click', function () {
+        const card = this.closest('.dm-question-card');
+        if (card.dataset.answered) return;
+        const inp = card.querySelector('.dm-q-input'); if (!inp) return;
+        inp.value = this.dataset.value;
+        card.querySelectorAll('.dm-wordbank button').forEach(x => x.classList.toggle('picked', x === this));
+        inp.focus();
+      });
+    });
+    // "Reveal answer": show it, then let the learner type it back from memory, and that typed answer is what gets checked
     list.querySelectorAll('.dm-reveal-btn').forEach(btn => {
       btn.addEventListener('click', function () {
         const card = this.closest('.dm-question-card');
-        card.dataset.answered = '1';
+        if (card.dataset.answered) return;
+        card.dataset.revealed = '1';
+        card.classList.add('revealed');
         this.style.display = 'none';
-        const checkBtn = card.querySelector('.dm-check-btn');
-        if (checkBtn) checkBtn.style.display = 'none';
         showExplanation(card, generatedQuestions[Number(card.dataset.index)]);
+        askAgain(card, 'Answer revealed. Now type it again from memory and press Check.');
       });
     });
     list.querySelectorAll('.dm-check-btn').forEach(btn => {
       btn.addEventListener('click', function () {
         const card = this.closest('.dm-question-card');
-        const idx = Number(card.dataset.index);
-        const q = generatedQuestions[idx];
+        const q = generatedQuestions[Number(card.dataset.index)];
         if (card.dataset.answered) return;
-        card.dataset.answered = '1';
-        this.style.display = 'none';
-        const revealBtn = card.querySelector('.dm-reveal-btn');
-        if (revealBtn) revealBtn.style.display = 'none';
         const input = card.querySelector('.dm-q-input');
         const guess = input ? input.value.trim() : '';
-        const verdict = judgeAnswer(guess, q.answer);
         const feedback = card.querySelector('.dm-check-feedback');
+        if (!guess) { if (feedback) { feedback.classList.remove('hidden'); feedback.className = 'dm-check-feedback info'; feedback.textContent = 'Type an answer first, or press Reveal Answer.'; } if (input) input.focus(); return; }
+        card.dataset.answered = '1';
+        this.style.display = 'none';
+        const revealBtn = card.querySelector('.dm-reveal-btn'); if (revealBtn) revealBtn.style.display = 'none';
+        if (input) input.disabled = true;
+        card.querySelectorAll('.dm-wordbank button').forEach(x => { x.disabled = true; });
+        const verdict = judgeAnswer(guess, q.answer);
+        const after = card.dataset.revealed === '1';
+        if (after) card.classList.add('after-reveal');
         if (feedback) {
           feedback.classList.remove('hidden');
-          if (verdict === 'correct') {
-            feedback.className = 'dm-check-feedback correct';
-            feedback.textContent = '✓ Correct!';
-            card.classList.add('answered-correct');
-          } else if (verdict === 'partial') {
-            feedback.className = 'dm-check-feedback partial';
-            feedback.textContent = '🤔 Almost there!';
-            card.classList.add('answered-correct');
-          } else {
-            feedback.className = 'dm-check-feedback wrong';
-            feedback.textContent = '✗ Not quite';
-            card.classList.add('answered-wrong');
-          }
+          if (verdict === 'correct') { feedback.className = 'dm-check-feedback correct'; feedback.textContent = after ? '✓ You\'ve got it now!' : '✓ Correct!'; card.classList.add('answered-correct'); }
+          else if (verdict === 'partial') { feedback.className = 'dm-check-feedback partial'; feedback.textContent = after ? '🤔 Close. Your answer is saved.' : '🤔 Almost there!'; card.classList.add('answered-correct'); }
+          else { feedback.className = 'dm-check-feedback wrong'; feedback.textContent = after ? '✗ Not quite. Your answer is saved.' : '✗ Not quite'; card.classList.add('answered-wrong'); }
         }
+        const mine = document.createElement('div'); mine.className = 'dm-your-answer'; mine.innerHTML = `<span>Your answer</span> ${escHtml(guess)}`;
+        card.querySelector('.dm-text-answer').appendChild(mine);
         showExplanation(card, q);
+        const retry = card.querySelector('.dm-retry-btn'); if (retry && verdict === 'wrong') retry.classList.remove('hidden');
       });
     });
+    // "Try again": having seen the answer, have another go
+    list.querySelectorAll('.dm-retry-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const card = this.closest('.dm-question-card');
+        delete card.dataset.answered; card.dataset.revealed = '1';
+        card.classList.remove('answered-correct', 'answered-wrong', 'after-reveal'); card.classList.add('revealed');
+        const mine = card.querySelector('.dm-your-answer'); if (mine) mine.remove();
+        this.classList.add('hidden');
+        askAgain(card, 'Have another go. Type the answer from memory.');
+      });
+    });
+  }
+
+  /* put a text question back into "type your answer" mode */
+  function askAgain(card, message) {
+    const input = card.querySelector('.dm-q-input'), feedback = card.querySelector('.dm-check-feedback');
+    if (input) { input.disabled = false; input.value = ''; input.placeholder = 'Type it from memory…'; input.focus(); }
+    card.querySelectorAll('.dm-wordbank button').forEach(x => { x.disabled = false; x.classList.remove('picked'); });
+    const check = card.querySelector('.dm-check-btn'); if (check) { check.style.display = ''; check.textContent = 'Check my answer'; }
+    if (feedback) { feedback.classList.remove('hidden'); feedback.className = 'dm-check-feedback info'; feedback.textContent = message; }
+  }
+
+  /* the sentence, with its blank turned into a box you type in */
+  const BLANK = /_{2,}|\.{4,}|\[(?:blank|\.\.\.)\]/i;
+  function hasBlank(q) { return q.type === 'fillinblank' && BLANK.test(q.question || ''); }
+  function questionHtml(q) {
+    if (!hasBlank(q)) return escHtml(q.question);
+    const parts = String(q.question).split(BLANK);
+    return escHtml(parts[0]) + '<input class="dm-q-input dm-q-inline" placeholder="type here" aria-label="Your answer for the blank" autocomplete="off">' + escHtml(parts.slice(1).join(' ______ '));
+  }
+  function wordBank(q) {
+    const opts = Array.isArray(q.options) ? q.options.filter(o => o != null && String(o).trim()) : [];
+    return opts.length ? `<div class="dm-wordbank" aria-label="Choices"><span>Choose from</span>${opts.map(o => `<button type="button" data-value="${escHtml(o)}">${escHtml(o)}</button>`).join('')}</div>` : '';
   }
 
   function renderAnswerArea(q) {
@@ -330,10 +372,11 @@ ssReady(function () {
     if (q.type === 'truefalse') {
       return `<div class="dm-tf-options"><button class="dm-tf-btn" data-value="True">True</button><button class="dm-tf-btn" data-value="False">False</button></div>`;
     }
+    const actions = `<div class="dm-text-actions"><button class="dm-check-btn">Check</button><button class="dm-reveal-btn">Reveal Answer</button><button class="dm-retry-btn hidden">↺ Try again</button></div><div class="dm-check-feedback hidden"></div>`;
     if (q.type === 'fillinblank') {
-      return `<div class="dm-text-answer"><input class="dm-q-input" placeholder="Fill in the blank…"><div class="dm-text-actions"><button class="dm-check-btn">Check</button><button class="dm-reveal-btn">Reveal Answer</button></div><div class="dm-check-feedback hidden"></div></div>`;
+      return `<div class="dm-text-answer">${hasBlank(q) ? '' : '<input class="dm-q-input" placeholder="Fill in the blank…" autocomplete="off">'}${wordBank(q)}${actions}</div>`;
     }
-    return `<div class="dm-text-answer"><textarea class="dm-q-input" rows="3" placeholder="Write your answer…"></textarea><div class="dm-text-actions"><button class="dm-check-btn">Check</button><button class="dm-reveal-btn">Reveal Answer</button></div><div class="dm-check-feedback hidden"></div></div>`;
+    return `<div class="dm-text-answer"><textarea class="dm-q-input" rows="3" placeholder="Write your answer…"></textarea>${actions}</div>`;
   }
 
   function showExplanation(card, q) {
@@ -351,17 +394,19 @@ ssReady(function () {
 
   const scoreBtnEl = $('practice-score-btn');
   if (scoreBtnEl) scoreBtnEl.addEventListener('click', () => {
-    let correct = 0, total = 0;
+    let correct = 0, learned = 0, answered = 0, total = 0;
     document.querySelectorAll('.dm-question-card').forEach((card, i) => {
-      const q = generatedQuestions[i];
-      if (!q || q.type === 'shortanswer') return;
+      if (!generatedQuestions[i]) return;
       total++;
-      if (card.classList.contains('answered-correct')) correct++;
+      if (!card.dataset.answered) return;
+      answered++;
+      if (card.classList.contains('answered-correct')) { if (card.classList.contains('after-reveal')) learned++; else correct++; }
     });
     const banner = $('practice-score-banner');
     banner.classList.remove('hidden');
     const pct = total ? Math.round((correct / total) * 100) : 0;
-    banner.innerHTML = `<strong>${correct}/${total} correct (${pct}%)</strong> ${pct >= 80 ? '🌟 Excellent!' : pct >= 50 ? '💪 Keep going!' : '📚 Keep studying!'}`;
+    const extra = [learned ? `${learned} learned after revealing the answer` : '', answered < total ? `${total - answered} not answered yet` : ''].filter(Boolean).join(' · ');
+    banner.innerHTML = `<strong>${correct}/${total} correct (${pct}%)</strong> ${pct >= 80 ? '🌟 Excellent!' : pct >= 50 ? '💪 Keep going!' : '📚 Keep practising!'}` + (extra ? `<div class="dm-score-extra">${extra}</div>` : '');
   });
 
   const retryBtnEl = $('practice-retry-btn');
