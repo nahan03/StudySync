@@ -44,7 +44,7 @@
     focusSound: 'chime', breakSound: 'bell', volume: 70, repeat: 'once', vibrate: true, notify: false,
     subject: '', goal: '',
     theme: 'forest', bg: 'theme', bgVideo: '', bgDim: 15,
-    ring: 'classic', font: 'serif', tsize: 'm',
+    ring: 'classic', font: 'serif', tsize: 'm', tfill: 'solid',
   };
   let prefs = Object.assign({}, DEFAULTS, load(PREFS_KEY, {}));
   let userPresets = load(PRESETS_KEY, []);
@@ -670,6 +670,8 @@
     $('st-rings').querySelectorAll('.st-ringtile').forEach(b => b.setAttribute('aria-checked', String(b.dataset.id === root.dataset.ring)));
     $('st-fonts').querySelectorAll('.st-fonttile').forEach(b => b.setAttribute('aria-checked', String(b.dataset.id === root.dataset.font)));
     $('st-tsize').querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.size === root.dataset.tsize)));
+    root.dataset.tfill = ['solid', 'outline', 'glass'].includes(prefs.tfill) ? prefs.tfill : 'solid';
+    $('st-tfill').querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.fill === root.dataset.tfill)));
     root.style.setProperty('--dim', num(prefs.bgDim, 0, 80, 15) / 100);
     $('bgl-image').style.backgroundImage = bgImage ? `url("${bgImage}")` : '';
     $('st-dim').value = num(prefs.bgDim, 0, 80, 15);
@@ -738,6 +740,7 @@
     applyAppearance();
     $('st-rings').addEventListener('click', e => { const b = e.target.closest('.st-ringtile'); if (b) { prefs.ring = b.dataset.id; saveAppearance(); } });
     $('st-fonts').addEventListener('click', e => { const b = e.target.closest('.st-fonttile'); if (b) { prefs.font = b.dataset.id; saveAppearance(); } });
+    $('st-tfill').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { prefs.tfill = b.dataset.fill; saveAppearance(); } });
     $('st-tsize').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { prefs.tsize = b.dataset.size; saveAppearance(); } });
 
     $('st-themes').addEventListener('click', e => {
@@ -770,7 +773,7 @@
       if (prefs.bg === 'image') prefs.bg = 'theme';
       saveAppearance();
     });
-    $('st-appearance-reset').addEventListener('click', () => { prefs.theme = 'forest'; prefs.bg = 'theme'; prefs.bgVideo = ''; prefs.bgDim = 15; prefs.ring = 'classic'; prefs.font = 'serif'; prefs.tsize = 'm'; saveAppearance(); });
+    $('st-appearance-reset').addEventListener('click', () => { prefs.theme = 'forest'; prefs.bg = 'theme'; prefs.bgVideo = ''; prefs.bgDim = 15; prefs.ring = 'classic'; prefs.font = 'serif'; prefs.tsize = 'm'; prefs.tfill = 'solid'; saveAppearance(); });
 
     // ---- real footage ----
     function renderFootage() {

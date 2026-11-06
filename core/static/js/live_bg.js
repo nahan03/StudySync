@@ -702,199 +702,166 @@
     },
   };
 
-  /* ---------- cabin fireside: an A-frame cabin, a wall of glass onto a misty snowy forest, a wood stove, candlelit shelves ---------- */
-  // droplets of melting snow running down the glass: each slides in jerks, leaves a wet trail and carries a little warm reflection
-  function makeDrops(a, win, n, rr_) { return Array.from({ length: a.n(n) }, () => ({ x: win.x + rr_() * win.w, y: win.y + rr_() * win.h, r: 1.6 + rr_() * 3.4 + (rr_() > 0.9 ? 3 : 0), vy: 0, wait: rr_() * 6, trail: [] })); }
-  function stepDrops(a, ds, win, dt, t, wetness) {
-    const ctx = a.ctx;
-    for (const d of ds) {
-      d.wait -= dt;
-      if (d.wait <= 0 && d.r > 2.6 && Math.random() < wetness) { d.vy = 28 + d.r * 14 + Math.random() * 40; d.wait = 0.25 + Math.random() * 1.4; }
-      if (d.vy > 0) { d.trail.push([d.x, d.y]); if (d.trail.length > 18) d.trail.shift(); d.y += d.vy * dt; d.x += (a.n2(d.y * 0.02 + d.r, t * 0.1) - 0.5) * 18 * dt; d.vy *= 0.9; if (d.vy < 3) d.vy = 0; }
-      else if (d.trail.length) d.trail.shift();
-      if (d.y > win.y + win.h + 6) { d.y = win.y - 6 - Math.random() * 30; d.x = win.x + Math.random() * win.w; d.trail.length = 0; d.r = 1.6 + Math.random() * 3.6 + (Math.random() > 0.9 ? 3 : 0); d.wait = Math.random() * 4; }
-      if (d.trail.length > 1) { ctx.strokeStyle = 'rgba(200,220,240,.13)'; ctx.lineWidth = Math.max(1, d.r * 0.5); ctx.lineCap = 'round'; ctx.beginPath(); d.trail.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.lineTo(d.x, d.y); ctx.stroke(); }
-      const gr = ctx.createRadialGradient(d.x - d.r * 0.3, d.y - d.r * 0.35, d.r * 0.1, d.x, d.y, d.r * 1.15);
-      gr.addColorStop(0, 'rgba(255,255,255,.55)'); gr.addColorStop(0.45, 'rgba(170,200,230,.16)'); gr.addColorStop(1, 'rgba(10,20,30,.38)');
-      ctx.fillStyle = gr; ctx.beginPath(); ctx.ellipse(d.x, d.y, d.r * 0.92, d.r * 1.1, 0, 0, TAU); ctx.fill();
-      ctx.fillStyle = 'rgba(255,196,120,.35)'; ctx.beginPath(); ctx.arc(d.x + d.r * 0.3, d.y + d.r * 0.4, d.r * 0.28, 0, TAU); ctx.fill();
-    }
-  }
-
+  /* ---------- cabin fireside: a log cabin window onto a snowstorm, lamp, bookshelf, stone fireplace, coffee table ---------- */
   scenes.snow = {
-    post: { bloom: 0.34, grade: 'rgb(255,200,150)', gradeA: 0.05, vignette: 0.2, grain: 0.03, halo: 0.08 },
+    post: { bloom: 0.38, grade: 'rgb(255,186,120)', gradeA: 0.08, vignette: 0.42, grain: 0.05, halo: 0.12 },
     init(a) {
       const { W, H } = a, s = (a.s = {}), r = rng(29), sc = Math.max(0.75, Math.min(1.4, H / 760)), portrait = W < H * 0.95;
-      // geometry: the glass wall leans like an A-frame roof; the cabin interior sits to its right
-      const gx1 = portrait ? W * 0.8 : W * 0.7, gx2 = portrait ? W * 0.42 : W * 0.47, gyB = Math.round(H * 0.8);
-      s.glass = [[0, 0], [gx1, 0], [gx2, gyB], [0, gyB]]; s.gb = { x: 0, y: 0, w: gx1, h: gyB };
-      const xr = y => gx1 + (gx2 - gx1) * (y / gyB);
-      const stW = portrait ? W * 0.27 : W * 0.15, stH = H * 0.17, stX = portrait ? W * 0.6 : W * 0.585, floorY = gyB + H * 0.012;
-      s.stove = { x: stX, y: floorY - stH, w: stW, h: stH };
-      s.door = { x: stX + stW * 0.15, y: floorY - stH * 0.8, w: stW * 0.7, h: stH * 0.5 };
+      const P = portrait ? { wx: 0.04, ww: 0.6, wy: 0.1, wh: 0.46, sx: 0.66, sw: 0.14, fx: 0.8 } : { wx: 0.14, ww: 0.49, wy: 0.12, wh: 0.54, sx: 0.67, sw: 0.11, fx: 0.775 };
+      const win = (s.win = { x: W * P.wx, y: H * P.wy, w: W * P.ww, h: H * P.wh });
+      const fx0 = W * P.fx, mantelY = H * 0.43, floorY = H * 0.88;
+      s.fire = { x: fx0 + W * 0.075, y: H * 0.585, w: W - fx0 - W * 0.075, h: H * 0.27 };
+      const wood = (g, x, y, w, h, base, grain) => {
+        const gr = g.createLinearGradient(0, y, 0, y + h); gr.addColorStop(0, rgb(mix(base, [255, 220, 170], 0.12))); gr.addColorStop(0.5, rgb(base)); gr.addColorStop(1, rgb(mix(base, [20, 8, 0], 0.35)));
+        g.fillStyle = gr; g.fillRect(x, y, w, h);
+        for (let k = 0; k < (grain || 5); k++) { const gy = y + h * r(); g.strokeStyle = `rgba(30,12,2,${0.07 + r() * 0.12})`; g.lineWidth = 0.6 + r() * 1.3; g.beginPath(); g.moveTo(x, gy); g.bezierCurveTo(x + w * 0.3, gy + (r() - 0.5) * 6, x + w * 0.6, gy + (r() - 0.5) * 6, x + w, gy + (r() - 0.5) * 3); g.stroke(); }
+      };
 
-      // ---- outside: a misty forest of snowy firs, out of focus ----
-      s.outFar = a.blur(a.layer(W, H, (g, w, h) => {
-        a.vgrad(g, w, h, [[0, [170, 206, 238]], [0.5, [208, 228, 244]], [1, [238, 246, 252]]]);
-        a.firRow(g, w, h * 0.62, h * 0.16, h * 0.34, 3, [84, 148, 140], { gap: [10, 22], snow: true, vary: [122, 180, 170], jitter: 4 });
-        const f1 = g.createLinearGradient(0, h * 0.35, 0, h * 0.7); f1.addColorStop(0, 'rgba(196,210,214,0)'); f1.addColorStop(1, 'rgba(170,188,192,.6)'); g.fillStyle = f1; g.fillRect(0, h * 0.35, w, h * 0.35);
-        a.firRow(g, w, h * 0.76, h * 0.26, h * 0.5, 5, [60, 120, 112], { gap: [28, 64], snow: true, vary: [96, 154, 144], jitter: 5 });
-        const f2 = g.createLinearGradient(0, h * 0.5, 0, h * 0.85); f2.addColorStop(0, 'rgba(190,204,208,0)'); f2.addColorStop(1, 'rgba(160,178,182,.55)'); g.fillStyle = f2; g.fillRect(0, h * 0.5, w, h * 0.35);
-      }), 3 * sc);
-      s.outNear = a.blur(a.layer(W * 1.08, H, (g, w, h) => {
-        const fr = rng(61); [[0.05, 1.0], [0.26, 0.86], [0.49, 1.1], [0.71, 0.92], [0.93, 1.02]].forEach(([fx, sz], i) => a.fir(g, w * fx, h * 1.02, h * sz, `rgb(${52 + i * 2},${112 + i * 3},${100 + i * 2})`, fr, false));
-        g.globalCompositeOperation = 'source-atop'; const nf = g.createLinearGradient(0, h * 0.15, 0, h * 0.9); nf.addColorStop(0, 'rgba(200,216,222,.05)'); nf.addColorStop(1, 'rgba(226,238,246,.5)'); g.fillStyle = nf; g.fillRect(0, 0, w, h); g.globalCompositeOperation = 'source-over';
-      }), 1.6 * sc);
-      s.fog = a.cloudTex(1024, 220, 6, { shadow: [168, 184, 190], lit: [212, 224, 228], rim: [236, 242, 244] }, { sx: 3, sy: 1.6, cut: 0.4, gain: 2.2, alpha: 0.7 }); s.foff = [r() * 900, r() * 900];
-
-      // ---- the cabin ----
-      const lanterns = [], bulbs = [], candles = [];
-      s.room = a.blur(a.layer(W, H, (g, w, h) => {
-        // dark wall boards
-        let x = 0; while (x < w) { const bw = rr(r, 54, 96) * sc, base = mix([150, 100, 62], [178, 124, 78], r()); const lg = g.createLinearGradient(0, 0, 0, h); lg.addColorStop(0, rgb(mix(base, [0, 0, 0], 0.1))); lg.addColorStop(1, rgb(mix(base, [60, 30, 10], 0.3))); g.fillStyle = lg; g.fillRect(x, 0, bw, h); g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(x + bw - 1.4, 0, 1.4, h); for (let k = 0; k < 7; k++) { g.strokeStyle = `rgba(255,255,255,${0.012 + r() * 0.02})`; g.lineWidth = 1; const gx = x + r() * bw; g.beginPath(); g.moveTo(gx, 0); g.lineTo(gx + (r() - 0.5) * 8, h); g.stroke(); } x += bw; }
-        // sloping roof beam in warm wood, top right
-        const rb = g.createLinearGradient(gx1 * 0.8, 0, w, h * 0.2); rb.addColorStop(0, 'rgb(196,138,86)'); rb.addColorStop(1, 'rgb(128,84,52)'); g.fillStyle = rb; g.beginPath(); g.moveTo(gx1 * 0.8, 0); g.lineTo(w, 0); g.lineTo(w, h * 0.2); g.closePath(); g.fill();
-        g.strokeStyle = 'rgba(0,0,0,.14)'; g.lineWidth = 1; for (let k = 1; k < 3; k++) { g.beginPath(); g.moveTo(gx1 * 0.8 + k * (w - gx1 * 0.8) / 5, 0); g.lineTo(w, h * 0.2 * (k / 5)); g.stroke(); }
-        // the glass wall is cut out of the wall
-        g.globalCompositeOperation = 'destination-out'; g.fillStyle = '#000'; g.beginPath(); s.glass.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fill(); g.globalCompositeOperation = 'source-over';
-        // floor
-        const fl = g.createLinearGradient(0, gyB - 4, 0, h); fl.addColorStop(0, 'rgb(170,116,72)'); fl.addColorStop(1, 'rgb(118,78,48)'); g.fillStyle = fl; g.fillRect(0, gyB - 4, w, h - gyB + 4);
-        g.strokeStyle = 'rgba(0,0,0,.45)'; g.lineWidth = 1.4; for (let k = 0; k < 14; k++) { const yy = gyB + (h - gyB) * Math.pow(k / 13, 1.5); g.beginPath(); g.moveTo(0, yy); g.lineTo(w, yy); g.stroke(); }
-        g.strokeStyle = 'rgba(255,200,140,.05)'; for (let k = 0; k < 18; k++) { const px = r() * w; g.beginPath(); g.moveTo(px, gyB); g.lineTo(px + (px - w * 0.5) * 0.5, h); g.stroke(); }
-        // black frame: the slanted edge, a structural rafter, and two cross bars
-        const bar = (x0, y0, x1, y1, wd) => { g.strokeStyle = 'rgb(12,14,14)'; g.lineWidth = wd; g.lineCap = 'butt'; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); g.strokeStyle = 'rgba(255,255,255,.1)'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(x0 - wd * 0.35, y0); g.lineTo(x1 - wd * 0.35, y1); g.stroke(); };
-        bar(gx1, 0, gx2, gyB, 28 * sc); bar(gx1 - w * 0.26, 0, gx2 - w * 0.26, gyB, 20 * sc);
-        [0.3, 0.56].forEach(f => { const yy = gyB * f; bar(0, yy, xr(yy), yy, 13 * sc); });
-        // window seat with dark cushions and a folded blanket
-        const bx = 0, bw = W * 0.2, by = gyB - H * 0.085; g.fillStyle = 'rgb(200,140,90)'; g.fillRect(bx, by, bw, H * 0.09); g.fillStyle = 'rgba(0,0,0,.4)'; g.fillRect(bx, by + H * 0.085, bw, 5);
-        [[bw * 0.04, 0.82], [bw * 0.38, 0.7]].forEach(([cx, sz], i) => { g.fillStyle = i ? 'rgb(232,214,184)' : 'rgb(214,150,128)'; g.beginPath(); g.roundRect ? g.roundRect(cx, by - H * 0.085 * sz, bw * 0.34, H * 0.085 * sz + 4, 14 * sc) : g.rect(cx, by - H * 0.085 * sz, bw * 0.34, H * 0.085 * sz); g.fill(); g.strokeStyle = 'rgba(255,255,255,.08)'; g.lineWidth = 1.2; g.stroke(); });
-        // shelves of books, candles and trailing plants on the right
-        const shX0 = Math.max(gx1 * 0.97, w * 0.74), shX1 = w * 0.985, sh = [0.27, 0.4, 0.53, 0.66].map(f => h * f);
-        sh.forEach((sy, ri) => {
-          let bxx = shX0 + 6 * sc; const bookCols = [[52, 62, 82], [86, 56, 48], [60, 82, 66], [200, 186, 150], [110, 86, 58], [40, 44, 52]];
-          while (bxx < shX1 - 14 * sc) {
-            const bwid = rr(r, 8, 18) * sc;
-            if (ri > 0 && r() > 0.78 && shX1 - bxx > 30 * sc) { const ch = rr(r, 12, 34) * sc; g.fillStyle = 'rgb(238,226,196)'; g.fillRect(bxx, sy - ch, 9 * sc, ch); candles.push({ x: bxx + 4.5 * sc, y: sy - ch - 3 * sc, ph: r() * 9 }); bxx += rr(r, 16, 30) * sc; continue; }
-            if (r() > 0.24) { const bh = rr(r, 34, 66) * sc, c = bookCols[Math.floor(r() * bookCols.length)]; g.fillStyle = rgb(mix(c, [0, 0, 0], r() * 0.3)); g.fillRect(bxx, sy - bh, bwid, bh); g.fillStyle = 'rgba(255,255,255,.1)'; g.fillRect(bxx, sy - bh, 1.4, bh); g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(bxx + bwid - 1.2, sy - bh, 1.2, bh); }
-            bxx += bwid + 1;
-          }
-          const bg = g.createLinearGradient(0, sy, 0, sy + 9 * sc); bg.addColorStop(0, 'rgb(204,146,92)'); bg.addColorStop(1, 'rgb(130,86,54)'); g.fillStyle = bg; g.fillRect(shX0 - 6 * sc, sy, shX1 - shX0 + 12 * sc, 9 * sc);
-        });
-        for (let i = 0; i < 6; i++) { const vx = shX0 + r() * (shX1 - shX0), vy = sh[0] + 6 * sc, len = rr(r, 70, 200) * sc; g.strokeStyle = 'rgb(36,86,52)'; g.lineWidth = 2.4 * sc; g.beginPath(); g.moveTo(vx, vy); g.bezierCurveTo(vx + (r() - 0.5) * 30, vy + len * 0.3, vx + (r() - 0.5) * 40, vy + len * 0.7, vx + (r() - 0.5) * 30, vy + len); g.stroke(); for (let k = 0; k < 9; k++) { g.fillStyle = rgb(mix([40, 100, 60], [100, 160, 90], r())); g.beginPath(); g.ellipse(vx + (r() - 0.5) * 24, vy + len * (k / 9) + 4, 6 * sc, 3.4 * sc, r() * 3, 0, TAU); g.fill(); } }
-        // firewood stacked under the shelves
-        const wx0 = shX0 + 4 * sc, wy1 = gyB + H * 0.012;
-        for (let row = 0; row < 5; row++) for (let col = 0; col < 8; col++) { const lx = wx0 + col * 20 * sc + (row % 2) * 10 * sc + (r() - 0.5) * 3, ly = wy1 - row * 17 * sc - 8 * sc, rad = rr(r, 8, 10.5) * sc; if (lx + rad > shX1 + 20) continue; g.fillStyle = rgb(mix([110, 82, 52], [150, 116, 76], r())); g.beginPath(); g.arc(lx, ly, rad, 0, TAU); g.fill(); g.strokeStyle = 'rgba(60,40,24,.7)'; g.lineWidth = 1.2; for (let q = 1; q < 3; q++) { g.beginPath(); g.arc(lx, ly, rad * q / 3, 0, TAU); g.stroke(); } }
-        // wood stove: chimney with an elbow, black body, glass door, slate hearth
-        const st = s.stove, chX = st.x + st.w * 0.5, chTop = h * 0.4, pw = 22 * sc;
-        const pg = g.createLinearGradient(chX - pw / 2, 0, chX + pw / 2, 0); pg.addColorStop(0, 'rgb(14,16,18)'); pg.addColorStop(0.5, 'rgb(46,50,54)'); pg.addColorStop(1, 'rgb(14,16,18)'); g.fillStyle = pg; g.fillRect(chX - pw / 2, chTop, pw, st.y - chTop + 6);
-        g.beginPath(); g.arc(chX + pw * 0.6, chTop, pw * 0.9, Math.PI, Math.PI * 1.5); g.lineWidth = pw; g.strokeStyle = 'rgb(30,33,36)'; g.stroke(); g.fillStyle = 'rgb(30,33,36)'; g.fillRect(chX + pw * 0.6, chTop - pw * 1.4, shX0 - chX, pw);
-        const hb = g.createLinearGradient(0, st.y + st.h, 0, st.y + st.h + 14 * sc); hb.addColorStop(0, 'rgb(76,84,90)'); hb.addColorStop(1, 'rgb(30,34,38)'); g.fillStyle = hb; g.beginPath(); g.moveTo(st.x - 26 * sc, st.y + st.h + 14 * sc); g.lineTo(st.x - 12 * sc, st.y + st.h - 6 * sc); g.lineTo(st.x + st.w + 12 * sc, st.y + st.h - 6 * sc); g.lineTo(st.x + st.w + 26 * sc, st.y + st.h + 14 * sc); g.closePath(); g.fill();
-        const sb = g.createLinearGradient(st.x, 0, st.x + st.w, 0); sb.addColorStop(0, 'rgb(18,20,22)'); sb.addColorStop(0.5, 'rgb(42,46,50)'); sb.addColorStop(1, 'rgb(14,16,18)'); g.fillStyle = sb; g.beginPath(); g.roundRect ? g.roundRect(st.x, st.y, st.w, st.h - 4 * sc, 6 * sc) : g.rect(st.x, st.y, st.w, st.h - 4 * sc); g.fill();
-        g.fillStyle = 'rgb(10,12,14)'; g.fillRect(st.x - 6 * sc, st.y - 6 * sc, st.w + 12 * sc, 9 * sc);
-        const dr = s.door; g.fillStyle = 'rgb(8,6,6)'; g.fillRect(dr.x - 6 * sc, dr.y - 6 * sc, dr.w + 12 * sc, dr.h + 12 * sc);
-        g.fillStyle = 'rgb(26,16,10)'; g.fillRect(dr.x, dr.y, dr.w, dr.h);
-        // a little moss on the stove top, like the reference
-        for (let k = 0; k < 14; k++) { g.fillStyle = rgb(mix([60, 110, 66], [110, 160, 90], r())); g.beginPath(); g.arc(st.x + st.w * (0.34 + r() * 0.3), st.y - 6 * sc - r() * 12 * sc, rr(r, 4, 8) * sc, 0, TAU); g.fill(); }
-        // fairy lights: a sagging wire along the window base and up the rafter
-        g.strokeStyle = 'rgba(0,0,0,.6)'; g.lineWidth = 1.4;
-        const wire = (pts) => { g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.stroke(); };
-        for (let i = 0; i < 26; i++) { const u = i / 25, bxx2 = xr(gyB) * u * 0.98 + 6, byy = gyB - H * 0.02 - Math.sin(u * Math.PI * 4) * 6 * sc - 4 * sc * Math.sin(u * 9); bulbs.push({ x: bxx2, y: byy, ph: r() * 9 }); }
-        for (let i = 0; i < 12; i++) { const u = i / 11, yy = gyB * (0.12 + 0.7 * u), bxx2 = xr(yy) - 30 * sc - w * 0.0; bulbs.push({ x: Math.max(8, xr(yy) - w * 0.26 + 16 * sc), y: yy, ph: r() * 9 }); }
-      }), 0.6 * sc);
-      s.plantL = a.blur(a.layer(W, H, (g, w, h) => {
-        // plants and lanterns standing along the base of the glass
-        const pr = rng(87), plant = (px, sz) => {
-          const py = gyB + H * 0.006; g.fillStyle = 'rgb(112,84,52)'; g.beginPath(); g.moveTo(px - 22 * sc * sz, py - 34 * sc * sz); g.lineTo(px + 22 * sc * sz, py - 34 * sc * sz); g.lineTo(px + 17 * sc * sz, py); g.lineTo(px - 17 * sc * sz, py); g.closePath(); g.fill(); g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1; for (let k = 0; k < 4; k++) { g.beginPath(); g.moveTo(px - 20 * sc * sz, py - 8 * k * sc * sz); g.lineTo(px + 20 * sc * sz, py - 8 * k * sc * sz); g.stroke(); }
-          for (let i = 0; i < 13; i++) { const ang = -Math.PI / 2 + (i - 6) * 0.2 + (pr() - 0.5) * 0.18, len = rr(pr, 60, 130) * sc * sz; const ex = px + Math.cos(ang) * len * 0.55, ey = py - 34 * sc * sz + Math.sin(ang) * len, cx2 = px + Math.cos(ang) * len * 0.15, cy2 = py - 34 * sc * sz + Math.sin(ang) * len * 0.55; const lg = g.createLinearGradient(px, py, ex, ey); lg.addColorStop(0, 'rgb(34,96,56)'); lg.addColorStop(1, rgb(mix([62, 150, 80], [128, 198, 100], pr()))); g.fillStyle = lg; g.beginPath(); g.moveTo(px, py - 34 * sc * sz); g.quadraticCurveTo(cx2 - 9 * sc, cy2, ex, ey); g.quadraticCurveTo(cx2 + 9 * sc, cy2, px, py - 34 * sc * sz); g.fill(); }
-        };
-        [0.26, 0.33, 0.41, 0.2, 0.47].forEach((fx, i) => plant(W * fx * (portrait ? 0.85 : 1), 0.8 + (i % 3) * 0.2));
-        [0.22, 0.3, 0.385, 0.44].forEach((fx, i) => { const lx = W * fx * (portrait ? 0.85 : 1) + 12 * sc, ly = gyB + H * (0.018 + (i % 2) * 0.012), lw = 22 * sc, lh = 32 * sc; g.fillStyle = 'rgb(30,28,26)'; g.fillRect(lx - lw / 2, ly - lh, lw, lh); g.fillStyle = 'rgba(255,190,110,.55)'; g.fillRect(lx - lw / 2 + 3, ly - lh + 6, lw - 6, lh - 10); g.strokeStyle = 'rgb(20,18,16)'; g.lineWidth = 2; g.strokeRect(lx - lw / 2, ly - lh, lw, lh); lanterns.push({ x: lx, y: ly - lh / 2, ph: i * 1.7 }); });
-        g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(8,8,12,0)'; g.fillRect(0, 0, w, h); g.globalCompositeOperation = 'source-over';
-      }), 1.0 * sc);
-      s.lanterns = lanterns; s.bulbs = bulbs; s.candles = candles;
-      // light falls off like a photograph: the room is dark except around the fire, candles and lamps
-      s.dark = a.lightmap(W, H, { color: [6, 5, 8], ambient: 0.7, holeA: 0.62, holes: [s.glass], lights: [
-        { x: s.door.x + s.door.w / 2, y: s.door.y + s.door.h / 2, r: H * 0.75, s: 0.95 },
-        ...candles.map(c => ({ x: c.x, y: c.y, r: 90 * sc, s: 0.6 })),
-        ...lanterns.map(l => ({ x: l.x, y: l.y, r: 110 * sc, s: 0.55 })),
-        { x: W * 0.2, y: H * 0.8, r: W * 0.3, s: 0.3 }] });
-
-      // ---- foreground: a rumpled bed with a knitted blanket and pillows, out of focus ----
-      s.bed = a.blur(a.layer(W, H, (g, w, h) => {
-        const top = x => h * (0.87 - 0.055 * a.fbm(x * 0.004 + 3, 7, 3));
-        g.beginPath(); g.moveTo(0, h); for (let x = 0; x <= w; x += 6) g.lineTo(x, top(x)); g.lineTo(w, h); g.closePath();
-        const bg = g.createLinearGradient(0, h * 0.8, 0, h); bg.addColorStop(0, 'rgb(236,220,194)'); bg.addColorStop(1, 'rgb(176,146,118)'); g.fillStyle = bg; g.fill();
-        g.save(); g.clip();
-        for (let k = 0; k < 46; k++) { const x0 = r() * w, y0 = h * rr(r, 0.85, 1), len = rr(r, 80, 260) * sc; g.strokeStyle = r() > 0.5 ? `rgba(255,255,255,${0.04 + r() * 0.06})` : `rgba(0,0,0,${0.12 + r() * 0.16})`; g.lineWidth = rr(r, 6, 22) * sc; g.lineCap = 'round'; g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo(x0 + len * 0.4, y0 - len * 0.18, x0 + len, y0 + (r() - 0.5) * 30); g.stroke(); }
-        for (let k = 0; k < 7; k++) { const bx = w * (0.1 + k * 0.1) + (r() - 0.5) * 30, by = h * (0.9 + (r() - 0.5) * 0.05), rx = w * rr(r, 0.12, 0.2), ry = h * rr(r, 0.035, 0.06); const bgd = g.createRadialGradient(bx, by - ry * 0.4, 0, bx, by, rx); bgd.addColorStop(0, 'rgba(255,248,232,.6)'); bgd.addColorStop(1, 'rgba(150,152,140,0)'); g.fillStyle = bgd; g.beginPath(); g.ellipse(bx, by, rx, ry, (r() - 0.5) * 0.3, 0, TAU); g.fill(); }
-        g.strokeStyle = 'rgba(80,82,74,.35)'; g.lineWidth = 1.3; for (let kx = -10; kx < 12; kx++) { g.beginPath(); for (let ky = 0; ky < 8; ky++) g.arc(w * 0.38 + kx * 22 * sc + Math.sin(ky) * 3, h * 0.9 + ky * 9 * sc, 4.2 * sc, 0, Math.PI); g.stroke(); }
-        g.restore();
-        [[0.82, 0.93, 0.34, 0.15, -0.18, [206, 120, 108]], [0.99, 0.98, 0.3, 0.17, 0.2, [226, 190, 120]], [0.62, 0.99, 0.28, 0.11, 0.1, [150, 110, 90]]].forEach(([px, py, pw, ph, rot, c]) => { g.save(); g.translate(w * px, h * py); g.rotate(rot); const pg = g.createLinearGradient(0, -h * ph / 2, 0, h * ph / 2); pg.addColorStop(0, rgb(mix(c, [255, 255, 240], 0.14))); pg.addColorStop(1, rgb(mix(c, [0, 0, 0], 0.4))); g.fillStyle = pg; g.beginPath(); g.roundRect ? g.roundRect(-w * pw / 2, -h * ph / 2, w * pw, h * ph, h * ph * 0.4) : g.rect(-w * pw / 2, -h * ph / 2, w * pw, h * ph); g.fill(); g.restore(); });
-      }), 3 * sc);
-
-      s.frost = a.layer(W, H, (g, w, h) => { const fr = rng(12);
-        [[0, 0, w, h * 0.2, 0, 1], [0, h * 0.8, w, h * 0.2, 1, 0]].forEach(([x, y, ww, hh, a0, a1]) => { const gr = g.createLinearGradient(0, y, 0, y + hh); gr.addColorStop(a0, 'rgba(225,238,244,.32)'); gr.addColorStop(a1, 'rgba(225,238,244,0)'); g.fillStyle = gr; g.fillRect(x, y, ww, hh); });
-        for (let i = 0; i < 200; i++) { const x = fr() * w, y = (fr() < 0.5 ? fr() * 0.14 : 0.86 + fr() * 0.14) * h, len = rr(fr, 14, 60) * sc; g.strokeStyle = `rgba(235,246,250,${0.05 + fr() * 0.1})`; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y); for (let k = 1; k < 4; k++) g.lineTo(x + (fr() - 0.5) * len, y + (y < h / 2 ? 1 : -1) * k * len / 3); g.stroke(); } });
-      s.drops = makeDrops(a, s.gb, 38, rng(21));
+      // ---- the view: a heavy snowfall over a spruce forest at dusk (window sized) ----
+      s.view = a.blur(a.layer(win.w, win.h, (g, w, h) => {
+        a.vgrad(g, w, h, [[0, [40, 54, 82]], [0.45, [64, 82, 112]], [0.8, [112, 132, 160]], [1, [166, 184, 206]]]);
+        a.firRow(g, w, h * 0.62, h * 0.18, h * 0.36, 3, [38, 58, 72], { gap: [10, 24], snow: true, vary: [74, 98, 116], jitter: 4 });
+        const f1 = g.createLinearGradient(0, h * 0.35, 0, h * 0.75); f1.addColorStop(0, 'rgba(150,172,196,0)'); f1.addColorStop(1, 'rgba(150,172,196,.5)'); g.fillStyle = f1; g.fillRect(0, h * 0.35, w, h * 0.4);
+        a.firRow(g, w, h * 0.8, h * 0.3, h * 0.55, 5, [26, 44, 54], { gap: [30, 70], snow: true, vary: [64, 88, 98], jitter: 5 });
+        const fr = rng(61); [[0.08, 0.95], [0.38, 1.05], [0.66, 0.9], [0.93, 1.0]].forEach(([fx, sz], i) => a.fir(g, w * fx, h * 1.02, h * sz, `rgb(${22 + i * 2},${40 + i * 3},${46 + i * 2})`, fr, true));
+        const gr = g.createLinearGradient(0, h * 0.86, 0, h); gr.addColorStop(0, 'rgba(206,222,238,0)'); gr.addColorStop(1, 'rgba(206,222,238,.9)'); g.fillStyle = gr; g.fillRect(0, h * 0.86, w, h * 0.14);
+      }), 1.8 * sc);
+      s.flakes = [0, 1, 2].map(li => Array.from({ length: a.n([320, 150, 46][li]) }, () => ({ x: r() * win.w, y: r() * win.h, v: [38, 78, 140][li] * (0.8 + r() * 0.4), sz: [2.2, 4.4, 9][li], ph: r() * 90, al: [0.55, 0.7, 0.55][li] })));
       s.flake = a.glow([255, 255, 255], 16);
-      s.layers = [0, 1].map(li => Array.from({ length: a.n([120, 34][li]) }, () => ({ x: r() * gx1, y: r() * gyB, v: [24, 66][li] * (0.8 + r() * 0.4), sz: [3.4, 12][li], ph: r() * 90, al: [0.7, 0.45][li] })));
-      s.warm = a.glow([255, 168, 80], 256); s.sp = [[255, 206, 110], [255, 140, 40], [214, 60, 18]].map(c => a.glow(c, 64)); s.spark = a.glow([255, 210, 120], 16);
-      s.bulb = a.glow([255, 214, 140], 32); s.cool = a.glow([150, 190, 200], 256);
-      s.fl = []; s.sk = []; s.acc = 0; s.sacc = 0; s.warmup = 40;
-      s.dust = Array.from({ length: a.n(30) }, () => ({ x: r() * W * 0.7, y: r() * H * 0.8, ph: r() * 90 })); s.dg = a.glow([240,244,236], 16);
+
+      // ---- the room: log walls, window frame, lamp, shelves, stone fireplace ----
+      const lamp = (s.lamp = { x: W * 0.085, y: H * 0.5 }), candles = (s.candles = []), shelfX = W * P.sx, shelfW = W * P.sw;
+      s.room = a.blur(a.layer(W, H, (g, w, h) => {
+        // log wall
+        const lh = 52 * sc; for (let y = -10; y < h; y += lh) { const jit = (r() - 0.5) * 8; const base = mix([150, 98, 56], [176, 118, 70], r()); wood(g, 0, y + jit * 0, w, lh, base, 7); g.fillStyle = 'rgba(14,6,0,.55)'; g.fillRect(0, y + lh - 3, w, 3);
+          for (let k = 0; k < 2; k++) if (r() > 0.55) { const kx = r() * w, ky = y + lh * (0.25 + r() * 0.5); g.fillStyle = 'rgba(40,18,4,.55)'; g.beginPath(); g.ellipse(kx, ky, 6 * sc, 3.5 * sc, 0, 0, TAU); g.fill(); } }
+        // ceiling beams
+        const cb = g.createLinearGradient(0, 0, 0, h * 0.1); cb.addColorStop(0, 'rgb(46,26,14)'); cb.addColorStop(1, 'rgb(98,58,32)'); g.fillStyle = cb; g.fillRect(0, 0, w, h * 0.085);
+        for (let i = 0; i < 4; i++) { g.fillStyle = 'rgba(30,16,8,.8)'; g.fillRect(w * (0.2 + i * 0.22), 0, 26 * sc, h * 0.085); }
+        // stone chimney breast
+        const sx0 = fx0 - 14 * sc; g.fillStyle = 'rgb(58,48,42)'; g.fillRect(sx0, 0, w - sx0, floorY + 10);
+        for (let y = 0, row = 0; y < floorY + 10; y += 38 * sc, row++) { let x = sx0 + (row % 2 ? -30 * sc : 0); while (x < w) { const sw2 = rr(r, 56, 112) * sc, sh2 = (34 + r() * 8) * sc, c = mix([84, 74, 66], [128, 116, 102], r()); const sg = g.createLinearGradient(x, y, x + sw2, y + sh2); sg.addColorStop(0, rgb(mix(c, [255, 240, 220], 0.16))); sg.addColorStop(1, rgb(mix(c, [30, 24, 20], 0.35))); g.fillStyle = sg; g.beginPath(); g.roundRect ? g.roundRect(x + 2, y + 2, sw2 - 4, sh2 - 4, 7 * sc) : g.rect(x + 2, y + 2, sw2 - 4, sh2 - 4); g.fill(); for (let k = 0; k < 6; k++) { g.fillStyle = `rgba(0,0,0,${0.06 + r() * 0.1})`; g.fillRect(x + 4 + r() * (sw2 - 8), y + 4 + r() * (sh2 - 8), 2, 2); } x += sw2; } }
+        // mantel with candles and a small frame
+        wood(g, sx0 - 18 * sc, mantelY, w - sx0 + 18 * sc, 30 * sc, [120, 78, 44], 6); g.fillStyle = 'rgba(0,0,0,.4)'; g.fillRect(sx0 - 18 * sc, mantelY + 28 * sc, w - sx0 + 18 * sc, 4);
+        const cand = (cx, cy, k) => { g.fillStyle = 'rgba(210,225,235,.32)'; g.fillRect(cx - 13 * k, cy - 40 * k, 26 * k, 40 * k); g.fillStyle = 'rgb(246,236,214)'; g.fillRect(cx - 8 * k, cy - 34 * k, 16 * k, 34 * k); g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(cx + 3 * k, cy - 34 * k, 5 * k, 34 * k); candles.push({ x: cx, y: cy - 38 * k, ph: r() * 9, k }); };
+        cand(sx0 + 40 * sc, mantelY, sc); cand(sx0 + 78 * sc, mantelY, sc * 0.8);
+        g.fillStyle = 'rgb(54,36,24)'; g.fillRect(w - 118 * sc, mantelY - 150 * sc, 112 * sc, 140 * sc); g.fillStyle = 'rgb(206,196,176)'; g.fillRect(w - 110 * sc, mantelY - 142 * sc, 96 * sc, 124 * sc);
+        const pg = g.createLinearGradient(0, mantelY - 130 * sc, 0, mantelY - 30 * sc); pg.addColorStop(0, 'rgb(150,150,150)'); pg.addColorStop(1, 'rgb(70,70,70)'); g.fillStyle = pg; g.fillRect(w - 102 * sc, mantelY - 134 * sc, 80 * sc, 100 * sc);
+        // firebox
+        const f = s.fire; g.fillStyle = 'rgb(16,14,14)'; g.beginPath(); g.moveTo(f.x - 14 * sc, f.y + f.h + 12 * sc); g.lineTo(f.x - 14 * sc, f.y + 22 * sc); g.quadraticCurveTo(f.x - 14 * sc, f.y - 14 * sc, f.x + 30 * sc, f.y - 14 * sc); g.lineTo(w, f.y - 14 * sc); g.lineTo(w, f.y + f.h + 12 * sc); g.closePath(); g.fill();
+        g.fillStyle = 'rgb(34,18,12)'; g.fillRect(f.x, f.y, f.w + 40, f.h);
+        const hs = g.createLinearGradient(0, floorY - 6, 0, h); hs.addColorStop(0, 'rgb(120,106,92)'); hs.addColorStop(1, 'rgb(60,52,46)'); g.fillStyle = hs; g.fillRect(sx0 - 30 * sc, floorY - 6, w - sx0 + 30 * sc, h - floorY + 6);
+        // logs in the fire
+        [[0.0, 0.84, 0.9, 14], [0.2, 0.72, 0.8, 13], [0.1, 0.62, 0.7, 12]].forEach(([ox, oy, lw, th]) => { const lx = f.x + f.w * ox, ly = f.y + f.h * oy; const lg = g.createLinearGradient(0, ly - th * sc, 0, ly + th * sc); lg.addColorStop(0, 'rgb(98,58,30)'); lg.addColorStop(1, 'rgb(34,18,8)'); g.fillStyle = lg; g.beginPath(); g.roundRect ? g.roundRect(lx, ly - th * sc, f.w * lw, th * 2 * sc, th * sc) : g.rect(lx, ly - th * sc, f.w * lw, th * 2 * sc); g.fill(); });
+        // floor
+        const fl = g.createLinearGradient(0, floorY, 0, h); fl.addColorStop(0, 'rgb(110,70,40)'); fl.addColorStop(1, 'rgb(52,30,16)'); g.fillStyle = fl; g.fillRect(0, floorY, sx0 - 30 * sc, h - floorY);
+        for (let k = 0; k < 8; k++) { g.strokeStyle = 'rgba(20,8,0,.5)'; g.lineWidth = 1.4; const yy = floorY + (h - floorY) * Math.pow(k / 7, 1.4); g.beginPath(); g.moveTo(0, yy); g.lineTo(sx0 - 30 * sc, yy); g.stroke(); }
+        // window: frame, sill, then the opening is cut out and the glazing bars go back on top
+        const fw = 18 * sc; wood(g, win.x - fw, win.y - fw, win.w + fw * 2, win.h + fw * 2 + 10 * sc, [108, 66, 36], 8);
+        g.globalCompositeOperation = 'destination-out'; g.fillStyle = '#000'; g.fillRect(win.x, win.y, win.w, win.h); g.globalCompositeOperation = 'source-over';
+        const bar = (x, y, bw, bh) => { wood(g, x, y, bw, bh, [100, 60, 32], 3); g.fillStyle = 'rgba(255,214,160,.16)'; g.fillRect(x, y, bw > bh ? bw : 1.6, bw > bh ? 1.6 : bh); };
+        [1, 2].forEach(i => { bar(win.x + win.w * i / 3 - 5 * sc, win.y, 10 * sc, win.h); bar(win.x, win.y + win.h * i / 3 - 5 * sc, win.w, 10 * sc); });
+        g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(win.x - fw, win.y + win.h + fw - 4, win.w + fw * 2, 5);
+        wood(g, win.x - fw - 20 * sc, win.y + win.h + fw, win.w + fw * 2 + 40 * sc, 16 * sc, [118, 74, 40], 4);
+        // radiator below the window
+        const ry = win.y + win.h + fw + 28 * sc, rh = floorY - ry - 8 * sc; g.fillStyle = 'rgb(214,198,170)'; g.fillRect(win.x + 10 * sc, ry, win.w - 20 * sc, rh);
+        for (let x = win.x + 18 * sc; x < win.x + win.w - 18 * sc; x += 9 * sc) { g.fillStyle = 'rgba(80,60,30,.28)'; g.fillRect(x, ry + 6 * sc, 2.4, rh - 12 * sc); }
+        // lamp
+        g.fillStyle = 'rgb(54,36,22)'; g.fillRect(lamp.x - 4 * sc, lamp.y + 28 * sc, 8 * sc, 84 * sc); g.beginPath(); g.ellipse(lamp.x, lamp.y + 118 * sc, 24 * sc, 9 * sc, 0, 0, TAU); g.fill();
+        const sh = g.createLinearGradient(lamp.x - 60 * sc, 0, lamp.x + 60 * sc, 0); sh.addColorStop(0, 'rgb(212,176,120)'); sh.addColorStop(0.5, 'rgb(255,236,190)'); sh.addColorStop(1, 'rgb(196,158,104)'); g.fillStyle = sh; g.beginPath(); g.moveTo(lamp.x - 36 * sc, lamp.y - 62 * sc); g.lineTo(lamp.x + 36 * sc, lamp.y - 62 * sc); g.lineTo(lamp.x + 62 * sc, lamp.y + 26 * sc); g.lineTo(lamp.x - 62 * sc, lamp.y + 26 * sc); g.closePath(); g.fill();
+        // bookshelf with candles and a plant on top
+        const sy0 = H * 0.2, sy1 = H * 0.72; wood(g, shelfX - 10 * sc, sy0 - 10 * sc, shelfW + 20 * sc, sy1 - sy0 + 20 * sc, [92,56,30], 5); g.fillStyle = 'rgb(26,14,8)'; g.fillRect(shelfX, sy0, shelfW, sy1 - sy0);
+        const rows = 4, rh2 = (sy1 - sy0) / rows, pal = [[150, 52, 44], [48, 76, 128], [212, 176, 92], [70, 104, 72], [110, 70, 44], [188, 156, 112], [40, 52, 70], [160, 90, 60]];
+        for (let i = 0; i < rows; i++) { const y1 = sy0 + rh2 * (i + 1); let x = shelfX + 5 * sc; const candleRow = i === 1;
+          while (x < shelfX + shelfW - 8 * sc) { if (candleRow && x > shelfX + shelfW * 0.55 && !s._c1) { s._c1 = 1; g.fillStyle = 'rgba(210,225,235,.3)'; g.fillRect(x, y1 - 38 * sc, 18 * sc, 38 * sc); g.fillStyle = 'rgb(248,238,216)'; g.fillRect(x + 4 * sc, y1 - 30 * sc, 10 * sc, 30 * sc); candles.push({ x: x + 9 * sc, y: y1 - 34 * sc, ph: r() * 9, k: 0.8 }); x += 26 * sc; continue; }
+            const bw = rr(r, 8, 16) * sc, bh = rh2 * rr(r, 0.6, 0.92); g.fillStyle = rgb(mix(pal[Math.floor(r() * pal.length)], [0, 0, 0], r() * 0.25)); g.fillRect(x, y1 - bh, bw, bh); g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(x, y1 - bh, 1.6, bh); g.fillStyle = 'rgba(212,180,110,.7)'; g.fillRect(x + 1, y1 - bh * 0.7, bw - 2, 2); x += bw + 0.6; }
+          g.fillStyle = 'rgb(84,50,26)'; g.fillRect(shelfX - 6 * sc, y1, shelfW + 12 * sc, 7 * sc); }
+        s._c1 = 0;
+        for (let i = 0; i < 16; i++) { const ang = -Math.PI / 2 + (r() - 0.5) * 2.2, len = rr(r, 26, 62) * sc, bx = shelfX + shelfW * 0.45, by = sy0 - 6 * sc; g.strokeStyle = 'rgb(40,70,40)'; g.lineWidth = 2; g.beginPath(); g.moveTo(bx, by); g.quadraticCurveTo(bx + Math.cos(ang) * len * 0.5, by + Math.sin(ang) * len * 0.3, bx + Math.cos(ang) * len, by + Math.sin(ang) * len); g.stroke(); g.fillStyle = rgb(mix([40, 92, 48], [92, 150, 70], r())); g.beginPath(); g.ellipse(bx + Math.cos(ang) * len, by + Math.sin(ang) * len, 9 * sc, 4.5 * sc, ang, 0, TAU); g.fill(); }
+        g.fillStyle = 'rgb(120,96,70)'; g.fillRect(shelfX + shelfW * 0.3, sy0 - 12 * sc, shelfW * 0.3, 12 * sc);
+        // a leafy plant at the lamp
+        for (let i = 0; i < 30; i++) { const ang = -Math.PI / 2 + (r() - 0.5) * 2.4, len = rr(r, 24, 70) * sc, bx = W * 0.02, by = H * 0.62; g.strokeStyle = 'rgb(30,52,30)'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(bx, by); g.lineTo(bx + Math.cos(ang) * len, by + Math.sin(ang) * len); g.stroke(); g.fillStyle = rgb(mix([26, 58, 30], [64, 110, 52], r())); g.beginPath(); g.ellipse(bx + Math.cos(ang) * len, by + Math.sin(ang) * len, 7 * sc, 3.2 * sc, ang, 0, TAU); g.fill(); }
+        // fire irons and a basket
+        g.strokeStyle = 'rgb(18,16,16)'; g.lineWidth = 4 * sc; g.beginPath(); g.moveTo(fx0 - 56 * sc, floorY - 150 * sc); g.lineTo(fx0 - 56 * sc, floorY + 6); g.stroke(); g.beginPath(); g.moveTo(fx0 - 66 * sc, floorY - 150 * sc); g.lineTo(fx0 - 46 * sc, floorY - 150 * sc); g.stroke();
+        const bkx = shelfX + shelfW * 0.2, bky = floorY - 40 * sc; g.fillStyle = 'rgb(120,82,46)'; g.beginPath(); g.roundRect ? g.roundRect(bkx, bky, 86 * sc, 52 * sc, 8 * sc) : g.rect(bkx, bky, 86 * sc, 52 * sc); g.fill(); g.strokeStyle = 'rgba(40,20,6,.6)'; g.lineWidth = 1.4; for (let k = 1; k < 5; k++) { g.beginPath(); g.moveTo(bkx, bky + k * 10 * sc); g.lineTo(bkx + 86 * sc, bky + k * 10 * sc); g.stroke(); }
+      }), 0.7 * sc);
+
+      // ---- the coffee table: mug, candle, books ----
+      s.table = a.blur(a.layer(W, H, (g, w, h) => {
+        const tx = w * 0.41, ty = h * 0.795, tw = w * 0.54, th = h * 0.15;
+        const tg = g.createLinearGradient(0, ty, 0, ty + th); tg.addColorStop(0, 'rgb(140,88,50)'); tg.addColorStop(1, 'rgb(74,42,22)'); g.fillStyle = tg; g.beginPath(); g.moveTo(tx + 20 * sc, ty); g.lineTo(tx + tw, ty - 6 * sc); g.lineTo(tx + tw + 30 * sc, ty + th); g.lineTo(tx, ty + th); g.closePath(); g.fill();
+        g.strokeStyle = 'rgba(30,12,2,.35)'; g.lineWidth = 1.2; for (let k = 0; k < 7; k++) { const yy = ty + th * (k + 0.5) / 7; g.beginPath(); g.moveTo(tx + 10 * sc, yy); g.lineTo(tx + tw + 20 * sc, yy - 4 * sc); g.stroke(); }
+        g.fillStyle = 'rgb(48,28,14)'; g.fillRect(tx + 6 * sc, ty + th, 22 * sc, h * 0.06); g.fillRect(tx + tw - 8 * sc, ty + th, 22 * sc, h * 0.06);
+        const mx = tx + tw * 0.22, my = ty + th * 0.35; g.fillStyle = 'rgb(236,230,220)'; g.beginPath(); g.moveTo(mx - 26 * sc, my - 58 * sc); g.lineTo(mx + 26 * sc, my - 58 * sc); g.lineTo(mx + 22 * sc, my); g.lineTo(mx - 22 * sc, my); g.closePath(); g.fill();
+        g.fillStyle = 'rgba(180,110,120,.55)'; for (let k = 0; k < 7; k++) { g.beginPath(); g.arc(mx - 16 * sc + (k % 4) * 11 * sc, my - 44 * sc + Math.floor(k / 4) * 18 * sc, 4 * sc, 0, TAU); g.fill(); }
+        g.strokeStyle = 'rgb(226,220,210)'; g.lineWidth = 6 * sc; g.beginPath(); g.arc(mx + 30 * sc, my - 32 * sc, 14 * sc, -1.3, 1.3); g.stroke();
+        const jx = tx + tw * 0.46, jy = ty + th * 0.4; g.fillStyle = 'rgba(210,228,238,.34)'; g.fillRect(jx - 26 * sc, jy - 48 * sc, 52 * sc, 48 * sc); g.fillStyle = 'rgb(246,238,218)'; g.fillRect(jx - 17 * sc, jy - 36 * sc, 34 * sc, 36 * sc);
+        s.tableCandle = { x: jx, y: jy - 40 * sc };
+        [[0.7, 0.5, 120, 20, [38, 32, 40]], [0.7, 0.44, 104, 18, [70, 50, 40]]].forEach(([fx, fy, bw, bh, c], i) => { const bx = tx + tw * fx - bw * sc / 2 + i * 8 * sc, by = ty + th * fy - i * 20 * sc; g.fillStyle = rgb(c); g.fillRect(bx, by - bh * sc, bw * sc, bh * sc); g.fillStyle = 'rgb(224,214,190)'; g.fillRect(bx + 4 * sc, by - bh * sc + 3 * sc, bw * sc - 8 * sc, bh * sc - 6 * sc); g.fillStyle = rgb(c); g.fillRect(bx, by - bh * sc, bw * sc, 3 * sc); });
+      }), 0.9 * sc);
+
+      // ---- foreground: a big armchair with a chunky knit blanket thrown over it ----
+      s.fg = a.blur(a.layer(W, H, (g, w, h) => {
+        // the chair itself: a dark, deep seat with a rolled arm
+        g.fillStyle = 'rgb(52,40,34)'; g.beginPath(); g.moveTo(-20, h); g.lineTo(-20, h * 0.74); g.bezierCurveTo(w * 0.05, h * 0.71, w * 0.14, h * 0.74, w * 0.22, h * 0.82); g.bezierCurveTo(w * 0.28, h * 0.88, w * 0.36, h * 0.93, w * 0.4, h + 20); g.closePath(); g.fill();
+        g.fillStyle = 'rgb(76,60,50)'; g.beginPath(); g.ellipse(w * 0.1, h * 0.82, w * 0.11, h * 0.045, -0.2, 0, TAU); g.fill();
+        // the blanket draped over the arm and seat
+        g.save(); g.beginPath(); g.moveTo(-20, h); g.lineTo(-20, h * 0.8); g.bezierCurveTo(w * 0.05, h * 0.78, w * 0.15, h * 0.84, w * 0.22, h * 0.9); g.bezierCurveTo(w * 0.27, h * 0.95, w * 0.3, h * 0.98, w * 0.31, h + 20); g.closePath();
+        const bg = g.createLinearGradient(0, h * 0.78, w * 0.3, h); bg.addColorStop(0, 'rgb(150,132,114)'); bg.addColorStop(1, 'rgb(62,50,42)'); g.fillStyle = bg; g.fill(); g.clip();
+        for (let y = h * 0.76, row = 0; y < h + 20; y += 11 * sc, row++) for (let x = -10 + (row % 2) * 7 * sc; x < w * 0.42; x += 14 * sc) { g.strokeStyle = (row + Math.floor(x / 14)) % 3 ? 'rgba(236,218,190,.2)' : 'rgba(24,14,8,.3)'; g.lineWidth = 2.6 * sc; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 5 * sc, y + 8 * sc); g.lineTo(x + 10 * sc, y); g.stroke(); }
+        g.restore();
+        for (let k = 0; k < 18; k++) { const x = w * (0.2 + r() * 0.2), y0 = h * (0.86 + r() * 0.06); g.strokeStyle = 'rgba(206,186,156,.45)'; g.lineWidth = 1.8; g.beginPath(); g.moveTo(x, y0); g.lineTo(x + (r() - 0.5) * 12, y0 + 26 * sc + r() * 22); g.stroke(); }
+      }), 1.2 * sc);
+
+      // ---- light: darkness with pools of light around the fire, lamp, candles and the cold window ----
+      const f = s.fire, lights = [{ x: f.x + f.w / 2, y: f.y + f.h * 0.6, r: H * 0.7, s: 0.75 }, { x: lamp.x, y: lamp.y, r: H * 0.55, s: 0.85 }, ...candles.map(c => ({ x: c.x, y: c.y, r: 120 * sc, s: 0.55 })), { x: s.tableCandle.x, y: s.tableCandle.y, r: 160 * sc, s: 0.6 }, { x: win.x + win.w / 2, y: win.y + win.h * 0.7, r: win.w * 0.7, s: 0.4 }];
+      s.dark = a.lightmap(W, H, { color: [8, 5, 6], ambient: 0.5, holes: [[[win.x, win.y], [win.x + win.w, win.y], [win.x + win.w, win.y + win.h], [win.x, win.y + win.h]]], holeA: 0.3, lights });
+      s.warm = a.glow([255, 168, 80], 256); s.cool = a.glow([150, 190, 230], 256); s.bulb = a.glow([255, 224, 160], 128);
+      s.sp = [[255, 206, 110], [255, 140, 40], [214, 60, 18]].map(c => a.glow(c, 64)); s.spark = a.glow([255, 210, 120], 16);
+      s.fl = []; s.sk = []; s.acc = 0; s.sacc = 0;
     },
     draw(a, t, dt) {
-      const { ctx, W, H, s } = a, sc = Math.max(0.75, Math.min(1.4, H / 760)), gust = a.gust(t, 1), wnd = a.wind(t, 4), gb = s.gb, st = s.stove, dr = s.door;
+      const { ctx, W, H, s } = a, sc = Math.max(0.75, Math.min(1.4, H / 760)), win = s.win, f = s.fire, gust = a.gust(t, 1), wnd = a.wind(t, 4);
       const fl = clamp(0.78 + 0.34 * (a.n2(t * 3.4, 2) - 0.5) + 0.2 * (a.n2(t * 10, 6) - 0.5), 0.45, 1);
-      s.foff[0] += (4 + gust * 10) * dt; s.foff[1] += (7 + gust * 14) * dt;
-      // ---- outside, clipped to the slanted glass ----
-      ctx.save(); ctx.beginPath(); s.glass.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.clip();
-      ctx.drawImage(s.outFar, 0, 0, W, H);
-      const fogBand = (k, y, h, al) => { const w = s.fog.width * (h / s.fog.height), x0 = -(s.foff[k] % w); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = al; for (let x = x0; x < gb.w + w; x += w) ctx.drawImage(s.fog, x, y, w + 1, h); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; };
-      fogBand(0, H * 0.28, H * 0.36, 0.7);
-      ctx.save(); const sh = (a.wind(t * 0.8, 3) * 0.7 + gust * 0.6) * 0.004; ctx.transform(1, 0, sh, 1, -sh * H, 0); ctx.drawImage(s.outNear, -W * 0.04, 0, W * 1.08, H); ctx.restore();
-      fogBand(1, H * 0.5, H * 0.34, 0.65);
-      s.layers.forEach((layer, li) => layer.forEach(f => {
-        const turb = (a.n2(f.x * 0.006 + t * 0.12, f.y * 0.006) - 0.5) * [30, 70][li], vx = -([6, 12][li] + gust * [36, 80][li]) + turb + wnd * 10;
-        f.y += f.v * dt * (0.85 + 0.3 * a.n2(f.ph + t * 0.2, 1)); f.x += vx * dt;
-        if (f.y > gb.h + 12) { f.y = -12; f.x = Math.random() * gb.w; } if (f.x < -20) f.x += gb.w + 40; if (f.x > gb.w + 20) f.x -= gb.w + 40;
-        ctx.globalAlpha = f.al; a.sprite(s.flake, f.x + Math.sin(t * 0.8 + f.ph) * [5, 10][li], f.y, f.sz * 2);
+      // outside
+      ctx.save(); ctx.beginPath(); ctx.rect(win.x, win.y, win.w, win.h); ctx.clip();
+      ctx.drawImage(s.view, win.x, win.y, win.w, win.h);
+      s.flakes.forEach((layer, li) => layer.forEach(p => {
+        const turb = (a.n2(p.x * 0.006 + t * 0.12, p.y * 0.006) - 0.5) * [30, 60, 110][li], vx = -[8, 16, 28][li] - gust * [30, 60, 110][li] + turb + wnd * 10;
+        p.y += p.v * dt * (0.85 + 0.3 * a.n2(p.ph + t * 0.2, 1)); p.x += vx * dt;
+        if (p.y > win.h + 12) { p.y = -12; p.x = Math.random() * (win.w + 80); } if (p.x < -30) p.x += win.w + 60; if (p.x > win.w + 30) p.x -= win.w + 60;
+        ctx.globalAlpha = p.al; a.sprite(s.flake, win.x + p.x + Math.sin(t * 0.8 + p.ph) * [4, 8, 14][li], win.y + p.y, p.sz * 2);
       }));
-      ctx.globalAlpha = 1;
-      const sheen = ctx.createLinearGradient(0, 0, gb.w, gb.h); sheen.addColorStop(0, 'rgba(230,242,246,.07)'); sheen.addColorStop(0.5, 'rgba(230,242,246,0)'); sheen.addColorStop(1, 'rgba(255,190,120,.06)'); ctx.fillStyle = sheen; ctx.fillRect(0, 0, gb.w, gb.h);
-      const hz = ctx.createLinearGradient(0, gb.h * 0.7, 0, gb.h); hz.addColorStop(0, 'rgba(190,205,210,0)'); hz.addColorStop(1, 'rgba(190,205,210,.2)'); ctx.fillStyle = hz; ctx.fillRect(0, gb.h * 0.7, gb.w, gb.h * 0.3);
-      stepDrops(a, s.drops, gb, dt, t, 0.35 + gust * 0.4);
-      // frost creeping in from the edges of the cold glass, and a ghost of the fire reflected in it
-      ctx.drawImage(s.frost, 0, 0, W, H);
-      ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.07 * fl; a.sprite(s.warm, gb.w * 0.62, gb.h * 0.62, H * 0.9); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
-      ctx.restore();
-      a.put(s.room, 0, 0); ctx.drawImage(s.plantL, 0, 0, W, H);
+      ctx.globalAlpha = 1; ctx.restore();
+      a.put(s.room, 0, 0);
+      ctx.drawImage(s.table, 0, 0, W, H);
+      ctx.drawImage(s.dark, 0, 0, W, H);
 
-      // ---- the stove fire (flames stay behind the glass door) ----
-      { const fg = ctx.createRadialGradient(dr.x + dr.w / 2, dr.y + dr.h, 0, dr.x + dr.w / 2, dr.y + dr.h, dr.h * 1.1); fg.addColorStop(0, `rgba(255,170,70,${0.55 * fl})`); fg.addColorStop(1, 'rgba(120,40,10,.25)'); ctx.fillStyle = fg; ctx.fillRect(dr.x, dr.y, dr.w, dr.h); }
-      s.acc += 130 * a.q * dt; while (s.acc > 1) { s.acc--; s.fl.push({ x: dr.x + dr.w * (0.2 + Math.random() * 0.6), y: dr.y + dr.h - 4, vx: (Math.random() - 0.5) * 10, vy: -(50 + Math.random() * 90), life: 0.5 + Math.random() * 0.6, age: 0, sz: 12 + Math.random() * 16, ph: Math.random() * 90 }); }
-      s.sacc += dt * 8 * a.q; while (s.sacc > 1) { s.sacc--; s.sk.push({ x: dr.x + dr.w * (0.25 + Math.random() * 0.5), y: dr.y + dr.h * 0.6, vx: (Math.random() - 0.5) * 20, vy: -(40 + Math.random() * 70), life: 0.8 + Math.random() * 0.9, age: 0 }); }
-      ctx.save(); ctx.beginPath(); ctx.rect(dr.x, dr.y, dr.w, dr.h); ctx.clip(); ctx.globalCompositeOperation = 'lighter';
-      for (let i = s.fl.length - 1; i >= 0; i--) { const p = s.fl[i]; p.age += dt; if (p.age >= p.life) { s.fl.splice(i, 1); continue; } p.x += (p.vx + (a.n2(p.age * 3 + p.ph, 2) - 0.5) * 26) * dt; p.y += p.vy * dt; const k = p.age / p.life, z = p.sz * (1 - k * 0.55) * sc, spi = k < 0.3 ? 0 : k < 0.62 ? 1 : 2; ctx.globalAlpha = (1 - k) * 0.8; a.sprite(s.sp[spi], p.x, p.y + z * 0.3, z * 2); }
+      // the fire: flames stay inside the firebox
+      const fx = f.x, fy = f.y, fw = f.w, fh = f.h;
+      s.acc += 125 * a.q * dt; while (s.acc > 1) { s.acc--; s.fl.push({ x: fx + fw * (0.08 + Math.random() * 0.8), y: fy + fh * 0.84, vx: (Math.random() - 0.5) * 12, vy: -(60 + Math.random() * 110), life: 0.5 + Math.random() * 0.7, age: 0, sz: 12 + Math.random() * 16, ph: Math.random() * 90 }); }
+      s.sacc += dt * 9 * a.q; while (s.sacc > 1) { s.sacc--; s.sk.push({ x: fx + fw * (0.15 + Math.random() * 0.6), y: fy + fh * 0.5, vx: (Math.random() - 0.5) * 24, vy: -(50 + Math.random() * 80), life: 0.8 + Math.random() * 1, age: 0 }); }
+      ctx.save(); ctx.beginPath(); ctx.rect(fx, fy, fw + 40, fh); ctx.clip(); ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.34 * fl; a.sprite(s.warm, fx + fw * 0.45, fy + fh * 0.85, fw * 1.3);
+      for (let i = s.fl.length - 1; i >= 0; i--) { const p = s.fl[i]; p.age += dt; if (p.age >= p.life) { s.fl.splice(i, 1); continue; } p.x += (p.vx + (a.n2(p.age * 3 + p.ph, 2) - 0.5) * 30) * dt; p.y += p.vy * dt; const k = p.age / p.life, z = p.sz * (1 - k * 0.5) * sc, spi = k < 0.3 ? 0 : k < 0.62 ? 1 : 2; ctx.globalAlpha = (1 - k) * 0.8; a.sprite(s.sp[spi], p.x, p.y + z * 0.3, z * 2); }
       for (let i = s.sk.length - 1; i >= 0; i--) { const p = s.sk[i]; p.age += dt; if (p.age >= p.life) { s.sk.splice(i, 1); continue; } p.x += p.vx * dt; p.y += p.vy * dt; ctx.globalAlpha = (1 - p.age / p.life) * 0.9; a.sprite(s.spark, p.x, p.y, 6); }
       ctx.restore();
-      // ---- warm light: stove, candles, lanterns, fairy lights; cool daylight through the glass ----
+
+      // warm light spilling out of the fire, the lamp and the candles; cold light from the window
       ctx.globalCompositeOperation = 'lighter';
-      ctx.globalAlpha = 0.28 * fl; a.sprite(s.warm, dr.x + dr.w / 2, dr.y + dr.h / 2, H * 1.2);
-      ctx.globalAlpha = 0.3 * fl; a.sprite(s.warm, dr.x + dr.w / 2, dr.y + dr.h * 0.7, st.w * 2.2);
-      s.candles.forEach((c, i) => { ctx.globalAlpha = clamp(0.55 + 0.4 * a.n2(t * 4 + c.ph, i), 0.2, 1) * 0.95; a.sprite(s.warm, c.x, c.y, 42 * sc); });
-      s.lanterns.forEach((l, i) => { ctx.globalAlpha = clamp(0.6 + 0.3 * a.n2(t * 2.2 + l.ph, 3), 0.3, 1); a.sprite(s.warm, l.x, l.y, 64 * sc); });
-      s.bulbs.forEach(b => { const tw = 0.55 + 0.45 * Math.sin(t * 1.6 + b.ph) * a.n2(t * 0.5 + b.ph, 1); ctx.globalAlpha = clamp(tw, 0.25, 1); a.sprite(s.bulb, b.x, b.y, 15 * sc); });
-      ctx.globalAlpha = 0.16; a.sprite(s.cool, W * 0.28, H * 0.8, W * 0.9);
-      s.dust.forEach(d => { const bb = Math.max(0, Math.sin(t * 0.6 + d.ph)); ctx.globalAlpha = 0.22 * bb; a.sprite(s.dg, d.x + (a.n2(t * 0.08 + d.ph, 2) - 0.5) * 70, d.y + (a.n2(t * 0.07, d.ph) - 0.5) * 50, 7); });
+      ctx.globalAlpha = 0.26 * fl; a.sprite(s.warm, fx + fw * 0.4, fy + fh * 0.5, H * 1.2);
+      ctx.globalAlpha = 0.18 * fl; a.sprite(s.warm, fx + fw * 0.4, H * 0.9, W * 0.5);
+      ctx.globalAlpha = 0.4 + 0.04 * Math.sin(t * 1.3); a.sprite(s.bulb, s.lamp.x, s.lamp.y - 10 * sc, 280 * sc);
+      ctx.globalAlpha = 0.22; a.sprite(s.warm, s.lamp.x, s.lamp.y + 30 * sc, 520 * sc);
+      s.candles.forEach((c, i) => { ctx.globalAlpha = clamp(0.55 + 0.4 * a.n2(t * 4 + c.ph, i), 0.25, 1); a.sprite(s.warm, c.x, c.y, 70 * sc * c.k); });
+      ctx.globalAlpha = clamp(0.6 + 0.4 * a.n2(t * 4 + 3, 8), 0.3, 1); a.sprite(s.warm, s.tableCandle.x, s.tableCandle.y, 120 * sc);
+      ctx.globalAlpha = 0.13; a.sprite(s.cool, win.x + win.w * 0.5, win.y + win.h * 0.75, win.w * 1.4);
       ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
-      // foreground bed, then the fire's glow warming the blanket
-      ctx.drawImage(s.bed, 0, 0, W, H);
-      ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.16 * fl; a.sprite(s.warm, dr.x + dr.w / 2, H * 0.92, W * 0.9); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(s.fg, 0, 0, W, H);
     },
   };
 
-    /* ---------- city at dusk: a bedroom window onto a skyline, a river and a lit bridge ---------- */
+  /* ---------- city at dusk: a bedroom window onto a skyline, a river and a lit bridge ---------- */
   scenes.city = {
     post: { bloom: 0.55, grade: 'rgb(255,150,120)', gradeA: 0.1, vignette: 0.58, grain: 0.085, halo: 0.14, haloColor: 'rgb(255,130,90)' },
     init(a) {
@@ -1064,104 +1031,108 @@
     },
   };
 
-  /* ---------- cherry blossoms: a bright, hand-painted spring day with a big tree in full bloom ---------- */
+  /* ---------- cherry blossoms: a wooden veranda looking into a big tree in full bloom, with a tiled roof beyond ---------- */
   scenes.sakura = {
-    post: { bloom: 0.3, grade: 'rgb(255,214,224)', gradeA: 0.05, vignette: 0.16, grain: 0.025, halo: 0.07, haloColor: 'rgb(255,170,190)' },
+    post: { bloom: 0.34, grade: 'rgb(255,214,226)', gradeA: 0.05, vignette: 0.22, grain: 0.035, halo: 0.08, haloColor: 'rgb(255,170,190)' },
     init(a) {
-      const { W, H } = a, s = (a.s = {}), r = rng(37), sc = Math.max(0.75, Math.min(1.4, H / 760));
-      s.sky = a.layer(W, H, (g, w, h) => a.vgrad(g, w, h, [[0, [110, 168, 236]], [0.34, [170, 204, 246]], [0.6, [252, 214, 232]], [0.82, [255, 226, 212]], [1, [255, 242, 222]]]));
-      s.sun = a.glow([255, 244, 214], 256); s.sunx = W * 0.78; s.suny = H * 0.24;
-      s.cloud = a.cloudTex(1024, 260, 5, { shadow: [238, 206, 232], lit: [255, 244, 248], rim: [255, 255, 255] }, { sx: 2.6, sy: 1.8, cut: 0.5, gain: 2.6, alpha: 0.95 }); s.coff = r() * 800;
-      s.hills = a.layer(W, H, (g, w, h) => {
-        a.ridge(g, w, h, h * 0.56, h * 0.13, 91, [[190, 190, 238], [226, 214, 244]], { freq: 0.5 });     // misty mauve mountains
-        a.ridge(g, w, h, h * 0.66, h * 0.07, 93, [[168, 214, 176], [206, 234, 190]], { freq: 0.7 });     // soft green hills
-      });
+      const { W, H } = a, s = (a.s = {}), r = rng(37), sc = Math.max(0.75, Math.min(1.4, H / 760)), portrait = W < H * 0.95;
+      const postW = W * (portrait ? 0.2 : 0.155), railY = H * 0.875;
 
-      /* cel-shaded blossom foliage: a mid pink blob, a lit blob up and to the left, a shaded one down and to the right, then flower dots */
-      const puff = (g, x, y, rad, tone) => {
-        const base = [[250, 168, 198], [255, 190, 212], [244, 150, 188]][tone % 3];
-        g.fillStyle = rgb(mix(base, [190, 84, 140], 0.28)); g.beginPath(); g.arc(x + rad * 0.12, y + rad * 0.14, rad, 0, TAU); g.fill();       // shade
-        g.fillStyle = rgb(base); g.beginPath(); g.arc(x, y, rad * 0.94, 0, TAU); g.fill();                                                        // body
-        g.fillStyle = rgb(mix(base, [255, 255, 255], 0.38)); g.beginPath(); g.arc(x - rad * 0.2, y - rad * 0.24, rad * 0.5, 0, TAU); g.fill(); // light
-      };
-      const flowers = (g, x, y, rad, n) => { for (let i = 0; i < n; i++) { const ang = r() * TAU, d = Math.sqrt(r()) * rad, px = x + Math.cos(ang) * d, py = y + Math.sin(ang) * d, k = 2.2 + r() * 2.6; g.fillStyle = r() > 0.5 ? 'rgba(255,255,255,.9)' : 'rgba(255,214,228,.95)'; for (let p = 0; p < 5; p++) { const q = p / 5 * TAU; g.beginPath(); g.arc(px + Math.cos(q) * k, py + Math.sin(q) * k, k * 0.8, 0, TAU); g.fill(); } g.fillStyle = 'rgba(226,96,140,.9)'; g.beginPath(); g.arc(px, py, k * 0.42, 0, TAU); g.fill(); } };
-      const tree = (g, x, base, hgt, sz, soft) => {
-        const lean = (r() - 0.5) * hgt * 0.12, top = base - hgt;
-        g.lineCap = 'round'; g.strokeStyle = soft ? 'rgb(170,128,128)' : 'rgb(104,66,64)';
-        g.lineWidth = sz * 0.13; g.beginPath(); g.moveTo(x, base); g.quadraticCurveTo(x + lean, base - hgt * 0.5, x + lean * 1.3, top + sz * 0.25); g.stroke();
-        if (!soft) { g.strokeStyle = 'rgba(190,140,130,.5)'; g.lineWidth = sz * 0.035; g.beginPath(); g.moveTo(x - sz * 0.03, base); g.quadraticCurveTo(x + lean - sz * 0.03, base - hgt * 0.5, x + lean * 1.3 - sz * 0.03, top + sz * 0.3); g.stroke(); }
-        for (let b = 0; b < 5; b++) { const ang = -Math.PI / 2 + (b - 2) * 0.62, ex = x + lean * 1.3 + Math.cos(ang) * sz * 0.78, ey = top + sz * 0.3 + Math.sin(ang) * sz * 0.4; g.lineWidth = sz * 0.05; g.beginPath(); g.moveTo(x + lean * 1.3, top + sz * 0.45); g.quadraticCurveTo((x + ex) / 2, top + sz * 0.2, ex, ey); g.stroke(); }
-        const cx0 = x + lean * 1.3, n = Math.round(sz * 0.5);
-        const blobs = []; for (let i = 0; i < n; i++) { const ang = r() * TAU, d = Math.sqrt(r()); blobs.push([cx0 + Math.cos(ang) * d * sz * 1.05, top + sz * 0.1 + Math.sin(ang) * d * sz * 0.62, sz * (0.07 + r() * 0.065), i]); }
-        blobs.sort((p, q) => p[1] - q[1]);                         // paint from the back (top) to the front (bottom)
-        blobs.forEach(b => puff(g, b[0], b[1], b[2], b[3]));
-        if (!soft) flowers(g, cx0, top + sz * 0.1, sz * 0.95, Math.round(sz * 0.55));
-      };
-      s.far = a.blur(a.layer(W, H, (g, w, h) => { [[0.06, 0.7, 0.28, 120], [0.34, 0.71, 0.3, 140], [0.62, 0.7, 0.26, 120], [0.92, 0.71, 0.3, 130]].forEach(([fx, fy, fh, sz]) => tree(g, w * fx, h * fy, h * fh, sz * sc, true)); }), 1.6 * sc);
-      s.big = a.layer(W, H, (g, w, h) => { tree(g, w * 0.17, h * 0.9, h * 0.46, 300 * sc, false); tree(g, w * 0.86, h * 0.9, h * 0.4, 230 * sc, false); });
-
-      // meadow: bright grass with clover, wildflowers and drifts of fallen petals
-      s.ground = a.layer(W, H * 0.24, (g, w, h) => {
-        a.vgrad(g, w, h, [[0, [170, 222, 140], 0], [0.18, [160, 218, 130], 1], [1, [96, 176, 96]]]);
-        for (let i = 0; i < 420; i++) { const x = r() * w, y = h * (0.2 + 0.8 * Math.pow(r(), 0.8)), L = 5 + 12 * (y / h); g.strokeStyle = `rgba(${70 + r() * 40},${150 + r() * 50},${70 + r() * 30},.55)`; g.lineWidth = 1.2 + 1.6 * (y / h); g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + (r() - 0.5) * 4, y - L * 0.6, x + (r() - 0.5) * 8, y - L); g.stroke(); }
-        for (let i = 0; i < 80; i++) { const x = r() * w, y = h * (0.25 + 0.75 * r()), z = 1.6 + 3.2 * (y / h); g.fillStyle = ['rgba(255,255,255,.95)', 'rgba(255,236,120,.95)', 'rgba(255,170,200,.95)'][Math.floor(r() * 3)]; g.beginPath(); g.arc(x, y, z, 0, TAU); g.fill(); }
-        for (let i = 0; i < 520; i++) { const x = r() * w, y = h * (0.15 + 0.85 * Math.pow(r(), 0.7)), z = 1.4 + 4 * (y / h); g.fillStyle = r() > 0.5 ? 'rgba(255,208,224,.9)' : 'rgba(255,240,244,.92)'; g.beginPath(); g.ellipse(x, y, z, z * 0.55, r() * 3, 0, TAU); g.fill(); }
+      /* one blossom: five notched petals, pale at the tips, deeper pink at the heart */
+      const flowerSprite = (c0, c1) => a.layer(30, 30, g => {
+        g.translate(15, 15);
+        for (let i = 0; i < 5; i++) { g.save(); g.rotate(i / 5 * TAU + 0.3); const pg = g.createLinearGradient(0, 0, 0, -13); pg.addColorStop(0, rgb(c0)); pg.addColorStop(1, rgb(c1));
+          g.fillStyle = pg; g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(-7.5, -4, -7, -12, -1.6, -13.4); g.lineTo(0, -11.6); g.lineTo(1.6, -13.4); g.bezierCurveTo(7, -12, 7.5, -4, 0, 0); g.fill(); g.restore(); }
+        g.fillStyle = 'rgba(190,70,110,.85)'; g.beginPath(); g.arc(0, 0, 2.2, 0, TAU); g.fill();
+        g.strokeStyle = 'rgba(255,236,170,.9)'; g.lineWidth = 0.7; for (let i = 0; i < 6; i++) { const q = i / 6 * TAU; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(q) * 5, Math.sin(q) * 5); g.stroke(); }
       });
-      // the sharp foreground branch
-      s.ax = W * 1.02; s.ay = H * 0.03;
-      s.branch = a.layer(W, H * 0.8, (g, w, h) => {
-        const bez = (x0, y0, x1, y1, cx, cy, n) => Array.from({ length: n + 1 }, (_, i) => { const u = i / n; return [(1 - u) * (1 - u) * x0 + 2 * (1 - u) * u * cx + u * u * x1, (1 - u) * (1 - u) * y0 + 2 * (1 - u) * u * cy + u * u * y1]; });
-        const limb = (p, w0) => { g.lineCap = 'round'; for (let i = 0; i < p.length - 1; i++) { const wd = Math.max(1.6, w0 * (1 - i / p.length)); g.strokeStyle = 'rgb(112,70,66)'; g.lineWidth = wd; g.beginPath(); g.moveTo(p[i][0], p[i][1]); g.lineTo(p[i + 1][0], p[i + 1][1]); g.stroke(); g.strokeStyle = 'rgba(214,160,150,.5)'; g.lineWidth = Math.max(0.7, wd * 0.28); g.beginPath(); g.moveTo(p[i][0], p[i][1] - wd * 0.24); g.lineTo(p[i + 1][0], p[i + 1][1] - wd * 0.24); g.stroke(); } };
-        const petal = (len, wd) => { g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(-wd, -len * 0.4, -wd * 0.9, -len * 0.92, -wd * 0.22, -len); g.lineTo(0, -len * 0.9); g.lineTo(wd * 0.22, -len); g.bezierCurveTo(wd * 0.9, -len * 0.92, wd, -len * 0.4, 0, 0); g.closePath(); };
-        const blossom = (x, y, k, open) => {
-          g.save(); g.translate(x, y); g.rotate(r() * TAU); g.scale(1, 0.6 + r() * 0.4);
-          for (let i = 0; i < 5; i++) { g.save(); g.rotate(i / 5 * TAU); const len = 15 * k * open, pg = g.createLinearGradient(0, 0, 0, -len); pg.addColorStop(0, 'rgb(240,110,156)'); pg.addColorStop(0.3, 'rgb(255,190,212)'); pg.addColorStop(1, 'rgb(255,248,250)'); g.fillStyle = pg; petal(len, 8 * k * open); g.fill(); g.strokeStyle = 'rgba(224,120,160,.4)'; g.lineWidth = 0.7; g.stroke(); g.restore(); }
-          g.strokeStyle = 'rgba(226,84,128,.95)'; g.lineWidth = 0.8; for (let i = 0; i < 9; i++) { const a2 = r() * TAU, l2 = (4 + r() * 3.4) * k; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(a2) * l2, Math.sin(a2) * l2); g.stroke(); g.fillStyle = 'rgb(255,232,150)'; g.fillRect(Math.cos(a2) * l2 - 0.9, Math.sin(a2) * l2 - 0.9, 1.8, 1.8); }
-          g.restore();
+      const SP = { lit: [flowerSprite([238, 150, 184], [255, 232, 240]), flowerSprite([246, 170, 200], [255, 244, 248])], mid: [flowerSprite([226, 128, 168], [252, 204, 224]), flowerSprite([236, 144, 182], [255, 218, 232])], dark: [flowerSprite([196, 100, 146], [236, 166, 198]), flowerSprite([206, 112, 156], [240, 178, 206])] };
+      const bloom = (g, x, y, tone, k) => { const set = SP[tone], sp = set[Math.floor(r() * set.length)], z = (14 + r() * 12) * k * sc; g.save(); g.translate(x, y); g.rotate(r() * TAU); g.drawImage(sp, -z / 2, -z / 2, z, z); g.restore(); };
+
+      // ---- a pale, misty sky and the garden beyond, out of focus ----
+      s.sky = a.layer(W, H, (g, w, h) => { a.vgrad(g, w, h, [[0, [232, 230, 236]], [0.55, [220, 218, 226]], [1, [204, 202, 210]]]); });
+      s.far = a.blur(a.layer(W, H, (g, w, h) => {
+        const blob = (x, y, rad, c, al) => { const gr = g.createRadialGradient(x, y, 0, x, y, rad); gr.addColorStop(0, rgb(c, al)); gr.addColorStop(0.65, rgb(c, al * 0.6)); gr.addColorStop(1, rgb(c, 0)); g.fillStyle = gr; g.fillRect(x - rad, y - rad, rad * 2, rad * 2); };
+        for (let i = 0; i < 60; i++) blob(w * (0.15 + r() * 0.36), h * (0.34 + r() * 0.5), (50 + r() * 70) * sc, mix([232, 150, 186], [248, 200, 218], r()), 0.85);           // pink trees on the left
+        for (let i = 0; i < 70; i++) blob(w * (0.28 + r() * 0.5), h * (0.56 + r() * 0.42), (46 + r() * 56) * sc, mix([48, 76, 52], [92, 120, 80], r()), 0.95);                   // dark green shrubs and pines
+        for (let i = 0; i < 24; i++) blob(w * (0.5 + r() * 0.2), h * (0.5 + r() * 0.2), (40 + r() * 50) * sc, mix([226, 150, 184], [244, 190, 212], r()), 0.5);
+        // the tiled roof of a low building
+        const bx = w * 0.76, by = h * 0.62; g.fillStyle = 'rgb(214,196,160)'; g.fillRect(bx + w * 0.02, by + h * 0.1, w * 0.3, h * 0.2);
+        g.fillStyle = 'rgb(62,66,72)'; g.beginPath(); g.moveTo(bx - w * 0.03, by + h * 0.12); g.quadraticCurveTo(bx + w * 0.02, by + h * 0.04, bx + w * 0.12, by); g.lineTo(bx + w * 0.4, by - h * 0.01); g.lineTo(bx + w * 0.4, by + h * 0.12); g.closePath(); g.fill();
+        for (let i = 0; i < 12; i++) { g.strokeStyle = 'rgba(160,170,180,.35)'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(bx - w * 0.02 + i * w * 0.036, by + h * 0.1); g.lineTo(bx + w * 0.02 + i * w * 0.036, by + h * 0.005); g.stroke(); }
+        g.fillStyle = 'rgba(90,70,56,.8)'; g.fillRect(bx + w * 0.02, by + h * 0.12, w * 0.3, h * 0.012);
+        const mist = g.createLinearGradient(0, h * 0.4, 0, h * 0.9); mist.addColorStop(0, 'rgba(232,230,238,0)'); mist.addColorStop(1, 'rgba(232,230,238,.12)'); g.fillStyle = mist; g.fillRect(0, h * 0.4, w, h * 0.5);
+      }), 3.2 * sc);
+
+      // ---- the big tree: dark trunk and limbs, then thousands of blossoms ----
+      s.tree = a.layer(W, H, (g, w, h) => {
+        const limb = (pts, w0, w1) => {
+          g.lineCap = 'round'; g.lineJoin = 'round';
+          for (let i = 0; i < pts.length - 1; i++) { const u = i / (pts.length - 1), wd = w0 + (w1 - w0) * u; g.strokeStyle = 'rgb(70,46,42)'; g.lineWidth = wd; g.beginPath(); g.moveTo(pts[i][0], pts[i][1]); g.lineTo(pts[i + 1][0], pts[i + 1][1]); g.stroke(); g.strokeStyle = 'rgba(138,98,86,.4)'; g.lineWidth = Math.max(1, wd * 0.22); g.beginPath(); g.moveTo(pts[i][0] - wd * 0.2, pts[i][1] - wd * 0.12); g.lineTo(pts[i + 1][0] - wd * 0.2, pts[i + 1][1] - wd * 0.12); g.stroke(); }
         };
-        const bud = (x, y, k) => { g.fillStyle = 'rgb(246,140,176)'; g.beginPath(); g.ellipse(x, y, 4 * k, 6.2 * k, r() * 3, 0, TAU); g.fill(); g.fillStyle = 'rgba(255,236,242,.7)'; g.beginPath(); g.ellipse(x - k, y - k, 1.4 * k, 2.6 * k, 0.3, 0, TAU); g.fill(); };
-        const leaf = (x, y, k) => { g.save(); g.translate(x, y); g.rotate(r() * TAU); g.fillStyle = rgb(mix([128, 180, 90], [178, 218, 120], r())); g.beginPath(); g.ellipse(7 * k, 0, 9 * k, 3.8 * k, 0, 0, TAU); g.fill(); g.restore(); };
-        const cluster = (x, y, n, spread, k) => { for (let i = 0; i < n; i++) { const px = x + (r() - 0.5) * spread * 2, py = y + (r() - 0.5) * spread, q = r(); if (q < 0.1) bud(px, py, k); else if (q < 0.18) leaf(px, py, k); else blossom(px, py, k * (0.85 + r() * 0.45), 0.65 + r() * 0.35); } };
-        const main = bez(s.ax, s.ay, w * 0.24, h * 0.52, w * 0.7, h * 0.1, 44); limb(main, 20);
-        for (let b = 0; b < 8; b++) {
-          const u = 0.1 + b * 0.105, [bx, by] = main[Math.floor(u * 44)];
-          const ex = bx - rr(r, 50, 150), ey = by + rr(r, 70, 170), tw = bez(bx, by, ex, ey, bx - 30, by + 40, 16); limb(tw, 8);
-          for (let f = 0; f < 3; f++) { const [fx, fy] = tw[6 + f * 3], ex2 = fx - rr(r, 20, 60), ey2 = fy + rr(r, 20, 70), tw2 = bez(fx, fy, ex2, ey2, fx - 10, fy + 20, 8); limb(tw2, 3); cluster(ex2, ey2, 6, 22, 1); }
-          tw.forEach((p, i) => { if (i % 3 === 0) cluster(p[0], p[1], 4, 26, 1.05); });
-          cluster(ex, ey, 9, 32, 1.1);
-        }
-        for (let i = 0; i <= 44; i += 2) cluster(main[i][0], main[i][1], 4, 32, 1.15);
+        const curve = (c, n) => { const out = []; for (let i = 0; i <= n; i++) { const u = i / n, k = u * (c.length - 1), j = Math.min(c.length - 2, Math.floor(k)), f = k - j, p0 = c[Math.max(0, j - 1)], p1 = c[j], p2 = c[j + 1], p3 = c[Math.min(c.length - 1, j + 2)];
+          const cr = (a0, a1, a2, a3) => 0.5 * ((2 * a1) + (-a0 + a2) * f + (2 * a0 - 5 * a1 + 4 * a2 - a3) * f * f + (-a0 + 3 * a1 - 3 * a2 + a3) * f * f * f); out.push([cr(p0[0], p1[0], p2[0], p3[0]) * w, cr(p0[1], p1[1], p2[1], p3[1]) * h]); } return out; };
+        const trunk = curve([[1.05, 1.02], [1.0, 0.74], [0.95, 0.5], [0.93, 0.32], [0.92, 0.2]], 18); limb(trunk, 150 * sc, 70 * sc);
+        const limbs = [
+          [[0.93, 0.34], [0.84, 0.27], [0.7, 0.21], [0.54, 0.23], [0.4, 0.29], [0.3, 0.33]], [[0.92, 0.42], [0.82, 0.41], [0.68, 0.44], [0.54, 0.5], [0.44, 0.58]],
+          [[0.94, 0.22], [0.86, 0.13], [0.72, 0.07], [0.56, 0.05], [0.4, 0.07]], [[0.97, 0.58], [0.88, 0.62], [0.78, 0.7], [0.68, 0.78], [0.62, 0.86]],
+          [[0.8, 0.25], [0.74, 0.34], [0.68, 0.42]], [[0.62, 0.22], [0.55, 0.12], [0.5, 0.04]], [[0.7, 0.44], [0.64, 0.52], [0.6, 0.6]],
+        ];
+        const all = [];
+        limbs.forEach((c, i) => { const pts = curve(c, 22); limb(pts, (i < 4 ? 40 : 20) * sc, 5 * sc); all.push([pts, i < 4 ? 1 : 0.7]);
+          // twigs off every limb
+          for (let t = 3; t < pts.length - 2; t += 2) { const [px, py] = pts[t], ang = -Math.PI * 0.5 + (r() - 0.5) * 2.6 + Math.PI * 0.5 * (i % 2 ? 1 : -1) * 0.5, len = rr(r, 40, 110) * sc, tw = []; for (let q = 0; q <= 5; q++) tw.push([px + Math.cos(ang + q * 0.12) * len * q / 5, py + Math.sin(ang + q * 0.12) * len * q / 5 + q * 4]); limb(tw, 6 * sc, 1.6 * sc); all.push([tw, 0.5]); }
+        });
+        // a shadowy under-layer so the canopy has depth, then the flowers: lit on top, shaded below
+        const mass = (cx, cy, rad) => { const gr = g.createRadialGradient(cx, cy, 0, cx, cy, rad); gr.addColorStop(0, 'rgba(200,110,150,.55)'); gr.addColorStop(1, 'rgba(200,110,150,0)'); g.fillStyle = gr; g.fillRect(cx - rad, cy - rad, rad * 2, rad * 2); };
+        for (let i = 0; i < 90; i++) { const x = w * (0.34 + r() * 0.7), y = h * (0.0 + r() * 0.56); if (x < w * 0.5 && y > h * 0.3 && r() < 0.6) continue; mass(x, y, (60 + r() * 90) * sc); }
+        const cluster = (cx, cy, n, rad) => { for (let i = 0; i < n; i++) { const ang = r() * TAU, d = Math.sqrt(r()) * rad, x = cx + Math.cos(ang) * d, y = cy + Math.sin(ang) * d * 0.8, dk = (y - cy) / rad + (r() - 0.5) * 0.7; bloom(g, x, y, dk < -0.2 ? 'lit' : dk < 0.45 ? 'mid' : 'dark', 1); } };
+        all.forEach(([pts, dens]) => pts.forEach((p, i) => { if (p[0] > w * 1.02) return; if (i % 2 === 0) cluster(p[0], p[1], Math.round(16 * dens + 6), (26 + 20 * dens) * sc); }));
+        for (let i = 0; i < 130; i++) { const x = w * (0.4 + r() * 0.64), y = h * (-0.02 + r() * 0.52); if (x < w * 0.52 && y > h * 0.28) continue; cluster(x, y, 34, (46 + r() * 36) * sc); }       // the dense crown, up and to the right
+        for (let i = 0; i < 40; i++) { const x = w * (0.45 + r() * 0.5), y = h * (0.45 + r() * 0.35); if (r() < 0.45) cluster(x, y, 22, 40 * sc); }
       });
-      s.fg = a.blur(a.layer(W, H, (g, w, h) => { const bl = a.glow([255, 196, 216], 64); for (let i = 0; i < 20; i++) { const x = r() * w * 0.28, y = r() * h * 0.26, z = rr(r, 30, 66) * sc; g.globalAlpha = 0.55; g.drawImage(bl, x - z, y - z, z * 2, z * 2); } g.globalAlpha = 1; }), 9 * sc);
-      s.petals = Array.from({ length: a.n(95) }, () => { const z = r(); return { x: r() * W, y: r() * H, z, v: 18 + z * 46, sw: 0.4 + r() * 1.1, ph: r() * TAU, rot: r() * TAU, spin: (r() - 0.5) * 3, flip: r() * TAU, fs: 1 + r() * 2.5, sz: 3.4 + z * 7.6, c: [[255, 190, 212], [255, 232, 240], [250, 160, 190]][Math.floor(r() * 3)] }; });
-      s.bk = a.glow([255, 226, 232], 64);
+
+      // ---- the veranda in the foreground: roof eave, window post and railing ----
+      s.frame = a.layer(W, H, (g, w, h) => {
+        const woodG = (x, y, ww, hh, vertical) => { const gr = vertical ? g.createLinearGradient(x, 0, x + ww, 0) : g.createLinearGradient(0, y, 0, y + hh); gr.addColorStop(0, 'rgb(112,64,40)'); gr.addColorStop(0.5, 'rgb(82,44,28)'); gr.addColorStop(1, 'rgb(48,26,16)'); g.fillStyle = gr; g.fillRect(x, y, ww, hh); for (let k = 0; k < 10; k++) { g.strokeStyle = `rgba(20,8,2,${0.1 + r() * 0.2})`; g.lineWidth = 0.7 + r() * 1.4; g.beginPath(); if (vertical) { const gx = x + r() * ww; g.moveTo(gx, y); g.lineTo(gx + (r() - 0.5) * 6, y + hh); } else { const gy = y + r() * hh; g.moveTo(x, gy); g.lineTo(x + ww, gy + (r() - 0.5) * 4); } g.stroke(); } };
+        // eave
+        g.fillStyle = 'rgb(54,34,24)'; g.beginPath(); g.moveTo(0, 0); g.lineTo(w * 0.52, 0); g.lineTo(postW * 0.95, h * 0.13); g.lineTo(0, h * 0.1); g.closePath(); g.fill();
+        for (let i = 0; i < 9; i++) { const x = w * 0.04 + i * w * 0.055; g.fillStyle = 'rgba(100,64,42,.7)'; g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 14 * sc, 0); g.lineTo(x * 0.55 + 10 * sc + postW * 0.3, h * 0.1 + (i * 0.002) * h); g.lineTo(x * 0.55 + postW * 0.3, h * 0.1); g.closePath(); g.fill(); }
+        g.fillStyle = 'rgba(0,0,0,.28)'; g.fillRect(0, 0, w * 0.52, h * 0.012);
+        // the window beside the post: lattice over the blurred garden
+        const ww = postW * 0.66; g.fillStyle = 'rgba(214,206,214,.2)'; g.fillRect(0, h * 0.09, ww, railY - h * 0.09);
+        for (let i = 0; i <= 3; i++) woodG(i * (ww / 3) - 4 * sc, h * 0.09, 8 * sc, railY - h * 0.09, true);
+        for (let i = 0; i <= 5; i++) woodG(0, h * 0.09 + i * (railY - h * 0.09) / 5 - 4 * sc, ww, 8 * sc, false);
+        woodG(ww, 0, postW - ww, h, true);                   // the post
+        g.fillStyle = 'rgba(255,200,150,.18)'; g.fillRect(ww + 3, 0, 3, h);
+        // railing with petals lying on it
+        woodG(postW, railY, w - postW, 22 * sc, false); g.fillStyle = 'rgba(255,214,190,.28)'; g.fillRect(postW, railY, w - postW, 3);
+        for (let x = postW + 40 * sc; x < w; x += 118 * sc) woodG(x, railY + 22 * sc, 16 * sc, h - railY - 22 * sc, true);
+        woodG(postW, railY + h * 0.07, w - postW, 12 * sc, false);
+        g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(postW, railY + 22 * sc, w - postW, 6);
+        for (let i = 0; i < 160; i++) { const x = postW + r() * (w - postW), y = railY + 2 + r() * 14 * sc; g.fillStyle = r() > 0.5 ? 'rgba(250,176,202,.95)' : 'rgba(255,214,228,.95)'; g.beginPath(); g.ellipse(x, y, 3 + r() * 4, 1.6 + r() * 1.6, r() * 0.6, 0, TAU); g.fill(); }
+      });
+      s.petals = Array.from({ length: a.n(80) }, () => { const z = r(); return { x: r() * W, y: r() * H * 0.9, z, v: 16 + z * 44, sw: 0.4 + r() * 1.1, ph: r() * TAU, rot: r() * TAU, spin: (r() - 0.5) * 3, flip: r() * TAU, fs: 1 + r() * 2.5, sz: 4 + z * 8, c: [[250, 170, 198], [255, 214, 228], [238, 140, 176]][Math.floor(r() * 3)] }; });
+      s.bk = a.glow([255, 220, 232], 64);
     },
     draw(a, t, dt) {
-      const { ctx, W, H, s } = a, wnd = a.wind(t, 2), gust = a.gust(t, 5), sc = Math.max(0.75, Math.min(1.4, H / 760));
+      const { ctx, W, H, s } = a, wnd = a.wind(t, 2), gust = a.gust(t, 5);
       a.put(s.sky, 0, 0);
-      ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.75; a.sprite(s.sun, s.sunx, s.suny, H * 0.95); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
-      s.coff += (3 + gust * 6) * dt; { const ch = H * 0.34, cw = s.cloud.width * (ch / s.cloud.height), x0 = -(s.coff % cw); ctx.globalAlpha = 0.9; for (let x = x0; x < W; x += cw) ctx.drawImage(s.cloud, x, H * 0.03, cw + 1, ch); ctx.globalAlpha = 1; }
-      ctx.drawImage(s.hills, 0, 0, W, H);
       const sway = k => (wnd * 0.5 + gust * 0.5) * k;
       ctx.save(); ctx.transform(1, 0, sway(0.0012), 1, 0, 0); ctx.drawImage(s.far, 0, 0, W, H); ctx.restore();
-      ctx.save(); ctx.translate(W * 0.5, H * 0.9); ctx.transform(1, 0, sway(0.004), 1, 0, 0); ctx.translate(-W * 0.5, -H * 0.9); ctx.drawImage(s.big, 0, 0, W, H); ctx.restore();
-      ctx.drawImage(s.ground, 0, H * 0.78, W, H * 0.24);
-      // warm light shafts
-      ctx.globalCompositeOperation = 'lighter';
-      for (let i = 0; i < 4; i++) { const al = 0.03 + 0.05 * Math.pow(a.n2(t * 0.08 + i * 3, 4), 1.4), x0 = W * (0.55 + i * 0.1), gr = ctx.createLinearGradient(x0, 0, x0 - H * 0.5, H); gr.addColorStop(0, `rgba(255,240,200,${al * 1.6})`); gr.addColorStop(1, 'rgba(255,240,200,0)'); ctx.fillStyle = gr; ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0 + 70 * sc, 0); ctx.lineTo(x0 - H * 0.5 + 200 * sc, H); ctx.lineTo(x0 - H * 0.5, H); ctx.closePath(); ctx.fill(); }
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.save(); ctx.translate(s.ax, s.ay); ctx.rotate((a.fbm(t * 0.25, 3, 2) - 0.45) * 0.03 + wnd * 0.004 + gust * 0.006); ctx.drawImage(s.branch, -s.ax, -s.ay, s.branch._w, s.branch._h); ctx.restore();
-      ctx.drawImage(s.fg, 0, 0, W, H);
+      // the tree moves as one, pivoting from its trunk
+      ctx.save(); ctx.translate(W, H); ctx.rotate(sway(0.012) + (a.fbm(t * 0.2, 3, 2) - 0.45) * 0.01); ctx.translate(-W, -H); ctx.drawImage(s.tree, 0, 0, W, H); ctx.restore();
       s.petals.forEach(p => {
         const turb = (a.n2(p.x * 0.004 + t * 0.1, p.y * 0.004 + p.ph) - 0.5) * 60;
-        p.y += p.v * (0.8 + 0.3 * a.n2(p.ph + t * 0.3, 2)) * dt; p.x += (-10 - gust * 50 + turb + wnd * 14) * dt * (0.5 + p.z); p.rot += p.spin * dt;
-        if (p.y > H + 14) { p.y = -14; p.x = Math.random() * W * 1.2; } if (p.x < -50) p.x += W + 100; if (p.x > W + 60) p.x -= W + 120;
+        p.y += p.v * (0.8 + 0.3 * a.n2(p.ph + t * 0.3, 2)) * dt; p.x += (-12 - gust * 50 + turb + wnd * 14) * dt * (0.5 + p.z); p.rot += p.spin * dt;
+        if (p.y > H * 0.9) { p.y = -14; p.x = Math.random() * W * 1.2; } if (p.x < -50) p.x += W + 100; if (p.x > W + 60) p.x -= W + 120;
         const x = p.x + Math.sin(t * p.sw + p.ph) * 26 * (0.4 + p.z);
         ctx.save(); ctx.translate(x, p.y); ctx.rotate(p.rot); ctx.scale(1, Math.abs(Math.cos(t * p.fs + p.flip)) * 0.8 + 0.2);
-        if (p.z > 0.88) { ctx.globalAlpha = 0.45; ctx.drawImage(s.bk, -p.sz * 2.2, -p.sz * 2.2, p.sz * 4.4, p.sz * 4.4); } else { ctx.globalAlpha = 0.97; ctx.fillStyle = rgb(p.c, 1); ctx.beginPath(); ctx.moveTo(0, -p.sz); ctx.bezierCurveTo(p.sz * 0.9, -p.sz * 0.5, p.sz * 0.7, p.sz * 0.8, 0, p.sz); ctx.bezierCurveTo(-p.sz * 0.7, p.sz * 0.8, -p.sz * 0.9, -p.sz * 0.5, 0, -p.sz); ctx.fill(); }
+        if (p.z > 0.9) { ctx.globalAlpha = 0.5; ctx.drawImage(s.bk, -p.sz * 2.2, -p.sz * 2.2, p.sz * 4.4, p.sz * 4.4); } else { ctx.globalAlpha = 0.95; ctx.fillStyle = rgb(p.c, 1); ctx.beginPath(); ctx.moveTo(0, -p.sz); ctx.bezierCurveTo(p.sz * 0.9, -p.sz * 0.5, p.sz * 0.7, p.sz * 0.8, 0, p.sz); ctx.bezierCurveTo(-p.sz * 0.7, p.sz * 0.8, -p.sz * 0.9, -p.sz * 0.5, 0, -p.sz); ctx.fill(); }
         ctx.restore();
       });
       ctx.globalAlpha = 1;
+      a.put(s.frame, 0, 0);
     },
   };
 

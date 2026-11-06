@@ -157,10 +157,31 @@
   .ss-nav-greeting { display: none; }
   .ss-nav-schedule-link { padding: 6px 10px; font-size: 11px; }
 }
+.ss-nav-look { cursor: pointer; font-family: inherit; }
+.ss-look { position: fixed; top: 64px; right: 18px; z-index: 1200; width: min(340px, calc(100vw - 24px)); padding: 16px 16px 14px; border-radius: 20px; background: color-mix(in srgb, var(--bark) 94%, transparent); border: 1px solid rgba(var(--surf), .16); box-shadow: 0 24px 60px rgba(0,0,0,.45); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: var(--cream); font-family: 'DM Sans', sans-serif; animation: ss-look-pop .2s ease; }
+.ss-look[hidden] { display: none; }
+@keyframes ss-look-pop { from { opacity: 0; transform: translateY(-8px) scale(.98); } to { opacity: 1; transform: none; } }
+.ss-look-head { display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
+.ss-look-head button { width: 28px; height: 28px; border: 0; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; color: var(--cream); background: rgba(var(--surf), .1); }
+.ss-look-sub { margin: 4px 0 12px; font-size: 12.5px; color: var(--fog); }
+.ss-look-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.ss-theme { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 2px 8px; border-radius: 12px; cursor: pointer; font: 600 11px 'DM Sans', sans-serif; color: var(--cream); background: rgba(var(--surf), .05); border: 1.5px solid rgba(var(--surf), .1); transition: transform .15s, border-color .15s, background .15s; }
+.ss-theme:hover { transform: translateY(-2px); }
+.ss-theme[aria-checked="true"] { border-color: var(--sprout); background: rgba(var(--accent-rgb), .16); }
+.ss-theme i { width: 30px; height: 30px; border-radius: 50%; display: block; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25), 0 2px 8px rgba(0,0,0,.3); }
+.ss-look-more { display: block; margin-top: 12px; font-size: 12.5px; font-weight: 600; color: var(--sprout); text-decoration: none; }
+.ss-look-more:hover { text-decoration: underline; }
 </style>
+<div class="ss-look" id="ss-look" role="dialog" aria-label="Appearance" hidden>
+  <div class="ss-look-head"><strong>Appearance</strong><button type="button" id="ss-look-x" aria-label="Close">&times;</button></div>
+  <p class="ss-look-sub">The theme you pick colours the whole of StudySync.</p>
+  <div class="ss-look-grid" id="ss-look-grid" role="radiogroup" aria-label="Theme"></div>
+  <a class="ss-look-more" href="/study/">More looks: wallpapers, timer ring and fonts &rarr;</a>
+</div>
 <nav class="ss-nav">
   <a class="ss-nav-logo" href="/"><span>Study</span>Sync</a>
   <div class="ss-nav-right">
+    <button type="button" class="ss-nav-schedule-link ss-nav-look" id="ss-look-btn" aria-haspopup="true" aria-expanded="false" aria-controls="ss-look">🎨 Appearance</button>
     <a href="/schedule/" class="ss-nav-schedule-link" id="ss-nav-schedule">📅 Schedule</a>
     <span class="ss-nav-greeting">
       Hello, <strong>{{ request.user.get_short_name|default:request.user.username }}</strong>
@@ -1199,6 +1220,29 @@ window.ssReady(function () {
 });
   }
   /* ── AVATAR DROPDOWN ── */
+/* ── APPEARANCE: the theme colours the whole site ── */
+(function () {
+  const THEMES = [['forest', 'Forest', 'linear-gradient(135deg,#4E7A34,#7DB54A)'], ['ocean', 'Ocean', 'linear-gradient(135deg,#1A9A8A,#3AC8B8)'], ['sunset', 'Sunset', 'linear-gradient(135deg,#C8562E,#F08A5D)'], ['lavender', 'Lavender', 'linear-gradient(135deg,#7455C8,#A98BE8)'],
+    ['rose', 'Rose', 'linear-gradient(135deg,#C8467A,#F07AA8)'], ['slate', 'Slate', 'linear-gradient(135deg,#64748B,#E2E8F0)'], ['paper', 'Paper', 'linear-gradient(135deg,#F7F0E1,#C9A77C)'], ['glass', 'Glass', 'linear-gradient(135deg,rgba(255,255,255,.7),rgba(120,160,255,.5) 55%,rgba(190,120,255,.6))']];
+  const btn = document.getElementById('ss-look-btn'), panel = document.getElementById('ss-look'), grid = document.getElementById('ss-look-grid');
+  if (!btn || !panel) return;
+  const KEY = 'studySyncStudyPrefs';
+  const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; } };
+  grid.innerHTML = THEMES.map(t => '<button type="button" class="ss-theme" role="radio" data-id="' + t[0] + '" aria-checked="false"><i style="background:' + t[2] + '"></i>' + t[1] + '</button>').join('');
+  function mark() { const cur = read().theme || 'forest'; grid.querySelectorAll('.ss-theme').forEach(b => b.setAttribute('aria-checked', String(b.dataset.id === cur))); }
+  function open(show) { panel.hidden = !show; btn.setAttribute('aria-expanded', String(show)); if (show) mark(); }
+  btn.addEventListener('click', e => { e.stopPropagation(); open(panel.hidden); });
+  document.getElementById('ss-look-x').addEventListener('click', () => open(false));
+  document.addEventListener('click', e => { if (!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target)) open(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') open(false); });
+  grid.addEventListener('click', e => {
+    const b = e.target.closest('.ss-theme'); if (!b) return;
+    const p = read(); p.theme = b.dataset.id;
+    try { localStorage.setItem(KEY, JSON.stringify(p)); } catch (err) { /* storage unavailable */ }
+    if (window.ssApplyTheme) window.ssApplyTheme(); mark();
+  });
+})();
+
 const avWrap = document.getElementById('ss-av-wrap');
 const avBtn  = document.getElementById('ss-avatar');
 const avMenu = document.getElementById('ss-av-dropdown');
