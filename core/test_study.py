@@ -221,3 +221,9 @@ class ToolPageTests(TestCase):
         html = self.client.get(reverse('home')).content.decode()
         self.assertIn('href="/practice/"', html)
         self.assertNotIn('class="tool-card" href="/schedule/"', html)
+
+    def test_shared_answer_judge_is_defined_outside_the_flashcards_block(self):
+        """The practice page runs the same script without the flashcard deck, so judgeAnswer must not live inside the deck-only block."""
+        from pathlib import Path
+        js = (Path(__file__).parent / 'static' / 'js' / 'exam_features.js').read_text(encoding='utf-8')
+        self.assertLess(js.index('function judgeAnswer'), js.index("if ($('fc-deck')) {"))

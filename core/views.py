@@ -18,7 +18,7 @@ from django.core.exceptions import ValidationError
 from django.utils.http import url_has_allowed_host_and_scheme
 from .models import StudySession, UserState
 
-GROQ_MODEL = 'llama-3.3-70b-versatile'
+GROQ_MODEL = os.environ.get('GROQ_MODEL', 'openai/gpt-oss-120b')   # llama-3.3-70b-versatile is no longer offered; override with the GROQ_MODEL setting
 
 
 def ai_rate_limit(view):

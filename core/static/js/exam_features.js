@@ -167,6 +167,20 @@ ssReady(function () {
 
   updateSourceCount();
 
+  /* how close a typed answer is to the real one: 'correct', 'partial' or 'wrong' (used by both flashcards and practice questions) */
+  function judgeAnswer(guess, correct) {
+    const norm = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+    const stopWords = new Set(['the','and','for','are','but','not','with','this','that','have','from','they','which','what','were','when','been','also','its','was','can','will','than','into','over']);
+    const guessN = norm(guess), correctN = norm(correct);
+    if (!guessN) return 'wrong';
+    if (guessN === correctN) return 'correct';
+    const keywords = correctN.split(/\s+/).filter(w => w.length > 3 && !stopWords.has(w));
+    if (!keywords.length) return guessN.length > 2 && correctN.includes(guessN) ? 'correct' : 'wrong';
+    const hits = keywords.filter(w => guessN.includes(w));
+    const score = hits.length / keywords.length;
+    return score >= 0.65 ? 'correct' : score >= 0.3 ? 'partial' : 'wrong';
+  }
+
   /* ══════════════════════════════════════════
      PRACTICE QUESTIONS
   ══════════════════════════════════════════ */
@@ -461,19 +475,6 @@ ssReady(function () {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
     return a;
-  }
-
-  function judgeAnswer(guess, correct) {
-    const norm = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
-    const stopWords = new Set(['the','and','for','are','but','not','with','this','that','have','from','they','which','what','were','when','been','also','its','was','can','will','than','into','over']);
-    const guessN = norm(guess), correctN = norm(correct);
-    if (!guessN) return 'wrong';
-    if (guessN === correctN) return 'correct';
-    const keywords = correctN.split(/\s+/).filter(w => w.length > 3 && !stopWords.has(w));
-    if (!keywords.length) return guessN.length > 2 && correctN.includes(guessN) ? 'correct' : 'wrong';
-    const hits = keywords.filter(w => guessN.includes(w));
-    const score = hits.length / keywords.length;
-    return score >= 0.65 ? 'correct' : score >= 0.3 ? 'partial' : 'wrong';
   }
 
   const FEEDBACK = {
