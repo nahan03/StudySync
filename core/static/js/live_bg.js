@@ -892,7 +892,6 @@
       ctx.drawImage(s.ground, 0, 0, W, H);
       ctx.drawImage(s.fence, 0, 0, W, H);
       s.people.filter(p => p.near).sort((m, n) => m.x - n.x).forEach(p => { const u = clamp((p.x / W - 0.19) / 0.85, -0.2, 1.2), e = s.edge(u), k = (96 + 150 * u) * sc; s.drawPerson(ctx, p, p.x, e.y + (46 + 70 * u) * sc, k); });
-      ctx.save(); ctx.translate(0, H); ctx.transform(1, 0, (wnd * 0.5 + gust * 0.6) * 0.004, 1, 0, 0); ctx.translate(0, -H); ctx.drawImage(s.tree, 0, 0, W, H); ctx.restore();
       ctx.drawImage(s.lampArt, 0, 0, W, H);
       ctx.drawImage(s.bench, 0, 0, W, H);
       const fl = clamp(0.92 + 0.08 * (a.n2(t * 2.2, 5) - 0.5) * 2, 0.78, 1);
