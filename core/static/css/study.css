@@ -425,3 +425,12 @@ body.study-page #fs-exit-btn { display: none !important; }
 body.study-page.is-fullscreen::before { display: none; }
 body.study-page.is-fullscreen { overflow: auto !important; }
 body.study-page.is-fullscreen .tree-growth-overlay:not(.hidden) { display: flex !important; }
+
+/* the cherry-blossom wallpaper is bright and pastel: a stronger scrim and darker glass cards keep the light text readable in every theme */
+.st-root[data-bg="sakura"] .bgl-dim { opacity: max(var(--dim, .15), .42); background: #1d0f1c; }
+.st-root[data-bg="sakura"] .st-card, .st-root[data-bg="sakura"] .st-tree-card {
+  background: rgba(34,16,32,.5); border-color: rgba(255,255,255,.14); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.st-root[data-bg="sakura"] .st-nav { background: rgba(34,16,32,.6); }
+.st-root[data-bg="sakura"] { --fog: #EBDCE6; }
+.st-root[data-bg="sakura"] .st-wrap h1, .st-root[data-bg="sakura"] .st-wrap p { text-shadow: 0 1px 10px rgba(30,12,28,.55); }
