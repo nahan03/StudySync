@@ -822,13 +822,15 @@
       s.drawPerson = (ctx, p, x, y, k) => {
         /* a walker in profile, ~9 heads tall: two-segment legs with a bending knee, long winter coat, swinging arms, scarf and hat,
            lit warmly on the side that faces the lamp */
-        const ph = p.ph, hip = -0.5 * k, sh = -0.8 * k, bob = p.skate ? 0 : Math.abs(Math.sin(ph)) * k * 0.012;
+        const LB = 0.45, ph = p.ph, hip = -0.5 * k, sh = -0.8 * k, bob = p.skate ? 0 : Math.abs(Math.sin(ph)) * k * 0.012;
         const lampSide = Math.sign(s.lamp.x - x) * p.dir || 1, lampK = clamp(1 - Math.abs(s.lamp.x - x) / (W * 0.7), 0, 1);
         const joint = (x0, y0, ang, len) => [x0 + Math.sin(ang) * len, y0 + Math.cos(ang) * len];
-        const leg = phi => {
+        const leg = (phi, isNear) => {
           const pu = Math.max(0, Math.sin(phi));   // skating: one leg glides, the other pushes out behind and lifts
-          const th = p.skate ? 0.16 - 0.8 * pu : 0.46 * Math.sin(phi), bend = p.skate ? 0.42 * (1 - pu) + 0.08 * pu : 0.12 + 0.75 * Math.max(0, Math.sin(phi + 1.15)), kn = joint(0, hip - bob, th, 0.25 * k), an = joint(kn[0], kn[1], th - bend, 0.25 * k);
-          return { kn, an, ang: th - bend };
+          const th = p.skate ? 0.16 - 0.8 * pu : 0.46 * Math.sin(phi), bend = p.skate ? 0.42 * (1 - pu) + 0.08 * pu : 0.12 + 0.75 * Math.max(0, Math.sin(phi + 1.15)), ang0 = th - bend;
+          const thE = th + ((isNear ? 2.0 : 1.5) - LB - th) * fa, saE = ang0 + ((isNear ? 1.2 : 1.5) - LB - ang0) * fa;   // seated: thigh forward, shin out or down
+          const kn = joint(0, hip - bob, thE, 0.25 * k), an = joint(kn[0], kn[1], saE, 0.25 * k);
+          return { kn, an, ang: saE };
         };
         const drawLeg = (L, col, wd) => {
           ctx.strokeStyle = col; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = wd; ctx.beginPath(); ctx.moveTo(0, hip - bob); ctx.lineTo(L.kn[0], L.kn[1]); ctx.lineWidth = wd * 0.86; ctx.lineTo(L.an[0], L.an[1]); ctx.stroke();
@@ -836,23 +838,24 @@
           if (p.skate) { ctx.strokeStyle = 'rgba(218,228,248,.95)'; ctx.lineWidth = Math.max(1, k * 0.012); ctx.beginPath(); ctx.moveTo(L.an[0] - k * 0.05, L.an[1] + k * 0.04); ctx.lineTo(L.an[0] + k * 0.1, L.an[1] + k * 0.04); ctx.stroke(); }   // blade
         };
         const drawArm = (phi, col, glove) => {
-          const a1 = p.skate ? 0.8 * Math.sin(phi) : -0.42 * Math.sin(phi), el = joint(0, sh + k * 0.02 - bob, a1, 0.17 * k), a2 = a1 + (p.skate ? 0.15 : 0.25 + 0.35 * Math.max(0, Math.sin(phi + 0.6))), hd = joint(el[0], el[1], a2, 0.16 * k);
+          const a1 = p.skate ? (0.8 * Math.sin(phi)) * (1 - fa) - 0.8 * fa + fw * 1.5 * Math.sin(phi * 1.7 + 1) : -0.42 * Math.sin(phi), el = joint(0, sh + k * 0.02 - bob, a1, 0.17 * k), a2 = a1 + (p.skate ? 0.15 * (1 - fa) - 0.05 * fa : 0.25 + 0.35 * Math.max(0, Math.sin(phi + 0.6))), hd = joint(el[0], el[1], a2, 0.16 * k);
           ctx.strokeStyle = col; ctx.lineCap = 'round'; ctx.lineWidth = k * 0.062; ctx.beginPath(); ctx.moveTo(0, sh + k * 0.02 - bob); ctx.lineTo(el[0], el[1]); ctx.lineWidth = k * 0.054; ctx.lineTo(hd[0], hd[1]); ctx.stroke();
           ctx.fillStyle = glove; ctx.beginPath(); ctx.arc(hd[0], hd[1], k * 0.03, 0, TAU); ctx.fill();
         };
         const coat = rgb(p.coat), coatDark = rgb(mix(p.coat, [0, 0, 8], 0.5)), coatLight = rgb(mix(p.coat, [255, 190, 130], 0.4));
         ctx.save(); ctx.translate(x, y); ctx.scale(p.dir, 1);
         if (p.skate) { const rg = ctx.createLinearGradient(0, 0, 0, k * 0.55); rg.addColorStop(0, rgb(p.coat, 0.3)); rg.addColorStop(1, rgb(p.coat, 0)); ctx.fillStyle = rg; ctx.fillRect(-k * 0.12, 0, k * 0.24, k * 0.55); }   // coat colour mirrored in the ice
-        const fl = p.skate ? clamp(p.fall || 0, 0, 1) : 0, fa = fl * fl * (3 - 2 * fl);   // eased fall amount: 0 upright, 1 flat on the ice
-        ctx.translate(0, -k * 0.05 * fa); ctx.rotate(p.skate ? 0.13 * (1 - fa) - 1.5 * fa : 0.025);
+        const fl = p.skate ? clamp(p.fall || 0, 0, 1) : 0, fa = fl * fl * (3 - 2 * fl), fw = p.skate ? 4 * fl * (1 - fl) : 0;   // fa: 0 upright .. 1 sitting on the ice; fw: arm-flailing, strongest mid-fall
+        ctx.translate(0, k * 0.46 * fa); ctx.rotate(p.skate ? 0.13 * (1 - fa) : 0.025);
+        if (fa > 0) { ctx.translate(0, hip); ctx.rotate(-LB * fa); ctx.translate(0, -hip); }   // lean back from the hips
         // soft shadow stretched away from the lamp
         ctx.fillStyle = 'rgba(14,10,28,.38)'; ctx.beginPath(); ctx.ellipse(-lampSide * p.dir * k * 0.12, 0, k * 0.26, k * 0.05, 0, 0, TAU); ctx.fill();
-        const far = leg(ph + Math.PI), near = leg(ph);
+        const far = leg(ph + Math.PI, false), near = leg(ph, true);
         drawLeg(far, 'rgb(18,16,24)', k * 0.085); drawArm(ph, coatDark, 'rgb(26,22,30)');
         // the coat: shoulders, a belted waist, a hem that swings with the stride
-        const sw = Math.sin(ph) * k * 0.025;
-        const body = new Path2D(); body.moveTo(-k * 0.085, sh - bob); body.quadraticCurveTo(-k * 0.115, sh + k * 0.16 - bob, -k * 0.1, hip - bob); body.quadraticCurveTo(-k * 0.16 - sw, hip + k * 0.12 - bob, -k * 0.17 - sw, -k * 0.27 - bob);
-        body.lineTo(k * 0.15 + sw, -k * 0.27 - bob); body.quadraticCurveTo(k * 0.15 + sw, hip + k * 0.1 - bob, k * 0.1, hip - bob); body.quadraticCurveTo(k * 0.115, sh + k * 0.16 - bob, k * 0.085, sh - bob); body.closePath();
+        const sw = Math.sin(ph) * k * 0.025, hemY = (-0.27 * (1 - fa) - 0.44 * fa) * k;
+        const body = new Path2D(); body.moveTo(-k * 0.085, sh - bob); body.quadraticCurveTo(-k * 0.115, sh + k * 0.16 - bob, -k * 0.1, hip - bob); body.quadraticCurveTo(-k * 0.16 - sw, hip + k * 0.12 - bob, -k * 0.17 - sw, hemY - bob);
+        body.lineTo(k * 0.15 + sw, hemY - bob); body.quadraticCurveTo(k * 0.15 + sw, hip + k * 0.1 - bob, k * 0.1, hip - bob); body.quadraticCurveTo(k * 0.115, sh + k * 0.16 - bob, k * 0.085, sh - bob); body.closePath();
         ctx.fillStyle = coat; ctx.fill(body);
         const side = ctx.createLinearGradient(lampSide * -k * 0.16, 0, lampSide * k * 0.16, 0); side.addColorStop(0, `rgba(255,176,104,${0.5 * lampK})`); side.addColorStop(0.45, 'rgba(255,176,104,0)'); side.addColorStop(1, 'rgba(10,8,24,.38)'); ctx.fillStyle = side; ctx.fill(body);
         ctx.strokeStyle = coatDark; ctx.lineWidth = Math.max(1, k * 0.012); ctx.beginPath(); ctx.moveTo(-k * 0.1, hip - bob + k * 0.01); ctx.lineTo(k * 0.1, hip - bob + k * 0.01); ctx.stroke();   // belt
