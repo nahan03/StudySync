@@ -226,6 +226,7 @@ ssReady(function () {
 
   function renderQuestions(questions) {
     const list = $('practice-questions-list');
+    list.querySelectorAll('.dm-question-card').forEach(c => { if (c._memTimer) clearInterval(c._memTimer); });
     list.innerHTML = '';
     $('practice-q-count').textContent = `${questions.length} question${questions.length !== 1 ? 's' : ''} generated`;
     questions.forEach((q, i) => {
@@ -297,8 +298,7 @@ ssReady(function () {
         card.dataset.revealed = '1';
         card.classList.add('revealed');
         this.style.display = 'none';
-        showExplanation(card, generatedQuestions[Number(card.dataset.index)]);
-        askAgain(card, 'Answer revealed. Now type it again from memory and press Check.');
+        startMemorise(card, generatedQuestions[Number(card.dataset.index)]);
       });
     });
     list.querySelectorAll('.dm-check-btn').forEach(btn => {
@@ -338,9 +338,33 @@ ssReady(function () {
         card.classList.remove('answered-correct', 'answered-wrong', 'after-reveal'); card.classList.add('revealed');
         const mine = card.querySelector('.dm-your-answer'); if (mine) mine.remove();
         this.classList.add('hidden');
-        askAgain(card, 'Have another go. Type the answer from memory.');
+        startMemorise(card, generatedQuestions[Number(card.dataset.index)]);
       });
     });
+  }
+
+  /* the answer stays on screen for a minute (or until the learner says they're ready), then it closes itself
+     and the learner types it from memory; Check then says whether they got it */
+  function clearMemorise(card) { if (card._memTimer) { clearInterval(card._memTimer); card._memTimer = null; } }
+  function startMemorise(card, q) {
+    clearMemorise(card);
+    showExplanation(card, q);
+    const input = card.querySelector('.dm-q-input'), check = card.querySelector('.dm-check-btn'), feedback = card.querySelector('.dm-check-feedback');
+    if (input) input.disabled = true;
+    if (check) check.style.display = 'none';
+    card.querySelectorAll('.dm-wordbank button').forEach(x => { x.disabled = true; x.classList.remove('picked'); });
+    let left = Math.max(1, Number(window.PRACTICE_REVEAL_SECONDS) || 60);
+    feedback.classList.remove('hidden'); feedback.className = 'dm-check-feedback info memorising';
+    feedback.innerHTML = '<span class="dm-mem-text"></span><button type="button" class="dm-hide-now">I\'m ready, hide it</button>';
+    const txt = feedback.querySelector('.dm-mem-text'), say = () => { txt.textContent = `Study the answer. It hides in ${left}s and then you type it from memory.`; };
+    say();
+    const finish = () => {
+      clearMemorise(card);
+      const rev = card.querySelector('.dm-answer-reveal'); if (rev) rev.remove();
+      askAgain(card, 'The answer is hidden. Type it from memory and press Check.');
+    };
+    card._memTimer = setInterval(() => { left--; if (left <= 0) finish(); else say(); }, 1000);
+    feedback.querySelector('.dm-hide-now').addEventListener('click', finish);
   }
 
   /* put a text question back into "type your answer" mode */
@@ -411,6 +435,7 @@ ssReady(function () {
 
   const retryBtnEl = $('practice-retry-btn');
   if (retryBtnEl) retryBtnEl.addEventListener('click', () => {
+    document.querySelectorAll('.dm-question-card').forEach(c => { if (c._memTimer) clearInterval(c._memTimer); });
     $('practice-questions-output').classList.add('hidden');
     $('practice-score-banner').classList.add('hidden');
     $('practice-questions-list').innerHTML = '';

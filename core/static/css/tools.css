@@ -49,3 +49,7 @@ body.tool-page { background: #050a04; padding-bottom: 72px; }
 .tool-root .dm-question-card.revealed:not(.answered-correct):not(.answered-wrong) { border-color: rgba(var(--accent-rgb), .45); }
 .tool-root .dm-question-card.after-reveal .dm-q-type-badge::after { content: " · learned"; color: var(--sprout); }
 .tool-root .dm-score-extra { margin-top: 6px; font-size: 13px; color: var(--fog); font-weight: 500; }
+
+.tool-root .dm-check-feedback.memorising { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.tool-root .dm-hide-now { padding: 7px 14px; border-radius: 999px; cursor: pointer; font: 600 12.5px 'DM Sans', sans-serif; color: var(--on-accent); background: linear-gradient(135deg, var(--leaf), var(--sprout)); border: 0; }
+.tool-root .dm-hide-now:hover { filter: brightness(1.1); }

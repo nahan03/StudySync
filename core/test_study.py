@@ -227,3 +227,9 @@ class ToolPageTests(TestCase):
         from pathlib import Path
         js = (Path(__file__).parent / 'static' / 'js' / 'exam_features.js').read_text(encoding='utf-8')
         self.assertLess(js.index('function judgeAnswer'), js.index("if ($('fc-deck')) {"))
+
+    def test_revealed_answers_hide_themselves_after_a_minute_by_default(self):
+        from pathlib import Path
+        js = (Path(__file__).parent / 'static' / 'js' / 'exam_features.js').read_text(encoding='utf-8')
+        self.assertIn('window.PRACTICE_REVEAL_SECONDS) || 60', js)
+        self.assertIn('function startMemorise', js)
