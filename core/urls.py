@@ -9,6 +9,7 @@ urlpatterns = [
     # path('focus/', views.focus, name='focus'),
     # path('studytracker/', views.studytracker, name='studytracker'),
     # path('notes/', views.notes, name='notes'),
+    path('study/', views.study, name='study'),
     path('daily/', views.daily_mode, name='daily_mode'),
     path('exam/', views.exam_mode, name='exam_mode'),
     path('custom/', views.custom_mode, name='custom_mode'),

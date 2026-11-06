@@ -1,0 +1,215 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Study{% endblock %}
+{% block body_class %}study-page{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/study.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'css/tree_overlay.css' %}?v=1">
+{% endblock %}
+
+{% block content %}
+<nav class="st-nav">
+  <div class="st-nav-left">
+    <a href="/" class="st-back">&larr; Home</a>
+    <a href="/" class="st-logo"><span>Study</span>Sync</a>
+  </div>
+  <a href="/forest/" class="st-nav-link">&#127794; My forest</a>
+</nav>
+
+<div class="st-wrap">
+
+  <!-- ═════════════ SETUP ═════════════ -->
+  <section id="st-setup" aria-labelledby="st-setup-title">
+    <header class="st-head">
+      <div class="st-eyebrow">Study session</div>
+      <h1 class="st-title" id="st-setup-title">Set up <em>your</em> timer</h1>
+      <p class="st-sub">Pick a preset or build your own. Choose how long you focus, how your breaks work and how you want to be alerted.</p>
+    </header>
+
+    <div class="st-card">
+      <div class="st-row2">
+        <label class="st-field">
+          <span class="st-label">What are you studying?</span>
+          <input id="st-subject" type="text" maxlength="60" placeholder="e.g. Biology" list="st-subject-list" autocomplete="off">
+          <datalist id="st-subject-list"></datalist>
+        </label>
+        <label class="st-field">
+          <span class="st-label">Goal for this session <em>(optional)</em></span>
+          <input id="st-goal" type="text" maxlength="120" placeholder="e.g. Finish chapter 4 notes" autocomplete="off">
+        </label>
+      </div>
+    </div>
+
+    <div class="st-card">
+      <h2 class="st-card-title">Timer</h2>
+      <div class="st-presets" id="st-presets" role="radiogroup" aria-label="Timer presets"></div>
+
+      <div class="st-grid5">
+        <label class="st-field"><span class="st-label">Focus (min)</span>
+          <input id="st-focus" type="number" inputmode="numeric" min="1" max="180"></label>
+        <label class="st-field"><span class="st-label">Short break (min)</span>
+          <input id="st-short" type="number" inputmode="numeric" min="0" max="60"></label>
+        <label class="st-field"><span class="st-label">Long break (min)</span>
+          <input id="st-long" type="number" inputmode="numeric" min="0" max="90"></label>
+        <label class="st-field"><span class="st-label">Rounds</span>
+          <input id="st-rounds" type="number" inputmode="numeric" min="1" max="12"></label>
+        <label class="st-field"><span class="st-label">Long break every</span>
+          <input id="st-longevery" type="number" inputmode="numeric" min="1" max="12"></label>
+      </div>
+      <p class="st-hint">Set a break to <strong>0</strong> to skip it. The long break replaces the short one after every chosen number of rounds.</p>
+
+      <div class="st-toggles">
+        <label class="st-toggle"><input id="st-autobreak" type="checkbox"><span class="st-switch"></span>
+          <span class="st-toggle-text">Start breaks automatically</span></label>
+        <label class="st-toggle"><input id="st-autofocus" type="checkbox"><span class="st-switch"></span>
+          <span class="st-toggle-text">Start the next focus round automatically</span></label>
+      </div>
+
+      <div class="st-summary" id="st-summary" aria-live="polite"></div>
+
+      <div class="st-savepreset">
+        <input id="st-preset-name" type="text" maxlength="24" placeholder="Name this timer to save it as a preset" autocomplete="off">
+        <button class="st-btn st-btn-ghost" id="st-preset-save" type="button">Save preset</button>
+      </div>
+    </div>
+
+    <div class="st-card">
+      <h2 class="st-card-title">Alerts</h2>
+      <div class="st-row2">
+        <div class="st-field">
+          <span class="st-label">When a focus round ends</span>
+          <div class="st-soundrow">
+            <select id="st-focus-sound" aria-label="Focus end sound"></select>
+            <button class="st-btn st-btn-ghost st-btn-sm" id="st-test-focus" type="button" aria-label="Preview focus end sound">&#9654; Test</button>
+          </div>
+        </div>
+        <div class="st-field">
+          <span class="st-label">When a break ends</span>
+          <div class="st-soundrow">
+            <select id="st-break-sound" aria-label="Break end sound"></select>
+            <button class="st-btn st-btn-ghost st-btn-sm" id="st-test-break" type="button" aria-label="Preview break end sound">&#9654; Test</button>
+          </div>
+        </div>
+      </div>
+      <div class="st-row2">
+        <label class="st-field">
+          <span class="st-label">Volume <output id="st-volume-out">70</output>%</span>
+          <input id="st-volume" type="range" min="0" max="100" step="5">
+        </label>
+        <label class="st-field">
+          <span class="st-label">Repeat the alarm</span>
+          <select id="st-repeat">
+            <option value="once">Play once</option>
+            <option value="3x">Play 3 times</option>
+            <option value="until">Keep ringing until I dismiss it</option>
+          </select>
+        </label>
+      </div>
+      <div class="st-toggles">
+        <label class="st-toggle"><input id="st-vibrate" type="checkbox"><span class="st-switch"></span>
+          <span class="st-toggle-text">Vibrate on phones</span></label>
+        <label class="st-toggle"><input id="st-notify" type="checkbox"><span class="st-switch"></span>
+          <span class="st-toggle-text">Show a browser notification</span></label>
+      </div>
+      <p class="st-hint" id="st-notify-hint" hidden></p>
+    </div>
+
+    <button class="st-btn st-btn-primary st-start" id="st-start" type="button">&#127793; Start studying</button>
+  </section>
+
+  <!-- ═════════════ RUNNING ═════════════ -->
+  <section id="st-run" hidden aria-live="off">
+    <div class="st-run-top">
+      <div>
+        <div class="st-eyebrow" id="st-run-subject">Study</div>
+        <div class="st-run-goal" id="st-run-goal"></div>
+      </div>
+      <span class="st-phase" id="st-phase">Focus</span>
+    </div>
+
+    <div class="st-notice" id="st-notice" hidden></div>
+    <div class="st-ringing" id="st-ringing" hidden>
+      <span>&#128276; Time&rsquo;s up!</span>
+      <button class="st-btn st-btn-sm st-btn-primary" id="st-dismiss" type="button">Dismiss</button>
+    </div>
+
+    <div class="st-timer">
+      <div class="st-ring" id="st-ring">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="st-ring-bg" cx="100" cy="100" r="88"/>
+          <circle class="st-ring-arc" id="st-arc" cx="100" cy="100" r="88"/>
+        </svg>
+        <div class="st-ring-center">
+          <div class="st-time" id="st-time" role="timer" aria-live="off">25:00</div>
+          <div class="st-round" id="st-round">Round 1 of 4</div>
+        </div>
+      </div>
+      <div class="st-dots" id="st-dots" aria-hidden="true"></div>
+    </div>
+
+    <div class="st-controls">
+      <button class="st-btn st-btn-primary st-btn-lg" id="st-toggle" type="button">Pause</button>
+      <button class="st-btn st-btn-ghost" id="st-skip" type="button">Skip &rarr;</button>
+      <button class="st-btn st-btn-ghost st-btn-danger" id="st-end" type="button">End session</button>
+    </div>
+
+    <div class="st-tree-card">
+      <div class="st-tree-art" id="st-tree-art"></div>
+      <div class="st-tree-info">
+        <div class="st-tree-title" id="st-tree-title">Your next tree</div>
+        <div class="st-progress"><div class="st-progress-fill" id="st-progress-fill"></div></div>
+        <div class="st-tree-sub" id="st-tree-sub">0 / 5 sessions</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ DONE ═════════════ -->
+  <section id="st-done" hidden>
+    <div class="st-card st-donecard">
+      <div class="st-done-icon">&#127795;</div>
+      <h2 class="st-title st-done-title">Session complete!</h2>
+      <p class="st-sub" id="st-done-text"></p>
+      <div class="st-controls st-controls-center">
+        <button class="st-btn st-btn-primary" id="st-again" type="button">New session</button>
+        <a class="st-btn st-btn-ghost" href="/forest/">See my forest</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Tree growth overlay (same markup/classes as the other modes so tree_fx.js animates it) -->
+<div class="tree-growth-overlay hidden" id="tree-growth-overlay">
+  <div class="tree-growth-box">
+    <p class="tree-growth-eyebrow">Focus round complete</p>
+    <h3 class="tree-growth-title" id="tg-title">Your tree is growing!</h3>
+    <div class="tg-goal-reflect hidden" id="tg-goal-reflect">
+      <p class="tg-goal-label">Your goal was:</p>
+      <p class="tg-goal-text" id="tg-goal-text"></p>
+    </div>
+    <div id="tg-tree-svg" class="tg-tree-svg"></div>
+    <p class="tree-growth-stage" id="tg-stage"></p>
+    <p class="tree-growth-fact" id="tg-fact"></p>
+    <div class="tree-growth-progress">
+      <div class="tree-growth-pip" data-s="1"></div>
+      <div class="tree-growth-pip" data-s="2"></div>
+      <div class="tree-growth-pip" data-s="3"></div>
+      <div class="tree-growth-pip" data-s="4"></div>
+      <div class="tree-growth-pip" data-s="5"></div>
+    </div>
+    <button class="st-btn st-btn-primary" id="tg-continue-btn" type="button">Continue &rarr;</button>
+  </div>
+</div>
+
+<div id="st-audio" hidden
+     data-end="{% static 'audio/end.wav' %}"
+     data-start="{% static 'audio/start.mp3' %}"
+     data-start1="{% static 'audio/start1.mp3' %}"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/study.js' %}?v=1"></script>
+{% endblock %}

@@ -135,6 +135,12 @@ def logout_view(request):
     return redirect('login')
 
 @login_required
+def study(request):
+    """The single study page: user-configured timer, breaks and alarms plus the growing tree."""
+    return render(request, 'core/study.html')
+
+
+@login_required
 def daily_mode(request):
     return render(request, 'core/daily_mode.html')
 

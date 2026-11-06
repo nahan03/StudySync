@@ -706,12 +706,12 @@ body.home-page {
     </h1>
 
     <p class="hero-sub">
-      Choose a study mode, plant your plan, and let StudySync shape every session around you.
+      Set up a timer your way, focus in rounds with the breaks and alarms you choose, and watch every session grow a tree.
     </p>
 
     <div class="hero-actions">
       <a href="#modeSelect" class="hero-cta-primary">🌱 Start studying now</a>
-      <a href="#modeSelect" class="hero-cta-secondary">See how it works &rarr;</a>
+      <a href="#modeSelect" class="hero-cta-secondary">Set up my timer &rarr;</a>
     </div>
   </div>
 
@@ -724,8 +724,8 @@ body.home-page {
 <!-- STATS BAR -->
 <div class="stats-bar">
   <div class="stat-item">
-    <div class="stat-num">3</div>
-    <div class="stat-label">Study modes</div>
+    <div class="stat-num">1</div>
+    <div class="stat-label">Timer, your way</div>
   </div>
   <div class="stat-divider"></div>
   <div class="stat-item">
@@ -739,154 +739,32 @@ body.home-page {
   </div>
 </div>
 
-<!-- MODES + PLAN -->
+<!-- START STUDYING -->
 <section class="mode-section" id="modeSelect">
   <div class="section-head">
-    <div class="eyebrow">Step 1 — Pick your path</div>
-    <h2 class="section-title">How are you<br>studying today?</h2>
-    <p class="section-sub">Hover a card to see what each mode offers. Click to begin building your session.</p>
+    <div class="eyebrow">Ready when you are</div>
+    <h2 class="section-title">Start a study<br>session</h2>
+    <p class="section-sub">One timer, set up your way. Pick a preset or make your own focus, break and alarm settings. Every round you finish grows your tree.</p>
   </div>
 
-  <div class="modes-grid" id="modesGrid">
-
-    <!-- Daily -->
-    <button class="mode-card" data-mode="daily">
-      <div class="mode-card-inner">
-        <div class="mode-icon-wrap">🌳</div>
-        <div class="mode-name">Daily Mode</div>
-        <div class="mode-tagline">Steady growth through consistent daily habits</div>
-        <div class="mode-features">
-          <div class="mode-feat"><span class="feat-dot"></span>Create and save notes</div>
-          <div class="mode-feat"><span class="feat-dot"></span>Organise subjects and references</div>
-          <div class="mode-feat"><span class="feat-dot"></span>Build a daily study streak</div>
-          <div class="mode-feat"><span class="feat-dot"></span>Relaxed, sustainable pace</div>
-        </div>
-        <div class="mode-cta-row">
-          <span class="mode-cta-text">Choose Daily Mode</span>
-          <span class="mode-cta-arrow">&rarr;</span>
-        </div>
-      </div>
-    </button>
-
-    <!-- Exam -->
-    <button class="mode-card" data-mode="exam">
-      <div class="mode-card-inner">
-        <div class="mode-icon-wrap">🌊</div>
-        <div class="mode-name">Exam Mode</div>
-        <div class="mode-tagline">Deep roots when every revision hour counts</div>
-        <div class="mode-features">
-          <div class="mode-feat"><span class="feat-dot"></span>Countdown focus timers</div>
-          <div class="mode-feat"><span class="feat-dot"></span>Practice questions per topic</div>
-          <div class="mode-feat"><span class="feat-dot"></span>Smart revision sprints</div>
-          <div class="mode-feat"><span class="feat-dot"></span>Priority topic ranking</div>
-        </div>
-        <div class="mode-cta-row">
-          <span class="mode-cta-text">Choose Exam Mode</span>
-          <span class="mode-cta-arrow">&rarr;</span>
-        </div>
-      </div>
-    </button>
-
-    <!-- Custom -->
-    <button class="mode-card" data-mode="custom">
-      <div class="mode-card-inner">
-        <div class="mode-icon-wrap">🍂</div>
-        <div class="mode-name">Custom Mode</div>
-        <div class="mode-tagline">You shape the forest, we map the trail</div>
-        <div class="mode-features">
-          <div class="mode-feat"><span class="feat-dot"></span>Custom time blocks</div>
-          <div class="mode-feat"><span class="feat-dot"></span>Personalised goal display</div>
-          <div class="mode-feat"><span class="feat-dot"></span>Full control over structure</div>
-          <div class="mode-feat"><span class="feat-dot"></span>Adapts to hours and deadline</div>
-        </div>
-        <div class="mode-cta-row">
-          <span class="mode-cta-text">Choose Custom Mode</span>
-          <span class="mode-cta-arrow">&rarr;</span>
-        </div>
-      </div>
-    </button>
-
-    <!-- PLAN FORM -->
-    <div class="plan-outer" id="planOuter">
-      <div class="plan-clip">
-        <div class="plan-form" id="planForm">
-          <div class="plan-form-bar" id="planBar"></div>
-
-          <div class="plan-form-header">
-            <div class="plan-form-left">
-              <span class="plan-badge" id="planBadge">🌱 Daily Mode</span>
-              <span class="plan-form-title">Plan your session</span>
-            </div>
-            <span class="plan-step-hint">Step 2 of 2</span>
-          </div>
-
-          <div class="questions-grid">
-
-            <!-- Q1: Subject — now a select populated from profile -->
-            <div class="q-card">
-              <div class="q-num" id="qn1">01</div>
-              <label class="q-label" for="subject">What subject are you tackling?</label>
-              <select id="subject" data-subject-select>
-                <option value="">Pick a subject…</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-            <!-- Q2: Topic -->
-            <div class="q-card">
-              <div class="q-num" id="qn2">02</div>
-              <label class="q-label" for="topic">Which chapter or topic?</label>
-              <input id="topic" type="text" placeholder="e.g. Chapter 4 — Calculus" autocomplete="off">
-            </div>
-
-            <!-- Q3: Goal -->
-            <div class="q-card full">
-              <div class="q-num" id="qn3">03</div>
-              <label class="q-label" for="goal">What do you want to walk away having done?</label>
-              <textarea id="goal" placeholder="e.g. Understand integration by parts and finish 10 practice problems…"></textarea>
-            </div>
-
-            <!-- Q4: Hours -->
-            <div class="q-card">
-              <div class="q-num" id="qn4">04</div>
-              <label class="q-label" for="hours">How many hours do you have?</label>
-              <div class="num-row">
-                <input id="hours" type="number" min="1" max="24" placeholder="3">
-                <span class="num-unit">hours</span>
-              </div>
-            </div>
-
-            <!-- Q5: Deadline -->
-            <div class="q-card">
-              <div class="q-num" id="qn5">05</div>
-              <label class="q-label" for="deadline">When's your deadline?</label>
-              <div class="num-row">
-                <input id="deadline" type="number" min="1" placeholder="7">
-                <span class="num-unit">days away</span>
-              </div>
-            </div>
-
-            <!-- Exercises checkbox -->
-            <label class="q-check">
-              <input type="checkbox" id="doExercises">
-              <div>
-                <div class="q-check-text">Include exercises and practice questions</div>
-                <div class="q-check-sub">StudySync will add a dedicated practice block to your session</div>
-              </div>
-            </label>
-
-            <div class="q-divider"></div>
-            <p class="q-error" id="formError">Please fill in all required fields before starting.</p>
-
-            <div class="q-submit">
-              <button class="submit-btn" id="startSessionBtn">🌿 Begin my session</button>
-            </div>
-
-          </div>
-        </div>
+  <a class="study-cta" href="/study/" id="studyCta">
+    <div class="study-cta-icon">&#127793;</div>
+    <div class="study-cta-body">
+      <div class="study-cta-title">Start studying</div>
+      <div class="study-cta-text">Choose Pomodoro, Deep work or a sprint, or build a custom timer with your own breaks, rounds and alarm sounds.</div>
+      <div class="study-cta-chips">
+        <span>&#127813; Pomodoro</span><span>&#129504; Deep work</span><span>&#9889; Sprint</span><span>&#9998; Custom</span><span>&#128276; Your alarms</span>
       </div>
     </div>
+    <div class="study-cta-arrow">&rarr;</div>
+  </a>
 
+  <div class="tools-label">More tools</div>
+  <div class="tools-row">
+    <a class="tool-card" href="/exam/"><span class="tool-ico">&#127183;</span><span><strong>Flashcards &amp; practice</strong><small>AI flashcards, practice questions, exam countdown</small></span></a>
+    <a class="tool-card" href="/daily/"><span class="tool-ico">&#128218;</span><span><strong>Library &amp; AI coach</strong><small>Resources, PDF reader, notes and study coach</small></span></a>
+    <a class="tool-card" href="/schedule/"><span class="tool-ico">&#128197;</span><span><strong>Weekly schedule</strong><small>Plan your study blocks and get reminders</small></span></a>
+    <a class="tool-card" href="/forest/"><span class="tool-ico">&#127794;</span><span><strong>My forest</strong><small>See every tree your sessions have grown</small></span></a>
   </div>
 </section>
 
@@ -1315,13 +1193,43 @@ body.home-page {
   border-color: rgba(90,154,106,0.6);
   color: #b6eab6;
 }
+
+/* ── Single study entry + tools ── */
+.study-cta {
+  display: flex; align-items: center; gap: 22px; padding: 28px 30px; border-radius: 24px;
+  background: linear-gradient(135deg, rgba(30,46,28,.95), rgba(18,26,12,.95));
+  border: 1.5px solid rgba(125,181,74,.3); box-shadow: 0 0 50px rgba(78,122,52,.12), 0 20px 60px rgba(0,0,0,.45);
+  text-decoration: none; color: inherit; transition: transform .25s, border-color .25s, box-shadow .25s;
+}
+.study-cta:hover { transform: translateY(-4px); border-color: rgba(125,181,74,.6); box-shadow: 0 0 60px rgba(78,122,52,.28), 0 24px 70px rgba(0,0,0,.5); }
+.study-cta-icon { flex: 0 0 auto; width: 64px; height: 64px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 32px; background: linear-gradient(135deg, #2E4A2C, #4E7A34); box-shadow: 0 8px 24px rgba(78,122,52,.35); }
+.study-cta-body { flex: 1; min-width: 0; }
+.study-cta-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 800; color: var(--cream); margin-bottom: 6px; }
+.study-cta-text { font-size: 14px; line-height: 1.65; color: var(--fog); max-width: 560px; }
+.study-cta-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.study-cta-chips span { padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--lime); background: rgba(125,181,74,.1); border: 1px solid rgba(125,181,74,.22); }
+.study-cta-arrow { flex: 0 0 auto; width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #0E1A08; background: var(--sprout); transition: transform .25s; }
+.study-cta:hover .study-cta-arrow { transform: translateX(6px); }
+.tools-label { margin: 34px 0 14px; font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--fog); }
+.tools-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.tool-card { display: flex; align-items: flex-start; gap: 12px; padding: 16px 16px; border-radius: 18px; text-decoration: none; color: var(--cream); background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); transition: transform .2s, border-color .2s, background .2s; }
+.tool-card:hover { transform: translateY(-3px); border-color: rgba(125,181,74,.35); background: rgba(255,255,255,.05); }
+.tool-ico { font-size: 24px; line-height: 1; flex: 0 0 auto; }
+.tool-card strong { display: block; font-size: 14px; margin-bottom: 4px; }
+.tool-card small { display: block; font-size: 12px; line-height: 1.5; color: var(--fog); }
+@media (max-width: 900px) { .tools-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) {
+  .study-cta { flex-direction: column; align-items: flex-start; padding: 22px 20px; gap: 16px; }
+  .study-cta-arrow { align-self: flex-end; }
+  .tools-row { grid-template-columns: 1fr; }
+}
 </style>
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+window.ssReady(function () {
 
   /* ── HERO CTAs: intercept both buttons ── */
   document.querySelectorAll('.hero-cta-primary, .hero-cta-secondary').forEach(function (btn) {
@@ -1345,7 +1253,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 350);
   });
 
-  /* ── MODE CARDS + PLAN FORM ── */
+  /* ── MODE CARDS + PLAN FORM (legacy; the markup was replaced by the single Study entry) ── */
+  if (document.getElementById('planForm')) {
   var MODES = {
     daily:  { icon: '🌱', label: 'Daily Mode',  a: '#4E7A34', b: '#7DB54A', redirect: '/daily/'  },
     exam:   { icon: '🌲', label: 'Exam Mode',   a: '#2E4A2C', b: '#4E7A34', redirect: '/exam/'   },
@@ -1413,6 +1322,8 @@ document.addEventListener('DOMContentLoaded', function () {
     window.location.href = MODES[selectedMode].redirect;
   });
 
+  } /* end legacy mode/plan block */
+
   /* ── GRADE BADGE ── */
   var profile = JSON.parse(localStorage.getItem('studySyncProfile') || 'null');
   if (profile) {
@@ -1467,6 +1378,21 @@ document.getElementById('ss-av-edit').addEventListener('click', () => {
   }
 
   function detectActiveSession() {
+    // Study timer
+    const stRun = JSON.parse(localStorage.getItem('studySyncStudyRun') || 'null');
+    if (stRun && stRun.v === 1 && stRun.phase && stRun.phase !== 'done') {
+      let remaining = stRun.remaining;
+      if (stRun.running && stRun.endAt) remaining = Math.max(0, (stRun.endAt - Date.now()) / 1000);
+      const phaseLabel = { focus: 'Focus', short: 'Short break', long: 'Long break' }[stRun.phase] || '';
+      return {
+        mode: 'Study',
+        subject: (stRun.subject || 'Session') + (phaseLabel ? ' · ' + phaseLabel : ''),
+        remaining,
+        running: !!stRun.running,
+        url: '/study/',
+      };
+    }
+
     // Daily mode
     const dmState = JSON.parse(localStorage.getItem('studySyncTimerState') || 'null');
     if (dmState && dmState.sessionStarted && !dmState.timerFinished) {
@@ -1526,7 +1452,7 @@ document.getElementById('ss-av-edit').addEventListener('click', () => {
 
   // Label + colour theme based on mode
   const isExam = session.mode === 'Exam Mode';
-  btnEl.textContent = isExam ? 'Back to Exam Session →' : 'Back to Daily Session →';
+  btnEl.textContent = session.mode === 'Study' ? 'Back to Study Session →' : (isExam ? 'Back to Exam Session →' : 'Back to Daily Session →');
   widget.classList.toggle('asw-exam', isExam);
 
   // Live countdown

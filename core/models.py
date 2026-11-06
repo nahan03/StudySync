@@ -9,6 +9,7 @@ class StudySession(models.Model):
         ('daily', 'Daily'),
         ('exam', 'Exam'),
         ('custom', 'Custom'),
+        ('study', 'Study'),
     ]
 
     user = models.ForeignKey(
@@ -55,6 +56,8 @@ class UserState(models.Model):
         'studySyncSubjectSessions',
         'studySyncDailyRefs',
         'studySyncCustomNotes',
+        'studySyncStudyPrefs',       # Study page: timer, break and alarm settings
+        'studySyncTimerPresets',     # Study page: user-made timer presets
         'studySyncTree_daily',       # forest / tree progress
         'studySyncTree_custom',
         'studySyncTree_exam',

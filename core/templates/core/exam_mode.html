@@ -617,7 +617,7 @@
 })();
 
 // ── Reset button — zero the tree ──────────────────────────
-document.addEventListener('DOMContentLoaded', function () {
+window.ssReady(function () {
   var resetBtn = document.getElementById('em-reset');
   if (resetBtn) {
     resetBtn.addEventListener('click', function () {
