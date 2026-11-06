@@ -818,7 +818,7 @@
       s.coats = [[128, 44, 52], [44, 62, 112], [74, 74, 84], [166, 116, 66], [44, 98, 84], [196, 192, 208], [92, 50, 108]];
       s.hats = [[222, 220, 232], [160, 44, 56], [40, 40, 52], [226, 176, 80], [60, 110, 150]];
       const pk = arr => arr[Math.floor(r() * arr.length)];
-      s.skaters = [[0.5, 0.2, -1], [0.78, 0.55, 1], [0.9, 0.38, -1], [0.62, 0.72, 1], [0.3, 0.45, 1]].map(([fx, f, dir]) => ({ skate: true, near: false, dir, x: W * fx, f, v: 26 + r() * 22, ph: r() * 6, coat: pk(s.coats), hat: pk(s.hats), scarf: pk(s.coats) }));
+      s.skaters = [[0.5, 0.2, -1], [0.78, 0.55, 1], [0.9, 0.38, -1], [0.62, 0.72, 1], [0.3, 0.45, 1]].map(([fx, f, dir]) => ({ skate: true, near: false, dir, x: W * fx, f, v: 26 + r() * 22, ph: r() * 6, st: 'skate', fall: 0, t: 6 + r() * 26, coat: pk(s.coats), hat: pk(s.hats), scarf: pk(s.coats) }));
       s.drawPerson = (ctx, p, x, y, k) => {
         /* a walker in profile, ~9 heads tall: two-segment legs with a bending knee, long winter coat, swinging arms, scarf and hat,
            lit warmly on the side that faces the lamp */
@@ -843,7 +843,8 @@
         const coat = rgb(p.coat), coatDark = rgb(mix(p.coat, [0, 0, 8], 0.5)), coatLight = rgb(mix(p.coat, [255, 190, 130], 0.4));
         ctx.save(); ctx.translate(x, y); ctx.scale(p.dir, 1);
         if (p.skate) { const rg = ctx.createLinearGradient(0, 0, 0, k * 0.55); rg.addColorStop(0, rgb(p.coat, 0.3)); rg.addColorStop(1, rgb(p.coat, 0)); ctx.fillStyle = rg; ctx.fillRect(-k * 0.12, 0, k * 0.24, k * 0.55); }   // coat colour mirrored in the ice
-        ctx.rotate(p.skate ? 0.13 : 0.025);
+        const fl = p.skate ? clamp(p.fall || 0, 0, 1) : 0, fa = fl * fl * (3 - 2 * fl);   // eased fall amount: 0 upright, 1 flat on the ice
+        ctx.translate(0, -k * 0.05 * fa); ctx.rotate(p.skate ? 0.13 * (1 - fa) - 1.5 * fa : 0.025);
         // soft shadow stretched away from the lamp
         ctx.fillStyle = 'rgba(14,10,28,.38)'; ctx.beginPath(); ctx.ellipse(-lampSide * p.dir * k * 0.12, 0, k * 0.26, k * 0.05, 0, 0, TAU); ctx.fill();
         const far = leg(ph + Math.PI), near = leg(ph);
@@ -893,7 +894,13 @@
       s.skaters.forEach(p => {
         const u0 = clamp((p.x / W - 0.19) / 0.85, 0, 1), top = shoreY + 14 * sc, bottom = s.edge(u0).y - 12 * sc;
         p.y = top + p.f * Math.max(8 * sc, bottom - top); p.k = (22 + 120 * clamp((p.y - shoreY) / (H * 0.3), 0, 1.1)) * sc;
-        p.x += p.dir * p.v * sc * (0.45 + (p.y - shoreY) / (H * 0.3)) * dt; p.ph += dt * 1.9;
+        p.t -= dt;
+        if (p.st === 'skate') { if (p.t <= 0) { p.st = 'fall'; p.t = 0.75; } }                                       // trips
+        else if (p.st === 'fall') { p.fall = Math.min(1, p.fall + dt / 0.75); if (p.t <= 0) { p.st = 'down'; p.t = 2.6 + Math.random() * 2.4; } }
+        else if (p.st === 'down') { if (p.t <= 0) { p.st = 'rise'; p.t = 1.4; } }                                       // lies there for a moment
+        else { p.fall = Math.max(0, p.fall - dt / 1.4); if (p.t <= 0) { p.st = 'skate'; p.fall = 0; p.t = 16 + Math.random() * 30; } }
+        const glide = p.st === 'skate' ? 1 : p.st === 'fall' ? 0.7 : p.st === 'down' ? 0.2 * Math.max(0, Math.min(1, p.t / 2.5)) : 0;   // slides to a stop
+        p.x += p.dir * p.v * sc * (0.45 + (p.y - shoreY) / (H * 0.3)) * dt * glide; p.ph += dt * (p.st === 'skate' ? 1.9 : p.st === 'fall' ? 7 : p.st === 'down' ? 0.9 : 2.4);
         if ((p.dir > 0 && p.x > W * 0.97) || (p.dir < 0 && p.x < W * 0.1)) p.dir = -p.dir;
       });
       s.skaters.slice().sort((m, n) => m.y - n.y).forEach(p => s.drawPerson(ctx, p, p.x, p.y, p.k));
