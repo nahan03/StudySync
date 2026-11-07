@@ -1,12 +1,6 @@
-# Render Blueprint: New + > Blueprint, pick this repo, and Render creates the web service and the database.
-# The free plans are fine for trying it out; for real users switch both plans to paid ones
-# (the free web service sleeps when idle, and the free database is time-limited).
-databases:
-  - name: studysync-db
-    plan: free
-    databaseName: studysync
-    user: studysync
-
+# Render Blueprint: New + > Blueprint, pick this repo, and Render creates the web service.
+# The database is external (Neon free Postgres), its connection string goes in DATABASE_URL.
+# The free plan is fine for trying it out; for real users switch to a paid plan (the free web service sleeps when idle).
 services:
   - type: web
     name: studysync
@@ -21,10 +15,9 @@ services:
         value: "False"
       - key: DJANGO_SECRET_KEY
         generateValue: true
+      # paste the Postgres connection string (e.g. from Neon) in the Render dashboard; never stored in git
       - key: DATABASE_URL
-        fromDatabase:
-          name: studysync-db
-          property: connectionString
+        sync: false
       # the default *.onrender.com address; add your own domain here later, comma separated
       - key: DJANGO_ALLOWED_HOSTS
         value: .onrender.com
