@@ -47,7 +47,8 @@
 
   /* ---------- engine state ---------- */
   let canvas = null, ctx = null, raf = 0, curKey = '', curId = '', scene = null;
-  let post = null, emaMs = 0, W = 0, H = 0, dpr = 1, quality = 1, t = 0, last = 0, A = null, slow = 0, frames = 0, resizeTimer = 0;
+  const small = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || Math.min(screen.width || 9999, screen.height || 9999) <= 820;   // phones and tablets
+  let post = null, emaMs = 0, W = 0, H = 0, dpr = 1, quality = small ? 0.6 : 1, lastW = 0, lastH = 0, fEma = 33, fN = 0, prevTs = 0, t = 0, last = 0, A = null, slow = 0, frames = 0, resizeTimer = 0;
 
   function readPalette(theme) {
     const root = document.getElementById('st-root') || document.documentElement;
@@ -1273,7 +1274,8 @@
     const rect = canvas.getBoundingClientRect();
     W = Math.max(320, Math.round(rect.width || window.innerWidth));
     H = Math.max(240, Math.round(rect.height || window.innerHeight));
-    dpr = Math.min(window.devicePixelRatio || 1, quality < 0.7 ? 1 : 1.5);
+    dpr = small ? 1 : Math.min(window.devicePixelRatio || 1, quality < 0.7 ? 1 : 1.5);
+    lastW = window.innerWidth; lastH = window.innerHeight;
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     ctx = canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1293,8 +1295,9 @@
   function loop(ts) {
     raf = requestAnimationFrame(loop);
     if (!canvas || !canvas.isConnected) { stop(); return; }
-    if (document.hidden) { last = ts; return; }
+    if (document.hidden) { last = ts; prevTs = 0; return; }
     if (ts - last < 30) return;
+    if (prevTs) { fEma = fEma * 0.92 + Math.min(200, ts - prevTs) * 0.08; fN++; } prevTs = ts;
     const dt = Math.min(0.1, (ts - last) / 1000); last = ts; t += dt;
     const t0 = performance.now();
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1304,7 +1307,7 @@
     const cost = performance.now() - t0; emaMs = emaMs ? emaMs * 0.9 + cost * 0.1 : cost;
     frames++; slow += cost;
     if (frames === 90) {
-      if (slow / frames > 18 && quality > 0.45) { quality = Math.max(0.45, quality * 0.7); setup(curKey.split('|')[1]); }
+      if ((slow / frames > 18 || (fN > 60 && fEma > 55)) && quality > 0.35) { quality = Math.max(0.35, quality * 0.75); fEma = 33; fN = 0; prevTs = 0; setup(curKey.split('|')[1]); }   // under about 18 fps: simplify
       frames = 0; slow = 0;
     }
   }
@@ -1330,10 +1333,11 @@
     if (cfg.bloom) {
       post.bctx.filter = post.canFilter ? 'brightness(1.15) contrast(1.9) blur(1.5px)' : 'none';
       post.bctx.clearRect(0, 0, post.bw, post.bh); post.bctx.drawImage(canvas, 0, 0, post.bw, post.bh); post.bctx.filter = 'none';
-      ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = cfg.bloom; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+      const lite = small || quality < 0.7;
+      ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = cfg.bloom; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = lite ? 'low' : 'high';
       ctx.drawImage(post.bloom, 0, 0, W, H);
-      ctx.globalAlpha = cfg.bloom * 0.6; ctx.drawImage(post.bloom, -6, -4, W + 12, H + 8);
-      if (cfg.halo) { // a warm fringe around the brightest areas
+      if (!lite) { ctx.globalAlpha = cfg.bloom * 0.6; ctx.drawImage(post.bloom, -6, -4, W + 12, H + 8); }
+      if (cfg.halo && !lite) { // a warm fringe around the brightest areas
         const t = post.tctx; t.globalCompositeOperation = 'source-over'; t.clearRect(0, 0, post.bw, post.bh); t.drawImage(post.bloom, 0, 0);
         t.globalCompositeOperation = 'multiply'; t.fillStyle = cfg.haloColor || 'rgb(255,112,50)'; t.fillRect(0, 0, post.bw, post.bh); t.globalCompositeOperation = 'source-over';
         ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = cfg.halo; ctx.drawImage(post.tint, -10, -8, W + 20, H + 16);
@@ -1342,7 +1346,7 @@
     if (cfg.grade) { ctx.globalCompositeOperation = 'soft-light'; ctx.globalAlpha = cfg.gradeA == null ? 0.35 : cfg.gradeA; ctx.fillStyle = cfg.grade; ctx.fillRect(0, 0, W, H); }
     ctx.globalCompositeOperation = 'source-over';
     if (cfg.vignette) { ctx.globalAlpha = cfg.vignette; ctx.drawImage(post.vig, 0, 0, W, H); }
-    if (cfg.grain) {
+    if (cfg.grain && !small) {   // film grain is a full-screen fill every frame: skipped on phones
       ctx.globalAlpha = cfg.grain; ctx.fillStyle = post.grain; ctx.translate(-Math.random() * 160, -Math.random() * 160); ctx.fillRect(0, 0, W + 160, H + 160);
     }
     ctx.restore();
@@ -1350,7 +1354,10 @@
 
   function stopLoop() { cancelAnimationFrame(raf); raf = 0; }
   function stop() { stopLoop(); curKey = ''; curId = ''; scene = null; if (canvas && ctx) ctx.clearRect(0, 0, canvas.width, canvas.height); window.removeEventListener('resize', onResize); }
-  function onResize() { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (scene && setup(curKey.split('|')[1])) { const reduce = warm(); if (reduce) { scene.draw(A, t, 0.033); applyPost(scene.post); } } }, 220); }
+  function onResize() {
+    if (Math.abs(window.innerWidth - lastW) < 3 && Math.abs(window.innerHeight - lastH) < lastH * 0.3) return;   // only the browser bar moved
+    clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (scene && setup(curKey.split('|')[1])) { const reduce = warm(); if (reduce) { scene.draw(A, t, 0.033); applyPost(scene.post); } } }, 400);
+  }
 
   function start(id, theme) {
     canvas = document.getElementById('bg-canvas');
