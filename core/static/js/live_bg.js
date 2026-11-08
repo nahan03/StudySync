@@ -1274,7 +1274,7 @@
     const rect = canvas.getBoundingClientRect();
     W = Math.max(320, Math.round(rect.width || window.innerWidth));
     H = Math.max(240, Math.round(rect.height || window.innerHeight));
-    dpr = small ? 1 : Math.min(window.devicePixelRatio || 1, quality < 0.7 ? 1 : 1.5);
+    dpr = Math.min(window.devicePixelRatio || 1, small ? (quality >= 0.5 ? 1.75 : 1) : (quality < 0.7 ? 1 : 1.5));   // phones start sharp; the frame-rate check drops this to 1 if they struggle
     lastW = window.innerWidth; lastH = window.innerHeight;
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     ctx = canvas.getContext('2d');
