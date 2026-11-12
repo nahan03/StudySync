@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Karla:wght@400;500;600;700&display=swap');
 
 /* ── TOKENS (inherits home page palette) ── */
 :root {
@@ -24,7 +24,7 @@
 body.daily-mode-page {
   background: linear-gradient(180deg, #0a2411 0%, #123c1a 45%, #0d2c14 100%);
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   min-height: 100vh;
 }
 
@@ -519,7 +519,7 @@ body.daily-mode-page {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 12px;
   font-weight: 600;
   color: var(--fog);
@@ -649,7 +649,7 @@ body.daily-mode-page {
 }
 
 .dm-timer-time {
-  font-family: 'DM Sans', monospace;
+  font-family: 'Karla', monospace;
   font-size: clamp(32px, 3.5vw, 46px);
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -697,7 +697,7 @@ body.daily-mode-page {
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 10px;
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 13px;
   padding: 10px 12px;
   resize: none;
@@ -949,7 +949,7 @@ body.daily-mode-page {
   gap: 6px;
   padding: 8px 18px;
   border-radius: 999px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -1061,7 +1061,7 @@ body.daily-mode-page {
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: var(--r-sm);
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 13px;
   padding: 8px 14px;
   outline: none;
@@ -1077,7 +1077,7 @@ body.daily-mode-page {
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: var(--r-sm);
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 12px;
   padding: 6px 10px;
   outline: none;
@@ -1208,7 +1208,7 @@ body.daily-mode-page {
   border: none;
   border-bottom: 1px solid var(--leaf);
   color: var(--cream);
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: 15px;
   font-weight: 700;
   outline: none;
@@ -1270,7 +1270,7 @@ body.daily-mode-page {
 }
 
 .dm-note-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: 15px;
   font-weight: 700;
   color: var(--cream);
@@ -1614,7 +1614,7 @@ body.daily-mode-page {
   border: 1px solid rgba(255,255,255,0.09);
   border-radius: var(--r-sm);
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 13px;
   outline: none;
   transition: border-color 0.2s;
@@ -1679,7 +1679,7 @@ body.daily-mode-page {
   text-align: center;
 }
 .dm-score-banner h3 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: 22px;
   color: var(--sprout);
   margin-bottom: 6px;
@@ -1708,7 +1708,7 @@ body.daily-mode-page {
   border: 1px solid rgba(255,255,255,0.09);
   border-radius: var(--r-sm);
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 13px;
   outline: none;
   transition: border-color .2s;
@@ -1805,7 +1805,7 @@ body.daily-mode-page {
   border: 1px solid rgba(255,255,255,0.09);
   border-radius: var(--r-sm);
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 13px;
   padding: 10px 12px;
   outline: none;
@@ -1942,7 +1942,7 @@ body.daily-mode-page {
 }
 
 .dm-drawer-header h2 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: 20px;
   font-weight: 700;
   color: var(--cream);
@@ -2028,7 +2028,7 @@ body.daily-mode-page {
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: var(--r-sm);
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 13px;
   padding: 9px 12px;
   outline: none;
@@ -2336,7 +2336,7 @@ body.daily-mode-page {
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: var(--r-sm);
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 14px;
   padding: 10px 14px;
   outline: none;
@@ -2366,7 +2366,7 @@ body.daily-mode-page {
   padding: 32px 20px;
 }
 .dm-fc-results-score {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: 36px;
   font-weight: 700;
   color: var(--sprout);
@@ -2395,7 +2395,7 @@ body.daily-mode-page {
 .fc-shuffle-overlay.hidden { display: none; }
 
 .fc-shuffle-msg {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: 22px;
   color: var(--cream);
   font-weight: 700;
@@ -2471,7 +2471,7 @@ body.daily-mode-page {
 }
 .fc-ready-icon { font-size: 52px; margin-bottom: 16px; }
 .fc-ready-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: 24px;
   font-weight: 700;
   color: var(--cream);
@@ -2529,7 +2529,7 @@ body.daily-mode-page {
   margin-bottom: 8px;
 }
 .tree-growth-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: 22px;
   font-weight: 700;
   color: var(--cream);
@@ -2624,7 +2624,7 @@ body.daily-mode-page {
 }
 .dm-note-md p { margin: 0 0 4px; }
 .dm-note-md h1, .dm-note-md h2, .dm-note-md h3 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   color: var(--cream);
   font-size: 14px;
   margin: 0 0 4px;
@@ -2813,7 +2813,7 @@ body.daily-mode-page {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.1);
   color: rgba(154,136,112,0.8);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -2842,7 +2842,7 @@ body.daily-mode-page {
   border-radius: 12px;
   font-size: 13px;
   line-height: 1.55;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
 }
 .coach-bubble-user {
   background: rgba(78,122,52,0.18);
@@ -2883,7 +2883,7 @@ body.daily-mode-page {
   border: 1px solid rgba(255,255,255,0.09);
   border-radius: 8px;
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 13px;
   padding: 7px 11px;
   outline: none;
@@ -2950,7 +2950,7 @@ body.daily-mode-page {
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   animation: dict-fade-in 0.15s ease both;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
 }
 .dm-dict-popup.hidden { display: none; }
 
@@ -3079,7 +3079,7 @@ body.daily-mode-page {
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 6px;
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 13px;
   padding: 7px 10px;
   width: 100%;
@@ -3106,7 +3106,7 @@ body.daily-mode-page {
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 6px;
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 13px;
   padding: 7px 10px;
   width: 100%;
@@ -3872,7 +3872,7 @@ body.dm-day .is-fullscreen.daily-mode-page .dm-timer-card {
   letter-spacing: -0.03em !important;
   color: #e8f0dc !important;
   line-height: 1 !important;
-  font-family: 'DM Sans', monospace !important;
+  font-family: 'Karla', monospace !important;
   animation: fs-pulse 4s ease-in-out infinite !important;
   text-shadow: 0 0 80px rgba(125,181,74,0.12), 0 4px 24px rgba(0,0,0,0.5) !important;
 }

@@ -681,7 +681,7 @@ ssReady(function () {
     annNoteBtn.addEventListener('click', () => {
       annNoteInput.classList.toggle('hidden');
       if (!annNoteInput.classList.contains('hidden')) annNoteInput.focus();
-      annSaveBtn.textContent = '💛 Save';
+      annSaveBtn.textContent = 'Save';
     });
 
     annCancelBtn.addEventListener('click', () => {
@@ -706,7 +706,7 @@ ssReady(function () {
       popover.style.top  = '80px';
       popover.style.transform = 'translateX(-50%)';
       popover.classList.remove('hidden');
-      annSaveBtn.textContent = '💾 Update note';
+      annSaveBtn.textContent = 'Update note';
       const origSave = annSaveBtn.onclick;
       annSaveBtn.onclick = async () => {
         highlight.note = annNoteInput.value.trim();
@@ -716,7 +716,7 @@ ssReady(function () {
         await setAnn(currentPdfId, currentPage, ann);
         popover.classList.add('hidden');
         popover.style.transform = '';
-        annSaveBtn.textContent = '💛 Highlight';
+        annSaveBtn.textContent = 'Highlight';
         annSaveBtn.onclick = origSave;
         await loadHighlightLayer();
         refreshAnnotationsTab();

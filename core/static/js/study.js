@@ -43,10 +43,14 @@
     autoBreak: true, autoFocus: false,
     focusSound: 'chime', breakSound: 'bell', volume: 70, repeat: 'once', vibrate: true, notify: false,
     subject: '', goal: '',
-    theme: 'forest', bg: 'theme', bgVideo: '', bgDim: 15,
+    theme: 'lamp', themePicked: false, bg: 'lamp', bgPicked: false, bgVideo: '', bgDim: 15,
     ring: 'classic', font: 'serif', tsize: 'm', tfill: 'solid', tcolor: '',
   };
   let prefs = Object.assign({}, DEFAULTS, load(PREFS_KEY, {}));
+  /* Desk lamp is the default look: 'forest' was only the old default, so it counts as a choice only if the user clicked it */
+  if (!prefs.themePicked && (!prefs.theme || prefs.theme === 'forest')) prefs.theme = 'lamp';
+  /* the desk-lamp room is also the default background; 'theme' (gradient) was the old default */
+  if (!prefs.bgPicked && (!prefs.bg || prefs.bg === 'theme')) prefs.bg = 'lamp';
   let userPresets = load(PRESETS_KEY, []);
   if (!Array.isArray(userPresets)) userPresets = [];
 
@@ -101,6 +105,7 @@
   function stopRinging() {
     clearTimeout(ringTimer); ringTimer = null; ringCount = 0;
     $('st-ringing').hidden = true;
+    document.dispatchEvent(new CustomEvent('studysync:alarm-stop'));   /* the alarm clock in the room stops ringing */
   }
   function alarm(kind, title, body) {
     const c = run.cfg;
@@ -109,6 +114,7 @@
     stopRinging();
     if (window.SSMixer && SSMixer.isPlaying()) SSMixer.duck(Math.min(8000, 3000 + (c.repeat === 'once' ? 0 : 3000)));
     if (c.repeat === 'until') $('st-ringing').hidden = false;
+    document.dispatchEvent(new CustomEvent('studysync:alarm', { detail: { kind: kind, repeat: c.repeat } }));   /* ...and starts ringing */
     (function ringOnce() {
       const len = playSound(soundId, c.volume);
       ringCount++;
@@ -579,6 +585,7 @@
 
   /* ---------- appearance: theme + background ---------- */
   const THEMES = [
+    { id: 'lamp',     name: 'Desk lamp', swatch: 'radial-gradient(circle at 32% 30%,#F2B84B,#7a5622 45%,#17130F 75%)' },
     { id: 'forest',   name: 'Forest',   swatch: 'linear-gradient(135deg,#4E7A34,#7DB54A)' },
     { id: 'ocean',    name: 'Ocean',    swatch: 'linear-gradient(135deg,#1A9A8A,#3AC8B8)' },
     { id: 'sunset',   name: 'Sunset',   swatch: 'linear-gradient(135deg,#C8562E,#F08A5D)' },
@@ -600,8 +607,8 @@
     { id: 'minimal',  name: 'Minimal' },
   ];
   const FONTS = [
-    { id: 'serif',  name: 'Classic',     css: "'Playfair Display',serif" },
-    { id: 'sans',   name: 'Clean',       css: "'DM Sans',sans-serif" },
+    { id: 'serif',  name: 'Classic',     css: "'Special Elite',serif" },
+    { id: 'sans',   name: 'Clean',       css: "'Karla',sans-serif" },
     { id: 'mono',   name: 'Mono',        css: "'Space Mono',monospace" },
     { id: 'round',  name: 'Rounded',     css: "'Nunito',sans-serif" },
     { id: 'digital', name: 'Digital',    css: "'Orbitron',sans-serif" },
@@ -626,8 +633,10 @@
     return `<svg viewBox="0 0 40 40" width="40" height="40" aria-hidden="true">${g}</svg>`;
   }
   const BGS = [
+    { id: 'lamp',     name: 'Desk lamp',       prev: 'radial-gradient(circle at 30% 34%,rgba(255,214,140,.7),transparent 38%),linear-gradient(180deg,#0D0B09 0 72%,#3a2a18 72% 74%,#1d160f 74%)' },
+    { id: 'cafe',     name: 'Rainy night café', prev: 'radial-gradient(circle at 30% 60%,rgba(255,190,110,.75),transparent 22%),radial-gradient(circle at 62% 70%,rgba(255,110,90,.6),transparent 18%),linear-gradient(180deg,#0e1424 0 64%,#3a2414 64%)' },
     { id: 'theme',    name: 'Gradient',        prev: 'linear-gradient(180deg,#14301a,#050a04)' },
-    { id: 'forest',   name: 'Enchanted forest', prev: 'radial-gradient(circle at 74% 14%,rgba(255,230,160,.55),transparent 42%),linear-gradient(180deg,#0d1c2e 0%,#1e3a34 55%,#0a1c10 56%,#050d08 100%)' },
+    { id: 'forest',   name: 'Glow glade', prev: 'radial-gradient(circle at 22% 78%,rgba(94,240,224,.55),transparent 22%),radial-gradient(circle at 80% 72%,rgba(255,138,216,.45),transparent 18%),linear-gradient(180deg,#040a12 0%,#08161c 60%,#0a3a40 80%,#050c0c 100%)' },
     { id: 'stars',    name: 'Starry night',    prev: 'radial-gradient(circle at 80% 20%,#E9EFFA 0 7px,rgba(200,215,255,.3) 8px,transparent 30px),linear-gradient(180deg,#02040e,#0b1636 60%,#1a2a55)' },
     { id: 'aurora',   name: 'Aurora lake',     prev: 'radial-gradient(ellipse at 30% 40%,#2fe0a0,transparent 55%),radial-gradient(ellipse at 75% 55%,#9a5cf0,transparent 55%),linear-gradient(180deg,#02050e,#0a1c30 75%,#04101c 76%)' },
     { id: 'ocean',    name: 'Sunset ocean',    prev: 'linear-gradient(180deg,#1a2260,#a85a8a 38%,#f08a6a 54%,#f6c47c 55%,#4a5a96 58%,#08224a)' },
@@ -638,6 +647,8 @@
     { id: 'plain',    name: 'Plain',           prev: '#0b0f0a' },
     { id: 'image',    name: 'My picture',      prev: 'linear-gradient(135deg,#444,#888)' },
   ];
+  /* the theme that suits each background (Gradient, Plain and your own picture or video keep the current theme) */
+  const BG_THEME = { lamp: 'lamp', cafe: 'lamp', forest: 'forest', stars: 'slate', aurora: 'ocean', ocean: 'sunset', campfire: 'lamp', snow: 'slate', city: 'lavender', sakura: 'rose' };
   const SCENES = ['forest', 'stars', 'aurora', 'ocean', 'campfire', 'snow', 'city', 'sakura'];
   let footage = [];            // clips found in core/static/wallpapers
   let localVideoUrl = '';      // object URL of the clip this device stored (My video)
@@ -669,9 +680,9 @@
   if (typeof bgImage !== 'string') bgImage = '';
 
   function applyAppearance() {
-    const theme = THEMES.some(t => t.id === prefs.theme) ? prefs.theme : 'forest';
-    let bg = BGS.some(b => b.id === prefs.bg) ? prefs.bg : 'theme';
-    if (bg === 'image' && !bgImage) bg = 'theme'; // nothing chosen yet
+    const theme = THEMES.some(t => t.id === prefs.theme) ? prefs.theme : 'lamp';
+    let bg = BGS.some(b => b.id === prefs.bg) ? prefs.bg : 'lamp';
+    if (bg === 'image' && !bgImage) bg = 'lamp'; // nothing chosen yet
     root.dataset.theme = theme;
     document.documentElement.setAttribute('data-theme', theme); // the rest of the site follows
     root.dataset.bg = bg;
@@ -692,7 +703,7 @@
     $('st-dim').value = num(prefs.bgDim, 0, 80, 15);
     $('st-dim-out').textContent = $('st-dim').value;
     const videoSrc = prefs.bg === 'video' ? (prefs.bgVideo === 'local' ? localVideoUrl : prefs.bgVideo) : '';
-    if (prefs.bg === 'video') bg = videoSrc ? 'video' : 'theme';
+    if (prefs.bg === 'video') bg = videoSrc ? 'video' : 'lamp';
     root.dataset.bg = bg;
     const isVideo = bg === 'video', vid = $('bg-video');
     if (isVideo) {
@@ -764,11 +775,17 @@
 
     $('st-themes').addEventListener('click', e => {
       const b = e.target.closest('.st-theme'); if (!b) return;
-      prefs.theme = b.dataset.id; saveAppearance();
+      prefs.theme = b.dataset.id; prefs.themePicked = true; saveAppearance();
     });
     $('st-bgs').addEventListener('click', e => {
       const b = e.target.closest('.st-bgtile'); if (!b) return;
-      prefs.bg = b.dataset.id; saveAppearance();
+      prefs.bg = b.dataset.id; prefs.bgPicked = true;
+      /* each scene comes with the theme that suits it; you can still pick another theme after */
+      const match = BG_THEME[prefs.bg];
+      if (match) { prefs.theme = match; prefs.themePicked = true; }
+      saveAppearance();
+      /* the café comes with its sounds: start the café mix if nothing is playing yet */
+      if (prefs.bg === 'cafe' && window.SSMixer && !SSMixer.isPlaying()) { const au = document.getElementById('gmp-audio'); if (!au || au.paused) SSMixer.preset('Café study'); }
       if (prefs.bg === 'image' && !bgImage) $('st-bgfile').click();
     });
     $('st-dim').addEventListener('input', () => { prefs.bgDim = num($('st-dim').value, 0, 80, 15); saveAppearance(); });
@@ -789,10 +806,10 @@
     });
     $('st-bgremove').addEventListener('click', () => {
       bgImage = ''; drop(BG_IMAGE_KEY);
-      if (prefs.bg === 'image') prefs.bg = 'theme';
+      if (prefs.bg === 'image') prefs.bg = 'lamp';
       saveAppearance();
     });
-    $('st-appearance-reset').addEventListener('click', () => { prefs.theme = 'forest'; prefs.bg = 'theme'; prefs.bgVideo = ''; prefs.bgDim = 15; prefs.ring = 'classic'; prefs.font = 'serif'; prefs.tsize = 'm'; prefs.tfill = 'solid'; prefs.tcolor = ''; saveAppearance(); });
+    $('st-appearance-reset').addEventListener('click', () => { prefs.theme = 'lamp'; prefs.themePicked = false; prefs.bg = 'lamp'; prefs.bgPicked = false; prefs.bgVideo = ''; prefs.bgDim = 15; prefs.ring = 'classic'; prefs.font = 'serif'; prefs.tsize = 'm'; prefs.tfill = 'solid'; prefs.tcolor = ''; saveAppearance(); });
 
     // ---- real footage ----
     function renderFootage() {
@@ -807,7 +824,7 @@
     }
     $('st-footage').addEventListener('click', async e => {
       const x = e.target.closest('[data-del]');
-      if (x) { e.stopPropagation(); await vdel(); if (localVideoUrl) URL.revokeObjectURL(localVideoUrl); localVideoUrl = ''; if (prefs.bgVideo === 'local') { prefs.bg = 'theme'; prefs.bgVideo = ''; save(PREFS_KEY, prefs); } renderFootage(); return; }
+      if (x) { e.stopPropagation(); await vdel(); if (localVideoUrl) URL.revokeObjectURL(localVideoUrl); localVideoUrl = ''; if (prefs.bgVideo === 'local') { prefs.bg = 'lamp'; prefs.bgVideo = ''; save(PREFS_KEY, prefs); } renderFootage(); return; }
       const b = e.target.closest('.st-bgtile'); if (!b) return;
       if (b.dataset.src === 'local' && !localVideoUrl) { $('st-videofile').click(); return; }
       prefs.bg = 'video'; prefs.bgVideo = b.dataset.src; saveAppearance();

@@ -2,31 +2,38 @@
 <html lang="en">
 <head>
 
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Karla:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,800;1,800&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <script>
     /* the theme chosen on the Study page colours the whole site */
     (function () {
+      /* Desk lamp is the default; 'forest' saved before it existed was just the old default, not a choice */
+      function ssTheme(p) { p = p || {}; return (!p.themePicked && (!p.theme || p.theme === 'forest')) ? 'lamp' : p.theme; }
+      window.ssTheme = ssTheme;
       function apply() {
-        try { var t = (JSON.parse(localStorage.getItem('studySyncStudyPrefs') || '{}')).theme; document.documentElement.setAttribute('data-theme', t || 'forest'); }
-        catch (e) { document.documentElement.setAttribute('data-theme', 'forest'); }
+        try { document.documentElement.setAttribute('data-theme', ssTheme(JSON.parse(localStorage.getItem('studySyncStudyPrefs') || '{}'))); }
+        catch (e) { document.documentElement.setAttribute('data-theme', 'lamp'); }
       }
       window.ssApplyTheme = apply; apply(); window.addEventListener('storage', apply);
+      /* desk lamp: has the room light been switched on? */
+      try { if (localStorage.getItem('studySyncLampLit') === '1') document.documentElement.classList.add('ss-lit'); } catch (e) { /* storage unavailable */ }
     })();
     </script>
     <title>StudySync | {% block title %}{% endblock %}</title>
 
     {% load static %}
     <link rel="icon" href="{% static 'images/favicon.ico' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
-    <link rel="stylesheet" href="{% static 'css/site_themes.css' %}?v=2">
-    <link rel="stylesheet" href="{% static 'css/alert.css' %}?v=2">
-    <link rel="stylesheet" href="{% static 'css/music_player.css' %}?v=7">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=6">
+    <link rel="stylesheet" href="{% static 'css/site_themes.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/alert.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/music_player.css' %}?v=9">
     <meta name="ss-page-css-start">
     {% block extra_css %}{% endblock %}
     <meta name="ss-page-css-end">
+    <link rel="stylesheet" href="{% static 'css/lamp.css' %}?v=16">
     <script>
     window.ssReady = function ssReady(fn) {
       if (document.readyState === 'loading') {
@@ -55,10 +62,16 @@
     {% block scripts %}{% endblock %}
     </div>
 
+    <!-- Desk lamp: warm light that follows the pointer (see lamp.css / lamp.js) -->
+    <div id="ss-lamp" aria-hidden="true"></div>
+    <script src="{% static 'js/lamp.js' %}?v=1"></script>
+
 
     <!-- Global sound mixer -->
     <div id="gmp-bar">
-      <button id="gmp-play" class="gmp-play" type="button" aria-label="Play sounds">&#9654;</button>
+      <button id="gmp-bprev" class="gmp-bskip" type="button" aria-label="Previous track" hidden>&#9198;</button>
+      <button id="gmp-play" class="gmp-play" type="button" aria-label="Play">&#9654;</button>
+      <button id="gmp-bnext" class="gmp-bskip" type="button" aria-label="Next track" hidden>&#9197;</button>
       <div class="gmp-left" id="gmp-left">
         <div class="gmp-eq" aria-hidden="true">
           <span class="gmp-eq-bar"></span>
@@ -154,7 +167,7 @@
     <div id="global-toast" class="toast"></div>
     <script src="{% static 'js/alert.js' %}"></script>
     <script src="{% static 'js/ss_dialog.js' %}?v=1"></script>
-    <script src="{% static 'js/music_player.js' %}?v=14" defer></script>
+    <script src="{% static 'js/music_player.js' %}?v=17" defer></script>
     <script src="{% static 'js/global_ui.js' %}?v=1" defer></script>
     <script src="{% static 'js/tree_fx.js' %}?v=2" defer></script>
 
@@ -212,12 +225,12 @@
       letter-spacing: .02em; margin: 0 0 8px;
     }
     .sm-pq-mark {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Special Elite', serif;
       font-size: 42px; font-weight: 800; line-height: .6;
       color: rgba(58,200,184,0.18); margin-bottom: 5px;
     }
     .sm-pq-text {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Special Elite', serif;
       font-size: 15px; font-weight: 700; font-style: italic;
       color: #dce8e0; line-height: 1.6; margin: 0 0 10px;
     }
@@ -256,7 +269,7 @@
     #sm-pq-closing.sm-closing-open { display: block; }
     #sm-pq-closing.sm-closing-fade { opacity: 1; }
     .sm-pq-closing-text {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Special Elite', serif;
       font-size: 15px; font-weight: 700;
       color: #3ac8b8; line-height: 1.6; margin: 0;
       font-style: italic;
@@ -666,7 +679,7 @@
       cursor: pointer;
       letter-spacing: 0.04em;
       transition: background 0.2s, border-color 0.2s, opacity 0.5s ease;
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Karla', sans-serif;
       opacity: 0;
       pointer-events: none;
     }

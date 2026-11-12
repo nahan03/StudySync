@@ -10,6 +10,13 @@
   --surf: 255,255,255; --on-accent: #0E1A08;
 }
 
+/* the default look: a dark room lit by a warm desk lamp */
+html[data-theme="lamp"] {
+  --soil: #0D0B09; --bark: #17130F; --moss: #2A2017; --canopy: #3A2C1C;
+  --leaf: #B7832F; --sprout: #E9A93B; --lime: #F4C978; --gold: #C9952A; --amber: #F2B84B; --dawn: #F8DC9C;
+  --cream: #F3E9D6; --fog: #9C8B74;
+  --accent-rgb: 233,169,59; --accent-dark-rgb: 183,131,47; --warm-rgb: 242,184,75; --gold-rgb: 201,149,42; --lime-rgb: 244,201,120; --on-accent: #1A1206;
+}
 html[data-theme="ocean"] {
   --soil: #04121A; --bark: #030B10; --moss: #0b2e3a; --canopy: #0f4a55;
   --leaf: #1A9A8A; --sprout: #3AC8B8; --lime: #8FE8DC; --gold: #D8A94A; --amber: #E8C46A; --dawn: #F5DE9C;

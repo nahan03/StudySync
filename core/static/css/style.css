@@ -1,7 +1,7 @@
 /* ==============================
    Global Coffee Theme
 ============================== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Karla:wght@400;500;600;700&display=swap');
 
 * {
   margin: 0;
@@ -15,7 +15,7 @@ html {
 
 body {
   min-height: 100vh;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Karla', sans-serif;
   color: #f6efe8;
   background: radial-gradient(circle at top left, #3c271c, #160f0a 55%, #080402 100%);
 }
@@ -90,7 +90,7 @@ img {
 }
 
 .hero h1 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: clamp(3rem, 6vw, 5rem);
   line-height: 1.02;
   margin-bottom: 1rem;
@@ -286,7 +286,7 @@ img {
 }
 
 .top-navbar .brand {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: 1.4rem;
   font-weight: 700;
   color: #e8c79c;
@@ -314,7 +314,7 @@ img {
 }
 
 .auth-container h2 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: 2rem;
   text-align: center;
   margin-bottom: 1.6rem;
@@ -416,7 +416,7 @@ body.signup-page #gmp-panel {
 /* Account page */
 .account-container { width: min(92vw, 480px); }
 .account-user { text-align: center; color: #e5d2c2; margin: -0.8rem 0 1rem; }
-.account-h { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin: 2rem 0 0.6rem; }
+.account-h { font-family: 'Special Elite', serif; font-size: 1.2rem; margin: 2rem 0 0.6rem; }
 .account-h:first-of-type { margin-top: 1rem; }
 .account-note { font-size: 0.9rem; color: #e5d2c2; line-height: 1.5; }
 .account-link-btn { display: block; text-align: center; margin-top: 1rem; }

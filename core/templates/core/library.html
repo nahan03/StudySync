@@ -5,10 +5,10 @@
 
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/study.css' %}?v=14">
-<link rel="stylesheet" href="{% static 'css/daily_mode.css' %}?v=48">
-<link rel="stylesheet" href="{% static 'css/tools.css' %}?v=4">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/study.css' %}?v=21">
+<link rel="stylesheet" href="{% static 'css/daily_mode.css' %}?v=49">
+<link rel="stylesheet" href="{% static 'css/tools.css' %}?v=5">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 {% endblock %}
 
@@ -23,7 +23,7 @@
     <label for="tool-subject-input">Subject for the coach</label>
     <input id="tool-subject-input" type="text" maxlength="60" placeholder="e.g. Biology" list="tool-subject-list" autocomplete="off">
     <datalist id="tool-subject-list"></datalist>
-    <button type="button" class="dm-btn dm-btn-primary" id="coach-toggle">&#129302; Ask the coach</button>
+    <button type="button" class="dm-btn dm-btn-primary" id="coach-toggle"><svg class="ss-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.7A8 8 0 1 1 21 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/></svg> Ask the coach</button>
   </div>
 </div>
 
@@ -46,8 +46,8 @@
           <form id="reference-form" class="dm-add-resource-form">
             <!-- Type toggle -->
             <div class="dm-res-type-toggle">
-              <button type="button" class="dm-res-type-btn active" data-type="link">🔗 Link</button>
-              <button type="button" class="dm-res-type-btn" data-type="pdf">📄 PDF</button>
+              <button type="button" class="dm-res-type-btn active" data-type="link">Link</button>
+              <button type="button" class="dm-res-type-btn" data-type="pdf">PDF</button>
             </div>
             <input id="ref-title" type="text" placeholder="Title" class="dm-res-input" />
             <!-- Link fields -->
@@ -80,7 +80,7 @@
         <div class="dm-toolbar">
           <span class="dm-note-count" id="daily-note-count">0 resources</span>
           <div class="dm-toolbar-right">
-            <button class="dm-btn dm-btn-ghost dm-search-toggle-btn" id="search-toggle-btn" title="Search resources">🔍</button>
+            <button class="dm-btn dm-btn-ghost dm-search-toggle-btn" id="search-toggle-btn" title="Search resources" aria-label="Search resources"><svg class="ss-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg></button>
           </div>
         </div>
         <div class="dm-res-filter-row" id="res-filter-row">
@@ -167,7 +167,7 @@
       <div id="pdf-ann-popover" class="pdf-ann-popover hidden">
         <span id="pdf-ann-selected-text" class="pdf-ann-selected-text"></span>
         <div class="pdf-ann-popover-actions">
-          <button id="pdf-ann-save" class="pdf-ann-btn pdf-ann-btn-primary">💛 Highlight</button>
+          <button id="pdf-ann-save" class="pdf-ann-btn pdf-ann-btn-primary">Highlight</button>
           <button id="pdf-ann-note" class="pdf-ann-btn">📝 + Note</button>
           <button id="pdf-ann-cancel" class="pdf-ann-btn">✕</button>
         </div>
@@ -226,7 +226,7 @@
 <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
-<script src="{% static 'js/library.js' %}?v=1"></script>
+<script src="{% static 'js/library.js' %}?v=2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 <script type="module">
   import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs';

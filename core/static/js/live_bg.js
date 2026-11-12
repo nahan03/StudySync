@@ -241,159 +241,91 @@
   ====================================================================== */
   const scenes = {};
 
-  /* ---------- enchanted forest ---------- */
+  /* ---------- glow glade (the "forest" background): a hidden glade at night where the mushrooms, the hanging vines
+     and the stream glow. Spores drift up, light flows down the water, and a fox sits on the bank.
+     Painted in a 1600x900 frame scaled to cover the screen; the still parts are drawn once. ---------- */
+  const gH = i => { const v = Math.sin(i * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
+  function gEll(g, x, y, rx, ry, c) { g.fillStyle = c; g.beginPath(); g.ellipse(x, y, Math.max(0.1, rx), Math.max(0.1, ry), 0, 0, TAU); g.fill(); }
+  function gGlow(g, sp, x, y, r, al) { if (al <= 0.01) return; g.globalCompositeOperation = 'lighter'; g.globalAlpha = Math.min(1, al); g.drawImage(sp, x - r, y - r, r * 2, r * 2); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; }
+  function gFern(g, x, y, sz, c) { g.strokeStyle = c; g.lineWidth = 3.5; g.lineCap = 'round'; for (let l = -3; l <= 3; l++) { g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + l * 26 * sz, y - 110 * sz, x + l * 44 * sz, y - (70 + Math.abs(l) * 8) * sz); g.stroke(); } }
   scenes.forest = {
-    post: { bloom: 0.42, grade: 'rgb(120,200,150)', gradeA: 0.14, vignette: 0.45, grain: 0.06 },
+    post: { bloom: 0.5, grade: 'rgb(90,200,190)', gradeA: 0.12, vignette: 0.5, grain: 0.05 },
     init(a) {
-      const { W, H, pal } = a, s = (a.s = {}), LW = W * 1.12;
-      const fog = mix(pal.bg2, pal.accent, 0.38), blk = [3, 6, 5], leafDark = mix(pal.hill[1], blk, 0.35), leafLit = mix(mix(pal.accent, [200, 230, 90], 0.45), pal.warm, 0.15);
-      const bark = d => (d === 0 ? mix(mix(pal.hill[2], fog, 0.5), blk, 0.1) : d === 1 ? mix(mix(pal.hill[1], blk, 0.3), fog, 0.12) : mix(mix(pal.hill[0], blk, 0.55), pal.accent, 0.03));
-      s.sky = a.layer(W, H, (g, w, h) => a.vgrad(g, w, h, [[0, mix(pal.bg1, [6, 18, 26], 0.55)], [0.5, mix(pal.bg2, pal.accent, 0.3)], [1, mix(pal.bg2, pal.warm, 0.24)]]));
-      s.sun = a.glow(mix(pal.warm, [255, 255, 255], 0.35), 256);
-      { const rr_ = rng(77); s.rain = [a.n(110), a.n(90), a.n(46)].map((n, b) => Array.from({ length: n }, () => ({ x: rr_() * W * 1.2 - W * 0.1, y: rr_() * H, v: [520, 760, 1100][b] * (0.85 + rr_() * 0.3), len: [16, 26, 44][b] * (0.8 + rr_() * 0.4) }))); s.rip = []; }
-
-      const leafTuft = (g, x, y, r, n, spread) => { for (let k = 0; k < n; k++) { g.fillStyle = rgb(mix(leafDark, leafLit, r() * 0.4), 0.9); g.save(); g.translate(x + (r() - 0.5) * spread, y + (r() - 0.5) * spread * 0.7); g.rotate(r() * TAU); g.beginPath(); g.ellipse(0, 0, rr(r, 5, 11), rr(r, 2.2, 4), 0, 0, TAU); g.fill(); g.restore(); } };
-      const branch = (g, x, y, ang, len, wd, d, r, c) => {
-        if (d > 3 || len < 16) return;
-        const ex = x + Math.cos(ang) * len, ey = y + Math.sin(ang) * len, cx = x + Math.cos(ang + (r() - 0.5) * 0.5) * len * 0.55, cy = y + Math.sin(ang) * len * 0.5 - len * 0.12;
-        g.strokeStyle = c; g.lineWidth = Math.max(1.2, wd); g.lineCap = 'round'; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(cx, cy, ex, ey); g.stroke();
-        if (d >= 2) leafTuft(g, ex, ey, r, 11, 30);
-        branch(g, ex, ey, ang + rr(r, 0.3, 0.8), len * rr(r, 0.55, 0.75), wd * 0.62, d + 1, r, c); branch(g, ex, ey, ang - rr(r, 0.3, 0.8), len * rr(r, 0.5, 0.7), wd * 0.58, d + 1, r, c);
-      };
-      // tall trunks: wobbling outline from noise, root flare, bark furrows, moss, knots, forking branches
-      const trunkLayer = (seed, depth, count, wMin, wMax, baseY) => a.layer(LW, H, (g, w, h) => {
-        const r = rng(seed), c = bark(depth);
-        for (let i = 0; i < count; i++) {
-          const x0 = (i + 0.15 + r() * 0.7) * w / count, tw = rr(r, wMin, wMax), by = h * baseY + rr(r, -6, 8), ph = r() * 60, lean = (r() - 0.5) * tw * 0.5;
-          const cxAt = y => x0 + (a.n2(y * 0.004 + ph, 2) - 0.5) * tw * 1.3 + lean * (1 - y / h);
-          const wAt = y => { const tt = by - y; return tw * 0.5 * (0.88 + 0.24 * a.n2(y * 0.02 + ph, 5)) * (1 - 0.14 * Math.min(1, tt / h)) * (1 + 1.2 * Math.exp(-tt / (tw * 1.6))); };
-          g.beginPath();
-          for (let y = by; y >= -10; y -= 5) { const cx = cxAt(y) - wAt(y) * (1 + 0.07 * (a.n2(y * 0.11 + ph, 1) - 0.5)); y === by ? g.moveTo(cx, y) : g.lineTo(cx, y); }
-          for (let y = -10; y <= by; y += 5) g.lineTo(cxAt(y) + wAt(y) * (1 + 0.07 * (a.n2(y * 0.11 + ph, 8) - 0.5)), y);
-          g.closePath();
-          const lg = g.createLinearGradient(x0 - tw, 0, x0 + tw, 0);
-          lg.addColorStop(0, rgb(mix(c, blk, 0.4))); lg.addColorStop(0.5, rgb(c)); lg.addColorStop(1, rgb(mix(c, mix(pal.warm, pal.accent, 0.4), depth === 0 ? 0.1 : 0.3)));
-          g.fillStyle = lg; g.fill();
-          if (depth > 0) {
-            g.save(); g.clip();
-            for (let k = 0; k < 9; k++) { const u = (r() - 0.5) * 0.9; g.strokeStyle = `rgba(0,0,0,${0.12 + r() * 0.18})`; g.lineWidth = Math.max(1, tw * 0.03 * (0.5 + r())); g.beginPath(); for (let y = by; y >= 0; y -= 8) { const px = cxAt(y) + u * wAt(y) * 2 + (a.n2(y * 0.05 + k * 3, 4) - 0.5) * tw * 0.07; y === by ? g.moveTo(px, y) : g.lineTo(px, y); } g.stroke(); }
-            const mg = g.createRadialGradient(x0 - tw * 0.25, by - tw * 0.9, 0, x0 - tw * 0.25, by - tw * 0.9, tw * 1.1); mg.addColorStop(0, rgb(pal.accent, depth === 2 ? 0.26 : 0.14)); mg.addColorStop(1, rgb(pal.accent, 0)); g.fillStyle = mg; g.fillRect(x0 - tw * 2, by - tw * 2.6, tw * 4, tw * 3.2);
-            for (let k = 0; k < 3; k++) { g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(cxAt(h * rr(r, 0.3, 0.8)) + (r() - 0.5) * tw * 0.4, h * rr(r, 0.3, 0.85), tw * 0.05, tw * 0.09, 0, 0, TAU); g.fill(); }
-            g.restore();
-          }
-          if (depth >= 1 && r() > 0.25) { const dir = r() > 0.5 ? 1 : -1, y0 = h * rr(r, 0.2, 0.5); branch(g, cxAt(y0), y0, dir > 0 ? -0.35 : Math.PI + 0.35, tw * rr(r, 3.5, 6), tw * 0.2, 0, r, rgb(mix(c, blk, 0.25))); }
+      const { W, H } = a, s = (a.s = {}), k = Math.max(W / 1600, H / 900);
+      s.k = k; s.ox = (W - 1600 * k) / 2; s.oy = (H - 900 * k) / 2;
+      s.back = a.layer(W, H, g => {
+        g.translate(s.ox, s.oy); g.scale(k, k);
+        const r = rng(19), sky = g.createLinearGradient(0, 0, 0, 900);
+        sky.addColorStop(0, '#040a12'); sky.addColorStop(0.5, '#08161c'); sky.addColorStop(1, '#050c0c'); g.fillStyle = sky; g.fillRect(-200, -200, 2000, 1300);
+        /* moonlight falling through the canopy */
+        for (let b = 0; b < 4; b++) { const lg = g.createLinearGradient(0, 0, 0, 900); lg.addColorStop(0, 'rgba(170,220,255,.09)'); lg.addColorStop(1, 'rgba(170,220,255,0)'); g.fillStyle = lg; g.beginPath(); g.moveTo(600 + b * 160, -10); g.lineTo(690 + b * 160, -10); g.lineTo(540 + b * 200, 900); g.lineTo(380 + b * 200, 900); g.fill(); }
+        /* three depths of trunks, the far ones hazy */
+        for (let L = 0; L < 3; L++) for (let i = 0; i < 14; i++) {
+          const x = r() * 1700 - 50, w = 30 + L * 32 + r() * 30, c = ['#0f2028', '#0b171c', '#060e10'][L];
+          g.fillStyle = c; g.beginPath(); g.moveTo(x - w / 2, -10); g.lineTo(x + w / 2, -10); g.lineTo(x + w * 0.62, 900); g.lineTo(x - w * 0.62, 900); g.fill();
+          if (L === 2) { g.strokeStyle = 'rgba(120,200,190,.08)'; g.lineWidth = 2; g.beginPath(); g.moveTo(x - w * 0.42, 0); g.lineTo(x - w * 0.55, 900); g.stroke(); }
+          if (L < 2) { const hz = g.createLinearGradient(0, 400, 0, 700); hz.addColorStop(0, 'rgba(40,90,100,0)'); hz.addColorStop(1, 'rgba(40,90,100,' + (0.18 - L * 0.08) + ')'); g.fillStyle = hz; g.fillRect(x - w, 400, w * 2, 300); }
         }
+        /* canopy overhead */
+        for (let c = 0; c < 26; c++) gEll(g, c * 66 - 20, -10 + r() * 50, 70 + r() * 50, 40 + r() * 30, ['#06100e', '#081412', '#050c0a'][c % 3]);
+        /* the forest floor and the stream */
+        g.fillStyle = '#060e0c'; g.fillRect(-200, 640, 2000, 400);
+        const st = g.createLinearGradient(0, 660, 0, 900); st.addColorStop(0, '#0a3a40'); st.addColorStop(1, '#04262a'); g.fillStyle = st;
+        g.beginPath(); g.moveTo(-200, 770); g.bezierCurveTo(400, 690, 700, 820, 1000, 740); g.bezierCurveTo(1250, 680, 1450, 720, 1800, 690); g.lineTo(1800, 790); g.bezierCurveTo(1450, 800, 1250, 760, 1000, 830); g.bezierCurveTo(700, 900, 400, 790, -200, 880); g.fill();
+        const sg = g.createRadialGradient(800, 780, 0, 800, 780, 700); sg.addColorStop(0, 'rgba(60,200,200,.18)'); sg.addColorStop(1, 'rgba(60,200,200,0)'); g.fillStyle = sg; g.fillRect(100, 300, 1400, 900);
+        /* mossy rocks and roots */
+        for (let i = 0; i < 14; i++) { const kx = r() * 1600, ky = 640 + r() * 40 + (i % 2) * 200, kw = 30 + r() * 40; gEll(g, kx, ky, kw, kw * 0.4, '#1e2c2a'); gEll(g, kx - kw * 0.2, ky - kw * 0.18, kw * 0.6, kw * 0.16, 'rgba(90,140,110,.35)'); }
+        g.strokeStyle = '#0c1714'; g.lineWidth = 10; g.lineCap = 'round'; [[60, 660, 260, 640], [1290, 650, 1480, 630]].forEach(q => { g.beginPath(); g.moveTo(q[0], q[1]); g.quadraticCurveTo((q[0] + q[2]) / 2, q[1] - 30, q[2], q[3]); g.stroke(); });
+        /* ferns at the edges */
+        for (let f = 0; f < 24; f++) { const fx = f < 12 ? r() * 440 - 40 : 1160 + r() * 480, fy = 905 - r() * 130; gFern(g, fx, fy, 0.8 + r() * 0.5, ['#0c1c18', '#0a1814', '#10221c'][f % 3]); }
       });
-      s.far = trunkLayer(21, 0, 22, 7, 15, 0.8); s.mid = trunkLayer(33, 1, 10, 20, 38, 0.92); s.near = trunkLayer(47, 2, 4, 52, 96, 1.04);
-
-      // a canopy made of thousands of individual leaves, lit from the upper right
-      s.canopy = a.layer(LW, H, (g, w, h) => {
-        const r = rng(61);
-        for (let x = -40; x < w + 40; x += 40) { const rad = rr(r, 50, 100), y = rr(r, -40, h * 0.12); g.fillStyle = rgb(mix(leafDark, blk, 0.5)); g.beginPath(); g.arc(x, y, rad, 0, TAU); g.fill(); }
-        const N = Math.round(3600 * a.q);
-        for (let i = 0; i < N; i++) {
-          const x = r() * w, y = Math.pow(r(), 1.55) * h * 0.34 - 14, lit = clamp((1 - y / (h * 0.28)) * (0.25 + 0.75 * x / w) * (0.4 + r() * 0.9), 0, 1);
-          g.fillStyle = rgb(mix(mix(leafDark, blk, 0.2 + r() * 0.3), leafLit, lit * lit), 0.92); g.save(); g.translate(x, y); g.rotate(r() * TAU); g.beginPath(); g.ellipse(0, 0, rr(r, 6, 13), rr(r, 2.6, 5.5), 0, 0, TAU); g.fill(); g.restore();
-        }
-        g.strokeStyle = rgb(mix(pal.hill[1], blk, 0.2)); g.lineCap = 'round';
-        for (let i = 0; i < 30; i++) { const x = r() * w, len = rr(r, h * 0.1, h * 0.32); g.lineWidth = rr(r, 1, 2.4); g.beginPath(); g.moveTo(x, h * 0.1); g.bezierCurveTo(x + rr(r, -16, 16), h * 0.1 + len * 0.4, x + rr(r, -22, 22), h * 0.1 + len * 0.7, x + rr(r, -10, 10), h * 0.1 + len); g.stroke(); for (let k = 0; k < 5; k++) leafTuft(g, x + rr(r, -8, 8), h * 0.1 + len * (0.25 + k * 0.18), r, 1, 8); }
-        g.globalCompositeOperation = 'source-atop'; const vgr = g.createLinearGradient(0, 0, 0, h * 0.36); vgr.addColorStop(0, 'rgba(0,0,0,.4)'); vgr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = vgr; g.fillRect(0, 0, w, h * 0.36); g.globalCompositeOperation = 'source-over';
-      });
-
-      // mossy floor: grass, leaf litter and little glowing mushrooms
-      const mushrooms = [];
-      s.ground = a.layer(W, H, (g, w, h) => {
-        const r = rng(73), gg = g.createLinearGradient(0, h * 0.8, 0, h);
-        gg.addColorStop(0, rgb(mix(pal.hill[1], fog, 0.2), 0)); gg.addColorStop(0.35, rgb(mix(pal.hill[1], blk, 0.35), 0.95)); gg.addColorStop(1, rgb(mix(pal.hill[0], blk, 0.65)));
-        g.fillStyle = gg; g.fillRect(0, h * 0.8, w, h * 0.2);
-        for (let i = 0; i < 380; i++) { g.fillStyle = `rgba(${90 + r() * 60},${60 + r() * 30},${30 + r() * 20},${0.12 + r() * 0.2})`; g.save(); g.translate(r() * w, h * rr(r, 0.9, 1)); g.rotate(r() * TAU); g.beginPath(); g.ellipse(0, 0, rr(r, 3, 8), rr(r, 1.5, 3.5), 0, 0, TAU); g.fill(); g.restore(); }
-        for (let i = 0; i < 620; i++) {
-          const x = r() * w, y = h * rr(r, 0.88, 1), bh = rr(r, 8, 28) * (0.5 + (y / h - 0.88) * 6), lean = (r() - 0.5) * 9;
-          g.fillStyle = rgb(mix(mix(pal.hill[1], pal.accent, rr(r, 0.1, 0.55)), blk, rr(r, 0.1, 0.45)));
-          g.beginPath(); g.moveTo(x - 1.6, y); g.quadraticCurveTo(x + lean * 0.3, y - bh * 0.6, x + lean, y - bh); g.quadraticCurveTo(x + lean * 0.4, y - bh * 0.5, x + 1.6, y); g.fill();
-        }
-        for (let i = 0; i < 9; i++) {
-          const x = w * (0.06 + r() * 0.88), y = h * rr(r, 0.93, 0.985), sc = rr(r, 0.7, 1.5);
-          g.fillStyle = 'rgba(190,200,190,.8)'; g.fillRect(x - 1.5 * sc, y - 9 * sc, 3 * sc, 9 * sc);
-          g.fillStyle = rgb(mix(pal.accent, i % 2 ? [150, 120, 255] : [90, 255, 220], 0.5), 0.95); g.beginPath(); g.ellipse(x, y - 9 * sc, 8 * sc, 5 * sc, 0, Math.PI, TAU); g.fill();
-          mushrooms.push({ x, y: y - 9 * sc, sc, c: i % 2 });
-        }
-      });
-      s.mush = mushrooms;
-      s.mg = [a.glow(mix(pal.accent, [90, 255, 220], 0.55), 64), a.glow([170, 130, 255], 64)];
-      s.mote = a.glow([255, 244, 214], 32); s.spore = [a.glow(mix(pal.accent, [120, 255, 230], 0.5), 32), a.glow([255, 150, 220], 32)]; s.fly = a.glow(mix(pal.warm, [230, 255, 130], 0.5), 32);
-      s.fogTex = a.cloudTex(1024, 190, 2, { shadow: mix(fog, [0, 0, 0], 0.1), lit: mix(fog, [255, 255, 255], 0.18), rim: mix(fog, [255, 255, 255], 0.3) }, { sx: 3.2, sy: 1.5, cut: 0.4, gain: 2.2, alpha: 0.6 });
-      const r = rng(5);
-      s.rays = Array.from({ length: 12 }, (_, i) => ({ x: W * (0.32 + i * 0.06) + r() * 40, w: 16 + r() * 60, ph: r() * 90, len: 0.45 + r() * 0.2 }));
-      s.motes = Array.from({ length: a.n(54) }, () => ({ x: W * (0.2 + r() * 0.8), y: r() * H * 0.9, sz: 5 + r() * 9, ph: r() * 90, bl: 0.6 + r() * 1.6 }));
-      s.spores = Array.from({ length: a.n(34) }, () => ({ x: r() * W, y: H * (0.5 + r() * 0.5), vy: -(8 + r() * 16), ph: r() * 90, sz: 8 + r() * 14, c: r() > 0.7 ? 1 : 0 }));
-      s.flies = Array.from({ length: a.n(26) }, () => ({ x: r() * W, y: H * (0.4 + r() * 0.5), ax: 50 + r() * 90, ay: 24 + r() * 50, sp: 0.5 + r() * 0.8, ph: r() * 90, bl: 0.5 + r() * 1.4, sz: 14 + r() * 14 }));
-      s.leaves = Array.from({ length: a.n(14) }, () => ({ x: r() * W, y: r() * H, v: 14 + r() * 24, ph: r() * 90, rot: r() * TAU, sp: 0.6 + r() * 1.6, sz: 3 + r() * 4, c: r() > 0.5 }));
-      s.foff = [r() * 900, r() * 900, r() * 900];
-      s.ferns = Array.from({ length: 10 }, (_, i) => ({ x: W * (0.03 + i * 0.105 + r() * 0.04), y: H * (0.97 + r() * 0.04), sc: 0.7 + r() * 0.9, ph: r() * 90, n: 7 + Math.floor(r() * 3) }));
+      s.sp = { cyan: a.glow([94, 240, 224], 128), violet: a.glow([154, 138, 255], 128), pink: a.glow([255, 138, 216], 128), mint: a.glow([120, 255, 220], 128) };
+      s.rings = [[260, 700, 'cyan', '#5ef0e0'], [470, 640, 'violet', '#9a8aff'], [1180, 650, 'cyan', '#5ef0e0'], [1400, 720, 'pink', '#ff8ad8'], [120, 820, 'violet', '#9a8aff'], [1520, 840, 'cyan', '#5ef0e0']];
+      s.fox = { look: 0, next: 4 };
+      s.nSpores = a.n(60); s.nFlow = a.n(70); s.nVine = 9;
+      s.warmup = 30;
     },
     draw(a, t, dt) {
-      const { ctx, W, H, s, pal } = a, gust = a.gust(t, 5), wd = a.wind(t, 1);
-      s.foff[0] += (5 + gust * 14) * dt; s.foff[1] += (8 + gust * 18) * dt; s.foff[2] += (6 + gust * 10) * dt;
-      const slide = (k, amp) => -W * 0.06 + (a.fbm(t * 0.03 + k, 2, 2) - 0.45) * W * amp * 6;
-      a.put(s.sky, 0, 0);
-      ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.55; a.sprite(s.sun, W * 0.78, H * 0.04, H * 1.1); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
-      a.put(s.far, slide(0, 0.012), 0);
-      const fogBand = (k, y, h, al) => { const w = s.fogTex.width * (h / s.fogTex.height), x0 = -(s.foff[k] % w); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = al; for (let x = x0; x < W; x += w) ctx.drawImage(s.fogTex, x, y, w + 1, h); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; };
-      fogBand(0, H * 0.5, H * 0.34, 0.5);
-      a.put(s.mid, slide(1.7, 0.02), 0);
-      // dappled light shafts whose strength drifts like light through moving leaves, with dust in the beams
-      ctx.globalCompositeOperation = 'lighter';
-      s.rays.forEach(rw => {
-        const al = 0.02 + 0.1 * Math.pow(a.n2(t * 0.09 + rw.ph, 3), 1.4), x0 = rw.x + (a.n2(t * 0.05 + rw.ph, 7) - 0.5) * 40, len = H * rw.len;
-        const gr = ctx.createLinearGradient(x0, 0, x0 - len, H); gr.addColorStop(0, rgb(mix(pal.warm, [255, 255, 255], 0.5), al * 1.5)); gr.addColorStop(0.6, rgb(pal.warm, al * 0.5)); gr.addColorStop(1, rgb(pal.warm, 0));
-        ctx.fillStyle = gr; ctx.beginPath(); ctx.moveTo(x0, -10); ctx.lineTo(x0 + rw.w, -10); ctx.lineTo(x0 - len + rw.w * 2.2, H); ctx.lineTo(x0 - len, H); ctx.closePath(); ctx.fill();
-      });
-      s.motes.forEach(m => {
-        m.x += (-6 + (a.n2(m.x * 0.006 + t * 0.07, m.y * 0.006) - 0.5) * 22 + wd * 8) * dt; m.y += (4 + (a.n2(m.x * 0.006, m.y * 0.006 + t * 0.07) - 0.5) * 16) * dt;
-        if (m.x < -20 || m.y > H + 10 || m.x > W + 30) { m.x = W * (0.4 + Math.random() * 0.7); m.y = -10; }
-        const b = Math.max(0, Math.sin(t * m.bl + m.ph)); ctx.globalAlpha = 0.15 + 0.6 * b * b * (0.5 + a.n2(t * 0.3 + m.ph, 1)); a.sprite(s.mote, m.x, m.y, m.sz);
-      });
-      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
-      a.put(s.near, slide(3.1, 0.035), 0);
-      fogBand(1, H * 0.68, H * 0.3, 0.55);
-      ctx.save(); const k = wd * 0.004 * (0.5 + gust); ctx.transform(1, 0, k, 1, 0, 0); a.put(s.canopy, -W * 0.06 + (a.fbm(t * 0.04, 4, 2) - 0.45) * W * 0.05, 0); ctx.restore();
-      a.put(s.ground, 0, 0);
-      ctx.lineCap = 'round';
-      s.ferns.forEach(f => {
-        const br = a.wind(t * 1.3, f.ph) * 0.08 * (0.5 + gust);
-        for (let i = 0; i < f.n; i++) {
-          const u = i / (f.n - 1), ang = (-1.25 + u * 2.5) + br + (a.n2(t * 0.8 + f.ph + i, 2) - 0.5) * 0.05, len = (46 + 24 * Math.cos((u - 0.5) * 2.6)) * f.sc;
-          const ex = f.x + Math.sin(ang) * len, ey = f.y - Math.cos(ang) * len, cx = f.x + Math.sin(ang) * len * 0.45, cy = f.y - Math.cos(ang) * len * 0.8;
-          ctx.strokeStyle = rgb(mix(mix(pal.hill[1], pal.accent, 0.35), [2, 8, 4], i % 2 ? 0.25 : 0.05), 0.95); ctx.lineWidth = 2.4 * f.sc;
-          ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.quadraticCurveTo(cx, cy, ex, ey); ctx.stroke();
-          ctx.lineWidth = 1.3 * f.sc; for (let j = 1; j < 7; j++) { const q = j / 7, px = (1 - q) * (1 - q) * f.x + 2 * (1 - q) * q * cx + q * q * ex, py = (1 - q) * (1 - q) * f.y + 2 * (1 - q) * q * cy + q * q * ey, sz = (1 - q * 0.6) * 11 * f.sc; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px - Math.cos(ang) * sz, py - Math.sin(ang) * sz * 0.6); ctx.moveTo(px, py); ctx.lineTo(px + Math.cos(ang) * sz, py + Math.sin(ang) * sz * 0.6); ctx.stroke(); }
+      const ctx = a.ctx, s = a.s, sp = s.sp;
+      a.put(s.back, 0, 0);
+      ctx.save(); ctx.translate(s.ox, s.oy); ctx.scale(s.k, s.k);
+      /* glowing vines hanging from the canopy */
+      for (let v = 0; v < s.nVine; v++) {
+        const vx = 80 + v * 180 + gH(v) * 60, vl = 120 + gH(v * 3) * 220, sw = Math.sin(t * 0.6 + v) * 6;
+        ctx.strokeStyle = 'rgba(40,90,80,.6)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(vx, 0); ctx.quadraticCurveTo(vx + sw, vl * 0.5, vx + sw * 1.5, vl); ctx.stroke();
+        for (let d = 1; d < 8; d++) { const dy = vl * d / 8, da = 0.5 + 0.5 * Math.sin(t * 1.5 + v + d), dx = vx + sw * 1.5 * d / 8; gEll(ctx, dx, dy, 2.4, 2.4, 'rgba(140,255,220,' + (0.5 * da) + ')'); gGlow(ctx, sp.mint, dx, dy, 14, 0.35 * da); }
+      }
+      /* light flowing down the stream */
+      for (let i = 0; i < s.nFlow; i++) { const u = (gH(i) + t * 0.03 * (0.6 + gH(i * 2))) % 1, x = u * 1600, yc = u < 0.62 ? 760 + Math.sin(u * 7) * 30 : 770 - (u - 0.62) * 120, y = yc + (gH(i * 5) - 0.5) * 50, al = 0.4 + 0.4 * Math.sin(t * 2 + i); gEll(ctx, x, y, 6 + gH(i) * 10, 1.5, 'rgba(120,255,240,' + (al * 0.5) + ')'); }
+      /* glowing mushrooms, each ring breathing at its own pace */
+      s.rings.forEach((m, mi) => {
+        const pulse = 0.7 + 0.3 * Math.sin(t * 1.3 + mi * 1.7); gGlow(ctx, sp[m[2]], m[0], m[1] - 10, 120, 0.4 * pulse);
+        for (let q = 0; q < 5; q++) {
+          const mx = m[0] + (q - 2) * 16 + gH(mi * 9 + q) * 6, mh = 14 + gH(mi + q * 3) * 20, cw = 7 + gH(q + mi) * 7;
+          ctx.fillStyle = 'rgba(220,250,250,.8)'; ctx.fillRect(mx - 1.5, m[1] - mh, 3, mh);
+          ctx.fillStyle = m[3]; ctx.globalAlpha = 0.9; ctx.beginPath(); ctx.ellipse(mx, m[1] - mh, cw, cw * 0.55, 0, Math.PI, 0); ctx.fill(); ctx.globalAlpha = 1;
+          gGlow(ctx, sp[m[2]], mx, m[1] - mh, 22, 0.55 * pulse);
         }
       });
-      ctx.globalCompositeOperation = 'lighter';
-      s.mush.forEach((m, i) => { const p = 0.5 + 0.5 * Math.sin(t * 1.1 + i * 1.9) * (0.7 + 0.5 * a.n2(t * 0.4 + i, 2)); ctx.globalAlpha = 0.4 + 0.5 * p; a.sprite(s.mg[m.c], m.x, m.y, 46 * m.sc + p * 10); });
-      s.spores.forEach(p => { p.y += (p.vy + (a.n2(p.x * 0.01 + t * 0.1, p.y * 0.01) - 0.5) * 14) * dt; p.x += (a.n2(p.x * 0.005, p.y * 0.01 + t * 0.12 + p.ph) - 0.5) * 30 * dt; if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; } const b = 0.5 + 0.5 * Math.sin(t * 1.3 + p.ph); ctx.globalAlpha = 0.15 + 0.7 * b; a.sprite(s.spore[p.c], p.x, p.y, p.sz * (0.8 + 0.4 * b)); });
-      s.flies.forEach(f => { const x = f.x + (a.fbm(t * 0.1 * f.sp + f.ph, 1, 2) - 0.47) * 2 * f.ax, y = f.y + (a.fbm(t * 0.09 * f.sp + f.ph, 7, 2) - 0.47) * 2 * f.ay, b = Math.pow(Math.max(0, Math.sin(t * f.bl + f.ph)), 2) * (0.5 + a.n2(t * 0.5 + f.ph, 4)); ctx.globalAlpha = 0.12 + 0.88 * Math.min(1, b); a.sprite(s.fly, x, y, f.sz * (0.7 + 0.5 * b)); });
-      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
-      // rain: three depth bands of slanted streaks, gusting with the wind, plus splashes on the ground
-      { const wetK = 0.62 + 0.38 * a.n2(t * 0.04, 9), slant = 0.16 + wd * 0.05 + gust * 0.12;
-        ctx.save(); ctx.fillStyle = 'rgba(14,30,38,' + (0.12 * wetK) + ')'; ctx.fillRect(0, 0, W, H); ctx.lineCap = 'round';
-        for (let b = 0; b < 3; b++) {
-          ctx.beginPath();
-          s.rain[b].forEach(d => { d.y += d.v * dt; d.x += d.v * slant * dt; if (d.y > H + 20) { d.y = -d.len; d.x = Math.random() * W * 1.2 - W * 0.1; if (b === 2 && Math.random() < 0.5) s.rip.push({ x: d.x, y: H * (0.84 + Math.random() * 0.14), age: 0 }); } if (d.x > W + 30) d.x -= W + 60; ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - d.len * slant, d.y - d.len); });
-          ctx.strokeStyle = 'rgba(200,225,235,' + ([0.16, 0.24, 0.34][b] * wetK) + ')'; ctx.lineWidth = [0.8, 1.2, 1.9][b]; ctx.stroke();
-        }
-        for (let i = s.rip.length - 1; i >= 0; i--) { const q = s.rip[i]; q.age += dt; if (q.age > 0.6) { s.rip.splice(i, 1); continue; } const k = q.age / 0.6; ctx.strokeStyle = 'rgba(200,225,235,' + (0.4 * (1 - k)) + ')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(q.x, q.y, 3 + k * 16, 1 + k * 4.5, 0, 0, TAU); ctx.stroke(); }
-        ctx.restore(); }
-      s.leaves.forEach(l => {
-        l.y += l.v * dt; l.rot += l.sp * dt; if (l.y > H + 10) { l.y = -10; l.x = Math.random() * W; }
-        const x = l.x + (a.n2(l.y * 0.01 + l.ph, t * 0.2) - 0.5) * 90 + wd * 20;
-        ctx.save(); ctx.translate(x, l.y); ctx.rotate(l.rot); ctx.scale(1, 0.55 + 0.45 * Math.cos(t * l.sp + l.ph));
-        ctx.fillStyle = l.c ? rgb(pal.warm, 0.75) : rgb(pal.accent, 0.7); ctx.beginPath(); ctx.ellipse(0, 0, l.sz, l.sz * 0.55, 0, 0, TAU); ctx.fill(); ctx.restore();
-      });
+      /* spores drifting up */
+      for (let i = 0; i < s.nSpores; i++) { const sx = gH(i) * 1600 + Math.sin(t * 0.4 + i) * 20, sy = 900 - ((gH(i * 3) * 900 + t * (10 + gH(i) * 14)) % 900), sa = 0.3 + 0.5 * Math.sin(t + i); if (sa > 0) gEll(ctx, sx, sy, 1.5, 1.5, 'rgba(160,255,230,' + sa + ')'); }
+      /* the fox on the bank: looks around, tail sways */
+      const F = s.fox; F.next -= dt; if (F.next <= 0) { F.look = F.look ? 0 : 1; F.next = 3 + Math.random() * 4; }
+      const tail = Math.sin(t * 1.4) * 0.15;
+      ctx.save(); ctx.translate(330, 720); ctx.fillStyle = '#c86a2a';
+      ctx.save(); ctx.rotate(tail); ctx.beginPath(); ctx.moveTo(20, -6); ctx.quadraticCurveTo(80, -10, 70, -46); ctx.quadraticCurveTo(52, -20, 14, -20); ctx.fill(); gEll(ctx, 68, -40, 8, 7, '#f2e8dc'); ctx.restore();
+      gEll(ctx, 0, -30, 26, 32, '#c86a2a'); gEll(ctx, -6, -24, 12, 20, '#f2e8dc');
+      ctx.save(); ctx.translate(-4, -64); ctx.rotate(F.look ? -0.3 : 0.1); ctx.fillStyle = '#c86a2a';
+      ctx.beginPath(); ctx.moveTo(-18, 0); ctx.lineTo(-14, -26); ctx.lineTo(-4, -10); ctx.lineTo(4, -10); ctx.lineTo(14, -26); ctx.lineTo(18, 0); ctx.quadraticCurveTo(0, 22, -18, 0); ctx.fill();
+      ctx.fillStyle = '#f2e8dc'; ctx.beginPath(); ctx.moveTo(-14, 4); ctx.quadraticCurveTo(0, 22, 14, 4); ctx.quadraticCurveTo(0, 10, -14, 4); ctx.fill();
+      gEll(ctx, 0, 14, 3, 2.4, '#140a06'); gEll(ctx, -7, -2, 2.2, 2.6, '#140a06'); gEll(ctx, 7, -2, 2.2, 2.6, '#140a06');
+      ctx.restore(); ctx.restore();
+      gGlow(ctx, sp.cyan, 330, 700, 120, 0.12);
+      /* low mist over the water */
+      for (let i = 0; i < 5; i++) { const x = ((i * 420 + t * 8) % 2200) - 300, y = 690; const mg = ctx.createRadialGradient(x, y, 0, x, y, 340); mg.addColorStop(0, 'rgba(180,230,230,.07)'); mg.addColorStop(1, 'rgba(180,230,230,0)'); ctx.fillStyle = mg; ctx.save(); ctx.translate(0, y); ctx.scale(1, 0.18); ctx.translate(0, -y); ctx.fillRect(x - 340, y - 340, 680, 680); ctx.restore(); }
+      ctx.restore();
     },
   };
-
   /* ---------- starry night ---------- */
   scenes.stars = {
     init(a) {

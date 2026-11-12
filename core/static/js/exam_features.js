@@ -466,7 +466,7 @@ ssReady(function () {
     badge.textContent = count;
     badge.classList.toggle('hidden', count === 0);
     reviewBtn.classList.toggle('hidden', count === 0);
-    if (count > 0) reviewBtn.textContent = `📅 Review Due (${count})`;
+    if (count > 0) reviewBtn.textContent = `Review Due (${count})`;
   }
 
   function scheduleReview(cardId, verdict) {

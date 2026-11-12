@@ -3,7 +3,7 @@
    Two-step first-visit modal overlay
 ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Karla:wght@400;500;600;700&display=swap');
 
 /* ── BACKDROP ── */
 .ob-backdrop {
@@ -118,7 +118,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -138,7 +138,7 @@
 
 /* ── HEADINGS ── */
 .ob-heading {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: clamp(32px, 6vw, 44px);
   font-weight: 800;
   line-height: 1.05;
@@ -156,7 +156,7 @@
 }
 
 .ob-sub {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 14px;
   color: var(--fog);
   line-height: 1.7;
@@ -169,7 +169,7 @@
   border-radius: 5px;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.12);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 12px;
   color: var(--cream);
 }
@@ -211,7 +211,7 @@
   align-items: center;
   justify-content: center;
   transition: background 0.2s, border-color 0.2s, transform 0.15s;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
 }
 
 .ob-grade-arrow:hover:not(:disabled) {
@@ -232,7 +232,7 @@
 
 .ob-grade-num {
   display: block;
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: 56px;
   font-weight: 800;
   color: var(--dawn);
@@ -242,7 +242,7 @@
 }
 
 .ob-grade-label {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 12px;
   color: var(--fog);
   letter-spacing: 0.08em;
@@ -263,7 +263,7 @@
   border-radius: 12px;
   padding: 12px 16px;
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -280,7 +280,7 @@
 
 /* ── BUTTONS ── */
 .ob-btn {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-weight: 600;
   cursor: pointer;
   border: none;
@@ -335,7 +335,7 @@
 }
 
 .ob-chips-empty {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 13px;
   color: rgba(154, 136, 112, 0.4);
   align-self: center;
@@ -349,7 +349,7 @@
   background: rgba(var(--accent-dark-rgb), 0.18);
   border: 1px solid rgba(var(--accent-dark-rgb), 0.35);
   border-radius: 999px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 13px;
   font-weight: 500;
   color: var(--lime);
@@ -370,7 +370,7 @@
   cursor: pointer;
   padding: 0;
   transition: background 0.15s;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
 }
 
 .ob-chip-remove:hover {
@@ -380,7 +380,7 @@
 
 /* ── ERROR ── */
 .ob-error {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 13px;
   color: #C0825A;
   margin-bottom: 16px;
@@ -398,7 +398,7 @@
   background: rgba(255,255,255,0.05);
   color: var(--fog);
   font-size: 18px;
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-weight: 700;
   cursor: pointer;
   display: flex;

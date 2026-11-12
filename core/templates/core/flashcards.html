@@ -5,11 +5,11 @@
 
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/study.css' %}?v=14">
-<link rel="stylesheet" href="{% static 'css/focus.css' %}?v=19">
-<link rel="stylesheet" href="{% static 'css/daily_mode.css' %}?v=48">
-<link rel="stylesheet" href="{% static 'css/tools.css' %}?v=4">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/study.css' %}?v=21">
+<link rel="stylesheet" href="{% static 'css/focus.css' %}?v=20">
+<link rel="stylesheet" href="{% static 'css/daily_mode.css' %}?v=49">
+<link rel="stylesheet" href="{% static 'css/tools.css' %}?v=5">
 {% endblock %}
 
 {% block content %}
@@ -34,9 +34,9 @@
         <div class="dm-panel-actions">
           <button class="dm-btn dm-btn-ghost" id="fc-add-btn">+ Add Card</button>
           <button class="dm-btn dm-btn-ghost" id="fc-generate-btn">✦ Generate from Files</button>
-          <button class="dm-btn dm-btn-ghost" id="fc-study-btn">📖 Study</button>
-          <button class="dm-btn dm-btn-primary" id="fc-guessit-btn">🎯 Guess It</button>
-          <button class="dm-btn dm-btn-ghost fc-review-due hidden" id="fc-review-due-btn">📅 Review Due</button>
+          <button class="dm-btn dm-btn-ghost" id="fc-study-btn"><svg class="ss-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h14v15H6.5A2.5 2.5 0 0 0 4 20.5 2.5 2.5 0 0 0 6.5 23H20"/><path d="M9 7h7M9 11h5"/></svg> Study</button>
+          <button class="dm-btn dm-btn-primary" id="fc-guessit-btn"><svg class="ss-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg> Guess It</button>
+          <button class="dm-btn dm-btn-ghost fc-review-due hidden" id="fc-review-due-btn"><svg class="ss-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg> Review Due</button>
           <span class="fc-due-badge hidden" id="fc-due-badge">0</span>
         </div>
       </div>
@@ -49,7 +49,7 @@
         </div>
         <div class="dm-upload-zone" id="practice-upload-zone">
           <input type="file" id="practice-file-input" multiple accept=".txt,.md,.pdf,.docx" style="display:none">
-          <span class="dm-upload-icon">📎</span>
+          <span class="dm-upload-icon"><svg class="ss-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.4 3.4 0 0 1 4.8 4.8l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/></svg></span>
           <p class="dm-upload-label">Drop files or <button type="button" class="dm-upload-browse-btn" id="practice-upload-btn">browse</button></p>
           <p class="dm-upload-hint">Supports .txt · .md · .pdf · .docx</p>
         </div>
@@ -80,12 +80,12 @@
         <select id="fc-deck-select" aria-label="Saved decks"><option value="">Saved decks…</option></select>
         <button class="dm-btn dm-btn-ghost dm-btn-sm" id="fc-deck-load" disabled>Load</button>
         <button class="dm-btn dm-btn-ghost dm-btn-sm" id="fc-deck-delete" disabled>Delete</button>
-        <button class="dm-btn dm-btn-ghost dm-btn-sm" id="fc-deck-save">💾 Save as deck</button>
+        <button class="dm-btn dm-btn-ghost dm-btn-sm" id="fc-deck-save">Save as deck</button>
       </div>
 
       <div id="fc-deck-section">
         <div class="dm-fc-empty hidden" id="fc-empty">
-          <span class="dm-empty-icon">🃏</span>
+          <span class="dm-empty-icon"><svg class="ss-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="13" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/></svg></span>
           <p>No flashcards yet. Upload a file and generate, or add one manually.</p>
         </div>
         <div class="dm-fc-grid" id="fc-deck"></div>
@@ -144,9 +144,6 @@
   </div>
 </div>
 
-
-</div>
-
 <!-- Shuffle overlay -->
 <div class="fc-shuffle-overlay hidden" id="fc-shuffle-overlay">
   <p class="fc-shuffle-msg" id="fc-shuffle-msg">Shuffling your deck…</p>
@@ -163,7 +160,7 @@
 <!-- "Ready to Guess?" overlay -->
 <div class="fc-ready-overlay hidden" id="fc-ready-overlay">
   <div class="fc-ready-box">
-    <div class="fc-ready-icon">🎯</div>
+    <div class="fc-ready-icon"><svg class="ss-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg></div>
     <h3 class="fc-ready-title">Ready to test yourself?</h3>
     <p class="fc-ready-sub">You've reviewed all the cards. Want to see how much you actually remember?</p>
     <div class="fc-ready-actions">
@@ -178,7 +175,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/exam_features.js' %}?v=10" defer></script>
+<script src="{% static 'js/exam_features.js' %}?v=11" defer></script>
 <script src="{% static 'js/exam_decks.js' %}?v=2" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 <script type="module">

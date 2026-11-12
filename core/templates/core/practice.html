@@ -5,11 +5,11 @@
 
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/study.css' %}?v=18">
-<link rel="stylesheet" href="{% static 'css/focus.css' %}?v=19">
-<link rel="stylesheet" href="{% static 'css/daily_mode.css' %}?v=48">
-<link rel="stylesheet" href="{% static 'css/tools.css' %}?v=4">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/study.css' %}?v=25">
+<link rel="stylesheet" href="{% static 'css/focus.css' %}?v=20">
+<link rel="stylesheet" href="{% static 'css/daily_mode.css' %}?v=49">
+<link rel="stylesheet" href="{% static 'css/tools.css' %}?v=5">
 {% endblock %}
 
 {% block content %}
@@ -32,7 +32,7 @@
         </div>
         <div class="dm-upload-zone" id="practice-upload-zone">
           <input type="file" id="practice-file-input" multiple accept=".txt,.md,.pdf,.docx" style="display:none">
-          <span class="dm-upload-icon">📎</span>
+          <span class="dm-upload-icon"><svg class="ss-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.4 3.4 0 0 1 4.8 4.8l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/></svg></span>
           <p class="dm-upload-label">Drop files or <button type="button" class="dm-upload-browse-btn" id="practice-upload-btn">browse</button></p>
           <p class="dm-upload-hint">Supports .txt · .md · .pdf · .docx</p>
         </div>
@@ -102,7 +102,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/exam_features.js' %}?v=10" defer></script>
+<script src="{% static 'js/exam_features.js' %}?v=11" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 <script type="module">
   import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs';

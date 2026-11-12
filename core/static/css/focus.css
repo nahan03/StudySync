@@ -1,5 +1,5 @@
 /* focus.css — Exam Mode — Coastal Forest v5 */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Karla:wght@400;500;600;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -28,7 +28,7 @@ body.exam-page {
     radial-gradient(ellipse 35% 25% at 15% 75%,  rgba(42,120,100,0.28) 0%, transparent 55%),
     linear-gradient(180deg, #2e504a 0%, #223a38 50%, #1e3838 100%);
   color: var(--cf-text);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -239,7 +239,7 @@ body.exam-page {
 .em-nav-home:hover { background: rgba(42,120,100,0.12); border-color: rgba(58,200,184,0.35); }
 
 .em-nav-logo {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: 18px;
   font-weight: 800;
   font-style: italic;
@@ -290,7 +290,7 @@ body.exam-page {
 }
 
 .em-heading {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: clamp(28px, 4vw, 46px);
   font-weight: 800;
   color: var(--cf-text);
@@ -320,7 +320,7 @@ body.exam-page {
   cursor: pointer;
   white-space: nowrap;
   transition: background .2s, border-color .2s;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
 }
 .em-change-btn:hover:not(:disabled) {
   background: rgba(212,160,80,0.12);
@@ -389,7 +389,7 @@ body.exam-page {
   gap: 5px;
 }
 .em-ring-time {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Special Elite', serif;
   font-size: 38px;
   font-weight: 800;
   color: var(--cf-text);
@@ -440,7 +440,7 @@ body.exam-page {
   cursor: pointer;
   transition: all .2s;
   border: 1px solid transparent;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
 }
 .em-btn-primary {
   background: linear-gradient(135deg, #1a5a4a, var(--cf-teal));
@@ -495,7 +495,7 @@ body.exam-page {
   border: 1px solid rgba(42,120,100,0.08);
   border-radius: 10px;
   color: var(--cf-text);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   font-size: 14px;
   padding: 10px 14px;
   outline: none;
@@ -596,7 +596,7 @@ body.exam-page {
 }
 .cp-close:hover { color: var(--cf-text); }
 .cp-title {
-  font-family: 'Playfair Display', serif; font-size: 24px;
+  font-family: 'Special Elite', serif; font-size: 24px;
   font-weight: 800; color: var(--cf-text);
   margin: 12px 0 0; padding: 0 28px; line-height: 1.2;
 }
@@ -606,13 +606,13 @@ body.exam-page {
   font-size: 11px; font-weight: 600; text-transform: uppercase;
   letter-spacing: .10em; color: rgba(58,200,184,0.35); margin-bottom: 10px;
 }
-.cp-step-num { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700; color: var(--cf-cyan); }
+.cp-step-num { font-family: 'Special Elite', serif; font-size: 13px; font-weight: 700; color: var(--cf-cyan); }
 .cp-input {
   display: block; width: 100%;
   background: rgba(42,120,100,0.03);
   border: 1px solid rgba(42,120,100,0.08);
   border-radius: 10px; color: var(--cf-text);
-  font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 11px 14px;
+  font-family: 'Karla', sans-serif; font-size: 14px; padding: 11px 14px;
   outline: none; transition: border-color .2s;
 }
 .cp-input::placeholder { color: rgba(58,200,184,0.15); }
@@ -621,7 +621,7 @@ body.exam-page {
 .cp-chip {
   background: rgba(42,120,100,0.04); border: 1px solid rgba(42,120,100,0.08);
   border-radius: 8px; color: rgba(58,200,184,0.5); font-size: 13px; font-weight: 500;
-  padding: 7px 14px; cursor: pointer; transition: all .18s; font-family: 'DM Sans', sans-serif;
+  padding: 7px 14px; cursor: pointer; transition: all .18s; font-family: 'Karla', sans-serif;
 }
 .cp-chip:hover { background: rgba(42,120,100,0.08); border-color: rgba(42,120,100,0.22); color: var(--cf-cyan); }
 .cp-chip-active { background: rgba(42,120,100,0.12); border-color: rgba(58,200,184,0.32); color: var(--cf-cyan); font-weight: 600; }
@@ -637,7 +637,7 @@ body.exam-page {
   display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
   padding: 11px 14px; border-radius: 10px; cursor: pointer; text-align: left;
   background: rgba(42,120,100,0.04); border: 1px solid rgba(42,120,100,0.10);
-  transition: all .18s; font-family: 'DM Sans', sans-serif;
+  transition: all .18s; font-family: 'Karla', sans-serif;
 }
 .cp-preset:hover { background: rgba(42,120,100,0.10); border-color: rgba(58,200,184,0.25); }
 .cp-preset-active {
@@ -660,7 +660,7 @@ body.exam-page {
   background: linear-gradient(135deg, #1a5a4a, var(--cf-teal));
   border: none; border-radius: 12px; color: #d8f0e8; font-size: 15px;
   font-weight: 700; cursor: pointer; transition: opacity .2s, transform .15s;
-  letter-spacing: .02em; font-family: 'DM Sans', sans-serif;
+  letter-spacing: .02em; font-family: 'Karla', sans-serif;
   box-shadow: 0 4px 20px rgba(26,90,74,0.35);
 }
 .cp-start-btn:hover { opacity: .92; transform: translateY(-1px); }
@@ -671,7 +671,7 @@ body.exam-page {
 .st-widget {
   position: fixed; bottom: 76px; right: 24px; z-index: 900;
   display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
 }
 .st-pill {
   display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 6px;
@@ -756,7 +756,7 @@ body.exam-page {
   font-weight: 800;
   letter-spacing: .18em;
   text-transform: uppercase;
-  font-family: 'Poppins', 'DM Sans', sans-serif;
+  font-family: 'Karla', 'Karla', sans-serif;
   opacity: 0.9;
 }
 .exam-page .dm-panel-subtitle { color: var(--cf-muted); }
@@ -1022,7 +1022,7 @@ body.exam-page {
   font-size: clamp(80px, 14vw, 180px) !important;
   font-weight: 800 !important;
   letter-spacing: -0.03em !important;
-  font-family: 'Playfair Display', serif !important;
+  font-family: 'Special Elite', serif !important;
   color: #e0f0e8 !important;
   line-height: 1 !important;
   animation: fs-pulse 4s ease-in-out infinite !important;

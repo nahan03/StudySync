@@ -5,20 +5,20 @@
 
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Nunito:wght@600;800&family=Orbitron:wght@500;700&family=Roboto+Slab:wght@500;700&family=Outfit:wght@200;300;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/study.css' %}?v=19">
-<link rel="stylesheet" href="{% static 'css/tree_overlay.css' %}?v=1">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Karla:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Nunito:wght@600;800&family=Orbitron:wght@500;700&family=Roboto+Slab:wght@500;700&family=Outfit:wght@200;300;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/study.css' %}?v=27">
+<link rel="stylesheet" href="{% static 'css/tree_overlay.css' %}?v=2">
 {% endblock %}
 
 {% block content %}
-<div class="st-root" id="st-root" data-theme="forest" data-bg="theme">
+<div class="st-root" id="st-root" data-theme="lamp" data-bg="lamp">
 <script>
 /* apply the saved look before first paint (study.js takes over afterwards) */
 (function () {
   try {
     var p = JSON.parse(localStorage.getItem('studySyncStudyPrefs') || '{}'), r = document.getElementById('st-root');
-    if (p.theme) r.dataset.theme = p.theme;
-    if (p.bg) r.dataset.bg = p.bg;
+    r.dataset.theme = window.ssTheme ? window.ssTheme(p) : (p.theme || 'lamp');
+    r.dataset.bg = (!p.bgPicked && (!p.bg || p.bg === 'theme')) ? 'lamp' : p.bg;
     if (p.ring) r.dataset.ring = p.ring;
     if (p.font) r.dataset.font = p.font;
     if (p.tsize) r.dataset.tsize = p.tsize;
@@ -31,6 +31,8 @@
 
 <div class="st-bg" aria-hidden="true">
   <div class="bgl bgl-base"></div>
+  <canvas class="st-room" id="st-room" aria-hidden="true" hidden></canvas>
+  <canvas class="st-room" id="st-scene" aria-hidden="true" hidden></canvas>
   <canvas class="bg-canvas" id="bg-canvas" aria-hidden="true"></canvas>
   <div class="bgl bgl-image" id="bgl-image"></div>
   <video class="bg-video" id="bg-video" muted loop playsinline preload="auto" aria-hidden="true"></video>
@@ -46,9 +48,9 @@
       <span class="st-treebtn-ico" aria-hidden="true">&#127793;</span><span class="st-treebtn-pct" id="st-tree-pct">0%</span>
       <span class="st-treebtn-bar" aria-hidden="true"><span id="st-tree-minibar"></span></span>
     </button>
-    <a href="/forest/" class="st-nav-link">&#127794; My forest</a>
+    <a href="/forest/" class="st-nav-link"><svg class="ss-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22v-6M12 2l6 8h-3l4 6H5l4-6H6z"/></svg> My forest</a>
     <button class="st-back st-fs-btn" id="st-fullscreen" type="button" aria-pressed="false" title="Full screen (F)"><span class="st-fs-ico" aria-hidden="true">&#9974;</span> <span class="st-fs-label">Full screen</span></button>
-    <button class="st-back st-appearance-btn" id="st-appearance-open" type="button" aria-haspopup="dialog" aria-controls="st-appearance">&#127912;<span class="st-lbl"> Appearance</span></button>
+    <button class="st-back st-appearance-btn" id="st-appearance-open" type="button" aria-haspopup="dialog" aria-controls="st-appearance"><svg class="ss-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-.9 2-1.9 0-1.4-1.2-1.6-1.2-2.8 0-.8.7-1.3 1.5-1.3H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="11" cy="7" r="1"/><circle cx="16" cy="8.5" r="1"/></svg><span class="st-lbl"> Appearance</span></button>
   </div>
 </nav>
 <div class="st-treepanel" id="st-treepanel" role="dialog" aria-label="Your growing tree" hidden>
@@ -256,7 +258,7 @@
   </div>
 
   <div class="st-field">
-    <span class="st-label">Background</span>
+    <span class="st-label">Background <em>picks the theme that suits it</em></span>
     <div class="st-bgs" id="st-bgs" role="radiogroup" aria-label="Background"></div>
   </div>
 
@@ -312,11 +314,14 @@
      data-start="{% static 'audio/start.mp3' %}"
      data-start1="{% static 'audio/start1.mp3' %}"
      data-wallpapers="{% url 'wallpaper_list' %}"
-     data-livebg="{% static 'js/live_bg.js' %}?v=45"></div>
+     data-livebg="{% static 'js/live_bg.js' %}?v=46"></div>
 
 </div><!-- /.st-root -->
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/study.js' %}?v=17"></script>
+<script src="{% static 'js/study.js' %}?v=25"></script>
+<script src="{% static 'js/study_room.js' %}?v=21"></script>
+<script src="{% static 'js/cafe_views.js' %}?v=1"></script>
+<script src="{% static 'js/tool_scenes.js' %}?v=18"></script>
 {% endblock %}

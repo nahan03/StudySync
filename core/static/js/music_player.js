@@ -224,11 +224,12 @@
     { name: 'Ocean calm', icon: '🌊', vols: { ocean: 60, pad: 24, wind: 10 } },
     { name: 'Night sky', icon: '🌙', vols: { night: 50, pad: 32, fire: 14 } },
   ];
-  const BG_MATCH = { forest: 'Rainy focus', stars: 'Night sky', aurora: 'Deep focus', ocean: 'Ocean calm', campfire: 'Cozy cabin', snow: 'Cozy cabin', city: 'Café study', sakura: 'Forest morning', video: 'Deep focus', image: 'Deep focus' };
+  const BG_MATCH = { cafe: 'Café study', lamp: 'Rainy focus', forest: 'Rainy focus', stars: 'Night sky', aurora: 'Deep focus', ocean: 'Ocean calm', campfire: 'Cozy cabin', snow: 'Cozy cabin', city: 'Café study', sakura: 'Forest morning', video: 'Deep focus', image: 'Deep focus' };
 
   /* ───────────── channels ───────────── */
   const channels = {};
   let audioEl = null;
+  let source = 'mix', ready = false, pending = null;   /* the bar controls whichever you used last; pending = waiting to resume after a reload */
   const curve = v => Math.pow(v / 100, 1.7);
   let state = load();
   function load() {
@@ -258,7 +259,7 @@
     }, 900);
   }
   function applyAll() { SOUNDS.forEach(applyChannel); applyMaster(); }
-  function applyMaster() { if (ctx) master.gain.setTargetAtTime(running ? Math.pow(state.master / 100, 1.5) * 1.5 * duckK : 0, ctx.currentTime, running ? 0.15 : 0.25); }
+  function applyMaster() { if (audioEl) audioEl.volume = Math.min(1, state.master / 100); if (ctx) master.gain.setTargetAtTime(running ? Math.pow(state.master / 100, 1.5) * 1.5 * duckK : 0, ctx.currentTime, running ? 0.15 : 0.25); }
 
   let duckK = 1, duckT = null;
   function duck(ms) { duckK = 0.18; applyMaster(); clearTimeout(duckT); duckT = setTimeout(() => { duckK = 1; applyMaster(); }, ms || 3000); }
@@ -267,10 +268,10 @@
   function play() {
     if (!ensure()) { toast('Your browser does not support the sound mixer.'); return; }
     if (!anyOn()) { setPreset(PRESETS[0], true); return; }
-    running = true; ctx.resume().then(() => { applyAll(); render(); });
-    render();
+    source = 'mix'; running = true; ctx.resume().then(() => { applyAll(); render(); });
+    render(); if (ready) npSave();
   }
-  function pause() { running = false; applyMaster(); setTimeout(() => { if (!running && ctx) ctx.suspend(); }, 450); render(); }
+  function pause() { running = false; applyMaster(); setTimeout(() => { if (!running && ctx) ctx.suspend(); }, 450); render(); if (ready) npSave(); }
   function toggle() { running ? pause() : play(); }
 
   function setVol(id, v) {
@@ -320,18 +321,22 @@
   }
   function render() {
     const on = SOUNDS.filter(s => (state.vols[s.id] || 0) > 0);
-    bar.classList.toggle('playing', running);
-    $('gmp-play').innerHTML = running ? '&#10074;&#10074;' : '&#9654;'; $('gmp-play').setAttribute('aria-label', running ? 'Pause sounds' : 'Play sounds');
-    $('gmp-name').textContent = state.name || (on.length ? 'Custom mix' : 'Study sounds');
+    const fileOn = !!(audioEl && !audioEl.paused), files = source === 'files' && audioEl && audioEl.getAttribute('src'), any = running || fileOn;
+    bar.classList.toggle('playing', any); bar.classList.toggle('files', !!files);
+    $('gmp-play').innerHTML = any ? '&#10074;&#10074;' : '&#9654;'; $('gmp-play').setAttribute('aria-label', any ? 'Pause' : 'Play');
+    $('gmp-bprev').hidden = $('gmp-bnext').hidden = !files;
+    $('gmp-name').textContent = files ? $('gmp-now-title').textContent : (state.name || (on.length ? 'Custom mix' : 'Study sounds'));
     let sub = on.length ? on.slice(0, 3).map(s => s.name).join(' · ') + (on.length > 3 ? ' +' + (on.length - 3) : '') : 'Tap play for a calm mix';
     if (sleepAt) { const m = Math.max(0, Math.ceil((sleepAt - Date.now()) / 60000)); sub += ' · sleep in ' + m + ' min'; }
-    if (typeof audioEl !== 'undefined' && audioEl && !audioEl.paused) sub = '♪ ' + $('gmp-now-title').textContent + (on.length ? ' + sounds' : '');
+    if (files) sub = (fileOn ? 'My music' : 'My music · paused') + (running ? ' + ' + (state.name || 'sounds') : '');
+    else if (fileOn) sub = '♪ ' + $('gmp-now-title').textContent + (on.length ? ' + sounds' : '');
+    if (pending) sub = 'Tap anywhere to keep listening';
     $('gmp-sub').textContent = sub;
     panel.querySelectorAll('[data-preset]').forEach(b => b.classList.toggle('active', PRESETS[+b.dataset.preset].name === state.name));
     panel.querySelectorAll('[data-mix]').forEach(b => b.classList.toggle('active', state.mixes[+b.dataset.mix] && state.mixes[+b.dataset.mix].name === state.name));
     const mt = $('gmp-match'); const bg = document.getElementById('st-root') && document.getElementById('st-root').dataset.bg;
     mt.hidden = !(bg && BG_MATCH[bg]); if (bg && BG_MATCH[bg]) mt.textContent = '✨ Match my wallpaper: ' + BG_MATCH[bg];
-    try { if ('mediaSession' in navigator) { navigator.mediaSession.metadata = new MediaMetadata({ title: state.name || 'Study sounds', artist: 'StudySync' }); navigator.mediaSession.playbackState = running ? 'playing' : 'paused'; } } catch (e) { }
+    try { if ('mediaSession' in navigator) { navigator.mediaSession.metadata = new MediaMetadata(files ? { title: $('gmp-now-title').textContent, artist: 'My music' } : { title: state.name || 'Study sounds', artist: 'StudySync' }); navigator.mediaSession.playbackState = any ? 'playing' : 'paused'; } } catch (e) { }
   }
   function toast(msg) { const t = $('global-toast'); if (t) { t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); } }
 
@@ -342,7 +347,9 @@
   }
 
   buildPanel(); syncSliders(); render();
-  $('gmp-play').addEventListener('click', toggle);
+  $('gmp-play').addEventListener('click', () => barToggle());
+  $('gmp-bprev').addEventListener('click', () => prevTrack());
+  $('gmp-bnext').addEventListener('click', () => nextTrack(1));
   $('gmp-toggle').addEventListener('click', () => openPanel());
   $('gmp-close').addEventListener('click', () => openPanel(false));
   $('gmp-left').addEventListener('click', () => openPanel());
@@ -371,7 +378,13 @@
   $('gmp-sleep').addEventListener('change', e => setSleep(+e.target.value));
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.classList.contains('hidden')) openPanel(false); });
   document.addEventListener('click', e => { if (!panel.classList.contains('hidden') && !panel.contains(e.target) && !bar.contains(e.target)) openPanel(false); });
-  if ('mediaSession' in navigator) { try { navigator.mediaSession.setActionHandler('play', play); navigator.mediaSession.setActionHandler('pause', pause); } catch (e) { } }
+  /* media keys and the lock screen follow the bar */
+  if ('mediaSession' in navigator) { try {
+    navigator.mediaSession.setActionHandler('play', () => { if (!(running || (audioEl && !audioEl.paused))) barToggle(); });
+    navigator.mediaSession.setActionHandler('pause', () => { if (running || (audioEl && !audioEl.paused)) barToggle(); });
+    navigator.mediaSession.setActionHandler('nexttrack', () => { if (source === 'files') nextTrack(1); });
+    navigator.mediaSession.setActionHandler('previoustrack', () => { if (source === 'files') prevTrack(); });
+  } catch (e) { } }
 
   /* ───────────── tabs ───────────── */
   function showTab(name) {
@@ -514,13 +527,15 @@
   drop.addEventListener('drop', e => { if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
   $('gmp-lplay').addEventListener('click', () => { if (cur < 0) loadTrack(0); else if (audioEl.paused) audioEl.play().catch(() => { }); else audioEl.pause(); });
   $('gmp-next').addEventListener('click', () => nextTrack(1));
-  $('gmp-prev').addEventListener('click', () => { if (audioEl.currentTime > 4) audioEl.currentTime = 0; else nextTrack(-1); });
+  function prevTrack() { if (audioEl.currentTime > 4) audioEl.currentTime = 0; else nextTrack(-1); }
+  $('gmp-prev').addEventListener('click', prevTrack);
   $('gmp-shuffle').addEventListener('click', e => { shuffle = !shuffle; e.currentTarget.setAttribute('aria-pressed', String(shuffle)); e.currentTarget.classList.toggle('on', shuffle); });
   $('gmp-repeat').addEventListener('click', e => { repeat = !repeat; e.currentTarget.setAttribute('aria-pressed', String(repeat)); e.currentTarget.classList.toggle('on', repeat); });
   $('gmp-seek').addEventListener('input', e => { if (audioEl.duration) audioEl.currentTime = audioEl.duration * (+e.target.value / 1000); });
   audioEl.addEventListener('timeupdate', () => { if (audioEl.duration) { $('gmp-seek').value = Math.round(audioEl.currentTime / audioEl.duration * 1000); $('gmp-seek').style.setProperty('--v', ($('gmp-seek').value / 10) + '%'); } $('gmp-t-cur').textContent = fmt(audioEl.currentTime); $('gmp-t-dur').textContent = fmt(audioEl.duration); });
-  audioEl.addEventListener('play', () => { $('gmp-lplay').innerHTML = '&#10074;&#10074;'; renderTracks(); render(); });
-  audioEl.addEventListener('pause', () => { $('gmp-lplay').innerHTML = '&#9654;'; renderTracks(); render(); });
+  audioEl.addEventListener('play', () => { source = 'files'; $('gmp-lplay').innerHTML = '&#10074;&#10074;'; renderTracks(); render(); npSave(); });
+  audioEl.addEventListener('pause', () => { $('gmp-lplay').innerHTML = '&#9654;'; renderTracks(); render(); npSave(); });
+  let npT = 0; audioEl.addEventListener('timeupdate', () => { if (Date.now() - npT > 2000) { npT = Date.now(); npSave(); } });
   audioEl.addEventListener('ended', () => { if (repeat && !shuffle) loadTrack(cur); else if (cur < tracks.length - 1 || shuffle || repeat) nextTrack(1); });
   $('gmp-tracks').addEventListener('click', e => {
     const d = e.target.closest('[data-track-del]');
@@ -534,10 +549,55 @@
     const b = e.target.closest('[data-track]'); if (b) loadTrack(+b.dataset.track);
   });
   $('gmp-clear-files').addEventListener('click', () => { audioEl.pause(); audioEl.removeAttribute('src'); Object.values(urls).forEach(u => URL.revokeObjectURL(u)); urls = {}; tracks = []; cur = -1; dbClear(); $('gmp-now-title').textContent = 'Nothing playing'; renderTracks(); });
-  dbAll().then(list => { tracks = list.map(r => ({ id: r.id, name: r.name, blob: r.blob })); if (tracks.length) renderTracks(); });
+  dbAll().then(list => { tracks = list.map(r => ({ id: r.id, name: r.name, blob: r.blob })); if (tracks.length) renderTracks(); restore(); });
+
+  /* ───────────── the bar: one play button for whatever you're listening to ───────────── */
+  let paused = null;   /* what the bar paused, so it can bring back the same thing */
+  function barToggle() {
+    if (pending) { resumePending(); return; }
+    const fileOn = !audioEl.paused;
+    if (running || fileOn) { paused = { mix: running, file: fileOn }; if (fileOn) audioEl.pause(); if (running) pause(); return; }
+    const want = paused || { mix: source === 'mix', file: source === 'files' }; paused = null;
+    if (want.file && tracks.length) { if (cur < 0) loadTrack(0); else audioEl.play().catch(() => { }); }
+    if (want.mix || !(want.file && tracks.length)) play();
+  }
+
+  /* ───────────── what's playing survives a reload ───────────── */
+  const NP_KEY = 'studySyncNowPlaying';
+  /* after a reload, browsers block sound until the first tap, so playback waits in `pending` */
+  function npSave() {
+    try { localStorage.setItem(NP_KEY, JSON.stringify({ source, mix: running, file: !audioEl.paused, track: cur >= 0 && tracks[cur] ? tracks[cur].id : null, time: audioEl.currentTime || 0 })); } catch (e) { }
+  }
+  window.addEventListener('pagehide', () => { if (!pending) npSave(); });
+  function restore() {
+    let np = null; try { np = JSON.parse(localStorage.getItem(NP_KEY) || 'null'); } catch (e) { }
+    if (!np) { ready = true; render(); return; }
+    source = np.source === 'files' ? 'files' : 'mix';
+    const i = np.track != null ? tracks.findIndex(t => t.id === np.track) : -1;
+    if (i >= 0) {
+      loadTrack(i, true);
+      audioEl.addEventListener('loadedmetadata', () => { if (np.time > 0) audioEl.currentTime = Math.min(np.time, Math.max(0, (audioEl.duration || np.time + 1) - 1)); }, { once: true });
+    }
+    const wantFile = !!np.file && i >= 0, wantMix = !!np.mix;
+    ready = true;
+    if (!wantFile && !wantMix) { render(); return; }
+    pending = { file: wantFile, mix: wantMix };
+    if (wantFile && !wantMix) audioEl.play().then(() => { pending = null; render(); }, () => render());   /* sometimes allowed straight away */
+    render();
+    const onFirst = e => { if (bar.contains(e.target) || panel.contains(e.target)) return; resumePending(); };
+    document.addEventListener('pointerdown', onFirst, true); document.addEventListener('keydown', onFirst, true);
+    pending.off = () => { document.removeEventListener('pointerdown', onFirst, true); document.removeEventListener('keydown', onFirst, true); };
+  }
+  function resumePending() {
+    const p = pending; if (!p) return; pending = null; if (p.off) p.off();
+    if (p.file && audioEl.paused) audioEl.play().catch(() => { });
+    if (p.mix) play();
+    render();
+  }
 
   window.SSMixer = {
     play, pause, toggle, duck, isPlaying: () => running,
+    preset(name) { const p = PRESETS.find(x => x.name === name); if (p) setPreset(p, true); },   /* start a named mix, e.g. 'Café study' */
     level() { if (!analyser) return 0; const d = new Uint8Array(analyser.fftSize); analyser.getByteTimeDomainData(d); let s = 0; for (let i = 0; i < d.length; i++) { const v = (d[i] - 128) / 128; s += v * v; } return Math.sqrt(s / d.length); },
     set(id, v) { setVol(id, v); syncSliders(); }, sounds: SOUNDS.map(s => s.id),
   };

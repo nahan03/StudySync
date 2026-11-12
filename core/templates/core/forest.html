@@ -5,7 +5,7 @@
 
 {% block content %}
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Karla:wght@400;500;600;700&family=Caveat:wght@700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -27,7 +27,7 @@
 body.forest-page {
   background: var(--soil);
   color: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Karla', sans-serif;
   min-height: 100vh;
 }
 
@@ -40,18 +40,18 @@ body.forest-page {
   border-bottom: none;
 }
 .ss-nav-logo {
-  font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 800;
+  font-family: 'Special Elite', serif; font-size: 20px; font-weight: 800;
   color: var(--cream); text-decoration: none; letter-spacing: -0.02em; font-style: italic;
 }
 .ss-nav-logo span { color: var(--sprout); font-style: normal; }
 .ss-nav-right { display: flex; align-items: center; gap: 14px; }
-.ss-nav-greeting { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--fog); font-weight: 500; }
+.ss-nav-greeting { font-family: 'Karla', sans-serif; font-size: 13px; color: var(--fog); font-weight: 500; }
 .ss-nav-greeting strong { color: var(--cream); font-weight: 700; }
 .ss-nav-avatar {
   width: 34px; height: 34px; border-radius: 50%;
   background: linear-gradient(135deg, var(--leaf), var(--sprout));
   display: flex; align-items: center; justify-content: center;
-  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+  font-family: 'Karla', sans-serif; font-size: 13px; font-weight: 700;
   color: #0E1A08; flex-shrink: 0;
   border: 1.5px solid rgba(var(--accent-rgb),0.4);
   box-shadow: 0 0 14px rgba(var(--accent-rgb),0.2);
@@ -61,7 +61,7 @@ body.forest-page {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 16px; border-radius: 999px; background: transparent;
   border: 1px solid rgba(var(--accent-rgb),0.2); color: var(--fog);
-  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+  font-family: 'Karla', sans-serif; font-size: 12px; font-weight: 600;
   cursor: pointer; text-decoration: none;
   transition: border-color .2s, color .2s, background .2s;
 }
@@ -92,7 +92,7 @@ body.forest-page {
 .ss-av-item {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 15px; width: 100%; border: none; background: none;
-  color: var(--cream); font-family: 'DM Sans', sans-serif;
+  color: var(--cream); font-family: 'Karla', sans-serif;
   font-size: 13.5px; font-weight: 500; cursor: pointer;
   text-align: left; text-decoration: none;
   transition: background 0.12s;
@@ -122,72 +122,9 @@ body.forest-page {
 /* ── PAGE LAYOUT ── */
 .forest-wrap { max-width: 1100px; margin: 0 auto; padding: 90px 24px 60px; }
 
-/* ── HEADER ── */
-.forest-header { margin-bottom: 48px; }
-.forest-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 11px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase;
-  color: var(--sprout); margin-bottom: 14px; opacity: .85;
-}
-.forest-eyebrow::before { content:''; display:block; width:24px; height:2px; background:var(--sprout); border-radius:2px; }
-.forest-title {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(36px, 5vw, 56px); font-weight: 800; line-height: 1.05;
-  color: var(--cream); margin-bottom: 10px; letter-spacing: -0.02em;
-}
-.forest-title em {
-  font-style: italic;
-  background: linear-gradient(100deg, var(--sprout), var(--lime), var(--amber));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.forest-sub { font-size: 15px; color: var(--fog); line-height: 1.7; max-width: 480px; }
-
-/* ── STATS ROW ── */
-.stats-row {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 48px;
-}
-.stat-card {
-  background: color-mix(in srgb, var(--bark) 90%, transparent); border: 1px solid rgba(255,255,255,.07);
-  border-radius: 16px; padding: 22px 24px; position: relative; overflow: hidden;
-  transition: border-color .2s, transform .2s;
-}
-.stat-card:hover { border-color: rgba(var(--accent-rgb),.25); transform: translateY(-2px); }
-.stat-card-icon { font-size: 24px; margin-bottom: 12px; display: block; }
-.stat-card-num {
-  font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 800;
-  color: var(--sprout); line-height: 1; margin-bottom: 4px;
-}
-.stat-card-label { font-size: 12px; color: var(--fog); letter-spacing: .04em; }
-.stat-card-glow {
-  position: absolute; bottom: -20px; right: -20px;
-  width: 80px; height: 80px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(var(--accent-rgb),.12), transparent 70%);
-}
-
-/* ── PROGRESS TO NEXT TREE ── */
-.next-tree-bar {
-  background: color-mix(in srgb, var(--bark) 90%, transparent); border: 1px solid rgba(255,255,255,.07);
-  border-radius: 16px; padding: 24px 28px; margin-bottom: 48px;
-  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
-}
-.next-tree-left { flex: 1; min-width: 200px; }
-.next-tree-label { font-size: 13px; color: var(--fog); margin-bottom: 6px; }
-.next-tree-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--cream); margin-bottom: 14px; }
-.progress-track {
-  height: 8px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden;
-}
-.progress-fill {
-  height: 100%; border-radius: 999px;
-  background: linear-gradient(90deg, var(--leaf), var(--sprout), var(--lime));
-  transition: width .8s cubic-bezier(.4,0,.2,1);
-}
-.next-tree-sessions { font-size: 12px; color: var(--fog); margin-top: 8px; }
-.next-tree-sessions strong { color: var(--sprout); }
-.next-tree-emoji { font-size: 48px; flex-shrink: 0; }
-
 /* ── FOREST GRID ── */
 .forest-section-title {
-  font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
+  font-family: 'Special Elite', serif; font-size: 22px; font-weight: 700;
   color: var(--cream); margin-bottom: 20px;
 }
 
@@ -217,7 +154,7 @@ body.forest-page {
 
 .tree-emoji { font-size: 44px; display: block; margin-bottom: 10px; line-height: 1; }
 .tree-subject {
-  font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600;
+  font-family: 'Karla', sans-serif; font-size: 11px; font-weight: 600;
   color: var(--sprout); letter-spacing: .04em; text-transform: uppercase;
   margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -235,7 +172,7 @@ body.forest-page {
 }
 .forest-empty-icon { font-size: 56px; display: block; margin-bottom: 16px; }
 .forest-empty-title {
-  font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
+  font-family: 'Special Elite', serif; font-size: 22px; font-weight: 700;
   color: var(--cream); margin-bottom: 8px;
 }
 .forest-empty-sub { font-size: 14px; color: var(--fog); line-height: 1.7; max-width: 340px; margin: 0 auto 24px; }
@@ -243,7 +180,7 @@ body.forest-page {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 14px 28px; border-radius: 999px;
   background: linear-gradient(135deg, var(--leaf), var(--sprout));
-  color: #0E1A08; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px;
+  color: #0E1A08; font-family: 'Karla', sans-serif; font-weight: 700; font-size: 14px;
   text-decoration: none; border: none; cursor: pointer;
   transition: transform .2s, box-shadow .2s;
 }
@@ -261,149 +198,48 @@ body.forest-page {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 700px) {
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
   .forest-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
   .ss-nav { padding: 0 16px; }
   .ss-nav-greeting { display: none; }
 }
-@media (max-width: 420px) {
-  .stats-row { grid-template-columns: 1fr 1fr; }
-}
+
 /* ══════════════════════════════════════════
-   FOREST SCENE
+   THE SKY HERO: the floating island fills the top of the page
 ══════════════════════════════════════════ */
-.fscene {
-  --u: 1;
-  position: relative; height: 400px; margin: 0 0 40px;
-  border-radius: 24px; overflow: hidden; isolation: isolate;
-  border: 1.5px solid rgba(255,255,255,.08);
-  box-shadow: 0 18px 60px rgba(0,0,0,.45);
-  background: linear-gradient(180deg, var(--sky-top), var(--sky-bot));
-  user-select: none;
-}
-.fscene[data-time="day"]   { --sky-top:#4FA3E0; --sky-bot:#D2EBF7; --h3:#7DB57A; --h2:#5A9C58; --h1:#3F8644; --orb:#FFE27A; --glow:255,226,122; }
-.fscene[data-time="dusk"]  { --sky-top:#2E2A5E; --sky-bot:#F29066; --h3:#6B5A86; --h2:#4A4A62; --h1:#2F4234; --orb:#FFB070; --glow:255,176,112; }
-.fscene[data-time="night"] { --sky-top:#040A1C; --sky-bot:#15284C; --h3:#17304A; --h2:#112638; --h1:#0C1C24; --orb:#E9EFFA; --glow:200,215,255; }
-
-.fs-sky { position: absolute; inset: 0; z-index: 0; }
-.fs-orb {
-  position: absolute; top: 12%; right: 15%; width: 62px; height: 62px; border-radius: 50%;
-  background: var(--orb); box-shadow: 0 0 70px 24px rgba(var(--glow), .45);
-}
-.fscene[data-time="dusk"] .fs-orb  { top: 40%; right: 20%; }
-.fscene[data-time="night"] .fs-orb { box-shadow: 0 0 50px 14px rgba(var(--glow), .3), inset -14px -6px 0 0 rgba(120,135,170,.28); }
-
-.fs-stars { position: absolute; inset: 0; opacity: 0; transition: opacity .6s; }
-.fscene[data-time="night"] .fs-stars { opacity: 1; }
-.fs-stars i { position: absolute; border-radius: 50%; background: #fff; animation: fs-twinkle var(--tw, 3s) ease-in-out var(--td, 0s) infinite; }
-@keyframes fs-twinkle { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
-
-.fs-cloud { position: absolute; left: -160px; height: 24px; border-radius: 30px; background: rgba(255,255,255,.8); opacity: 0; animation: fs-cloud 90s linear infinite; }
-.fs-cloud::before, .fs-cloud::after { content: ''; position: absolute; background: inherit; border-radius: 50%; }
-.fs-cloud::before { width: 42%; height: 150%; left: 14%; top: -70%; }
-.fs-cloud::after  { width: 32%; height: 120%; left: 50%; top: -50%; }
-.fs-cloud.c1 { top: 14%; width: 110px; }
-.fs-cloud.c2 { top: 28%; width: 78px; animation-duration: 120s; animation-delay: -60s; }
-.fs-cloud.c3 { top: 7%;  width: 140px; animation-duration: 150s; animation-delay: -100s; }
-.fscene[data-time="day"]  .fs-cloud { opacity: .9; }
-.fscene[data-time="dusk"] .fs-cloud { opacity: .32; background: #FFC0A0; }
-@keyframes fs-cloud { to { transform: translateX(calc(100vw + 340px)); } }
-
-.fs-hills { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
-.fs-hills .h3 { fill: var(--h3); } .fs-hills .h2 { fill: var(--h2); } .fs-hills .h1 { fill: var(--h1); }
-
-.fs-trees { position: absolute; inset: 0; z-index: 2; }
-.ft {
-  position: absolute; bottom: var(--b);
-  width: calc(100px * var(--s) * var(--u)); height: calc(140px * var(--s) * var(--u));
-  margin-left: calc(-50px * var(--s) * var(--u));
-  cursor: pointer; outline: none; transform-origin: 50% 100%;
-}
-.ft::after {
-  content: ''; position: absolute; left: 6%; right: 6%; bottom: -2px; height: 7%;
-  border-radius: 50%; background: rgba(0,0,0,.32); filter: blur(3px); z-index: -1;
-}
-.ft canvas, .ft svg {
-  display: block; width: 100%; height: 100%; overflow: visible; transform-origin: 50% 100%;
-  animation: ft-sway var(--sw, 6s) ease-in-out var(--sd, 0s) infinite alternate;
-  filter: drop-shadow(0 4px 5px rgba(0,0,0,.22));
-  transition: filter .5s;
-}
-.ft[data-row="0"] svg { filter: saturate(.8) brightness(.9) drop-shadow(0 3px 4px rgba(0,0,0,.18)); }
-.fscene[data-time="dusk"]  .ft canvas, .fscene[data-time="dusk"]  .ft svg { filter: brightness(.78) saturate(.9) drop-shadow(0 4px 5px rgba(0,0,0,.3)); }
-.fscene[data-time="night"] .ft canvas, .fscene[data-time="night"] .ft svg { filter: brightness(.55) saturate(.75) drop-shadow(0 4px 5px rgba(0,0,0,.4)); }
-.fscene[data-time="night"] .ft svg.t-cyber { filter: brightness(1.1) drop-shadow(0 0 9px rgba(24,196,196,.85)); }
-.ft:hover svg, .ft:focus-visible svg { animation-play-state: paused; }
-.ft:focus-visible { outline: 2px solid rgba(255,255,255,.75); outline-offset: 4px; border-radius: 10px; }
-@keyframes ft-sway { from { transform: rotate(-1.4deg); } to { transform: rotate(1.4deg); } }
-
-.ft.is-new { animation: ft-grow 1.7s cubic-bezier(.34,1.56,.64,1) var(--gd, 0s) both; }
-@keyframes ft-grow {
-  0%   { transform: scale(0);   opacity: 0; filter: brightness(2.4); }
-  55%  { opacity: 1; }
-  100% { transform: scale(1);   opacity: 1; filter: none; }
-}
-.ft-next::before {
-  content: ''; position: absolute; left: -35%; right: -35%; bottom: -7px; height: 16px;
-  border: 1.5px dashed rgba(255,255,255,.5); border-radius: 50%;
-}
-
-.fs-fx { position: absolute; inset: 0; z-index: 90; pointer-events: none; }
-.fs-mote { position: absolute; border-radius: 50%; width: 3px; height: 3px; animation: fs-drift var(--dur, 8s) ease-in-out var(--del, 0s) infinite; }
-.fs-mote-pollen { background: rgba(255,255,225,.85); box-shadow: 0 0 5px rgba(255,255,225,.7); }
-.fs-mote-ember  { background: #FFC27A; box-shadow: 0 0 7px 1px rgba(255,170,90,.8); }
-.fs-mote-fly {
-  width: 4px; height: 4px; background: #E4FF8A; box-shadow: 0 0 9px 3px rgba(210,255,120,.8);
-  animation: fs-drift var(--dur, 8s) ease-in-out var(--del, 0s) infinite, fs-blink 3.4s ease-in-out var(--del, 0s) infinite;
-}
-@keyframes fs-drift { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(var(--dx, 30px), var(--dy, -30px)); } }
-@keyframes fs-blink { 0%, 100% { opacity: .1; } 50% { opacity: 1; } }
-
-.fs-ring {
-  position: absolute; z-index: 95; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%;
-  border: 2px solid rgba(var(--lime-rgb),.9); box-shadow: 0 0 16px rgba(var(--lime-rgb),.6); pointer-events: none;
-  animation: fs-ring 1.2s ease-out forwards;
-}
-@keyframes fs-ring { from { transform: scale(.3); opacity: .95; } to { transform: scale(5.5); opacity: 0; } }
-.fs-spark { position: absolute; z-index: 95; width: 5px; height: 5px; border-radius: 50%; background: #F6E27A; box-shadow: 0 0 8px #F6E27A; pointer-events: none; }
-
+html body.forest-page { background: #f2d2a8 !important; color: #2a1a2a; }
+.isl-hero { position: relative; height: clamp(560px, 100svh, 940px); overflow: hidden; user-select: none; }
+.isl-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.isl-head { position: absolute; left: 0; right: 0; top: clamp(76px, 11vh, 112px); z-index: 2; padding: 0 16px; text-align: center; pointer-events: none; }
+html body.forest-page .isl-title { font-family: 'Special Elite', monospace; font-weight: 700; font-size: clamp(38px, 5vw, 58px); line-height: 1.05; color: #2a1a2a; margin: 0 0 12px; letter-spacing: 0; }
+.isl-stats { font: 700 clamp(13px, 1.25vw, 17px) 'Karla', sans-serif; color: rgba(42,26,42,.86); }
+.isl-stats b { font-weight: 800; }
+.isl-stats i { font-style: normal; margin: 0 .55em; opacity: .55; }
+.isl-sub { margin-top: 8px; font: 600 clamp(12px, 1.1vw, 15px) 'Karla', sans-serif; color: rgba(42,26,42,.78); }
 .fs-tip {
-  position: absolute; z-index: 100; pointer-events: none; display: flex; flex-direction: column; gap: 2px;
-  padding: 8px 12px; border-radius: 12px; white-space: nowrap;
-  background: color-mix(in srgb, var(--bark) 93%, transparent); border: 1px solid rgba(var(--accent-rgb),.35); box-shadow: 0 8px 24px rgba(0,0,0,.5);
+  position: absolute; z-index: 5; pointer-events: none; display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 12px; border-radius: 8px; white-space: nowrap; background: rgba(30,20,30,.9); box-shadow: 0 8px 24px rgba(0,0,0,.3);
 }
 .fs-tip[hidden] { display: none; }
-.fs-tip strong { font-size: 12px; color: var(--lime); }
-.fs-tip span { font-size: 11px; color: var(--fog); }
+.fs-tip strong { font-size: 13px; color: #e8b460; }
+.fs-tip span { font-size: 12px; color: #f1e6d2; }
 
-.fs-sky-btn {
-  position: absolute; top: 12px; right: 12px; z-index: 60; width: 38px; height: 38px; border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.28); backdrop-filter: blur(6px);
-  color: #fff; font-size: 17px; line-height: 1; cursor: pointer; transition: transform .2s, background .2s;
-}
-.fs-sky-btn:hover { transform: scale(1.1); background: rgba(0,0,0,.42); }
-.fs-caption {
-  position: absolute; left: 14px; bottom: 12px; z-index: 60; padding: 5px 13px; border-radius: 999px;
-  font-size: 12px; font-weight: 600; color: rgba(255,255,255,.9);
-  background: rgba(0,0,0,.38); backdrop-filter: blur(6px);
-}
+/* the list of your trees under the sky */
+.forest-wrap { padding-top: 28px; }
+html body.forest-page .forest-section-title { color: #2a1a2a; }
+html body.forest-page .tree-card { background: rgba(255,250,240,.62); border: 1.5px solid rgba(90,60,40,.12); }
+html body.forest-page .tree-card:hover { border-color: rgba(90,60,40,.3); box-shadow: 0 12px 30px rgba(90,50,30,.18); }
+html body.forest-page .tree-subject { color: #3e6a2a; }
+html body.forest-page .tree-stage, html body.forest-page .tree-num { color: #6a5040; }
+html body.forest-page .legend-item { background: rgba(255,250,240,.62); border: 1px solid rgba(90,60,40,.12); color: #4a3828; }
+html body.forest-page .forest-empty { background: rgba(255,250,240,.55); border: 1px dashed rgba(90,60,40,.25); }
+html body.forest-page .forest-empty-title { color: #2a1a2a; }
+html body.forest-page .forest-empty-sub { color: #6a5040; }
 
 /* artwork in the collection grid + legend */
 .tree-art { display: block; width: 62px; height: 87px; margin: 0 auto 10px; }
-.tree-art svg, .tree-art canvas { display: block; width: 100%; height: 100%; overflow: visible; }
+.tree-art canvas { display: block; width: 100%; height: 100%; }
 .legend-tree { display: inline-block; width: 17px; height: 24px; }
-.legend-tree svg, .legend-tree canvas { display: block; width: 100%; height: 100%; overflow: visible; }
-
-@media (max-width: 700px) {
-  .fscene { height: 330px; --u: .78; border-radius: 18px; }
-  .fs-orb { width: 46px; height: 46px; }
-}
-@media (max-width: 420px) { .fscene { height: 290px; } }
-
-@media (prefers-reduced-motion: reduce) {
-  .ft canvas, .ft svg, .ft.is-new, .fs-cloud, .fs-mote, .fs-stars i { animation: none !important; }
-  .fs-cloud { left: 20%; }
-}
+.legend-tree canvas { display: block; width: 100%; height: 100%; }
 </style>
 
 <!-- NAVBAR -->
@@ -459,76 +295,17 @@ body.forest-page {
   </div>
 </nav>
 
+<section class="isl-hero" id="fscene" role="group" aria-label="Your forest: every tree you grew, on a floating island">
+  <canvas class="isl-canvas" id="islCanvas"></canvas>
+  <div class="isl-head">
+    <h1 class="isl-title">Your Forest</h1>
+    <p class="isl-stats" id="islStats"></p>
+    <p class="isl-sub" id="fsCaption"></p>
+  </div>
+  <div class="fs-tip" id="fsTip" hidden></div>
+</section>
+
 <div class="forest-wrap">
-
-  <!-- HEADER -->
-  <div class="forest-header">
-    <div class="forest-eyebrow">Your progress</div>
-    <h1 class="forest-title">Your <em>Forest</em></h1>
-    <p class="forest-sub">Every 5 sessions you complete plants a new tree. Keep studying to grow your forest.</p>
-  </div>
-
-  <!-- STATS ROW -->
-  <div class="stats-row" id="statsRow">
-    <div class="stat-card">
-      <span class="stat-card-icon">🔥</span>
-      <div class="stat-card-num" id="statStreak">0</div>
-      <div class="stat-card-label">Day streak</div>
-      <div class="stat-card-glow"></div>
-    </div>
-    <div class="stat-card">
-      <span class="stat-card-icon">📚</span>
-      <div class="stat-card-num" id="statSessions">0</div>
-      <div class="stat-card-label">Sessions done</div>
-      <div class="stat-card-glow"></div>
-    </div>
-    <div class="stat-card">
-      <span class="stat-card-icon">⏱</span>
-      <div class="stat-card-num" id="statHours">0</div>
-      <div class="stat-card-label">Hours studied</div>
-      <div class="stat-card-glow"></div>
-    </div>
-    <div class="stat-card">
-      <span class="stat-card-icon">🌲</span>
-      <div class="stat-card-num" id="statTrees">0</div>
-      <div class="stat-card-label">Trees planted</div>
-      <div class="stat-card-glow"></div>
-    </div>
-  </div>
-
-  <!-- PROGRESS TO NEXT TREE -->
-  <div class="next-tree-bar" id="nextTreeBar">
-    <div class="next-tree-left">
-      <div class="next-tree-label">Progress to next tree</div>
-      <div class="next-tree-title" id="nextTreeTitle">Keep going — your forest is waiting</div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progressFill" style="width:0%"></div>
-      </div>
-      <div class="next-tree-sessions" id="nextTreeSessions">
-        <strong>0 / 5</strong> sessions completed
-      </div>
-    </div>
-    <div class="next-tree-emoji" id="nextTreeEmoji">🌱</div>
-  </div>
-
-  <!-- FOREST SCENE -->
-  <div class="fscene" id="fscene" data-time="day" role="group" aria-label="Your forest">
-    <div class="fs-sky">
-      <div class="fs-stars"></div>
-      <div class="fs-orb"></div>
-      <span class="fs-cloud c1"></span><span class="fs-cloud c2"></span><span class="fs-cloud c3"></span>
-    </div>
-    <svg class="fs-hills" viewBox="0 0 1000 400" preserveAspectRatio="none" aria-hidden="true">
-      <path class="h3" d="M0 250 C120 190 250 200 380 235 C520 270 640 170 780 190 C880 205 950 230 1000 215 L1000 400 L0 400Z"/>
-      <path class="h2" d="M0 300 C140 250 280 285 420 300 C560 315 700 250 840 270 C920 281 970 290 1000 285 L1000 400 L0 400Z"/>
-      <path class="h1" d="M0 345 C160 320 300 340 460 350 C620 360 760 325 900 338 C950 343 980 346 1000 344 L1000 400 L0 400Z"/>
-    </svg>
-    <div class="fs-trees" id="fsTrees"></div>
-    <div class="fs-fx" id="fsFx"></div>
-    <div class="fs-tip" id="fsTip" hidden></div>
-    <button class="fs-sky-btn" id="fsSkyBtn" type="button" aria-label="Change time of day">🌤</button>
-    <div class="fs-caption" id="fsCaption"></div>
-  </div>
 
   <!-- FOREST -->
   <div id="forestSection">
@@ -561,6 +338,21 @@ function prettyDate(d) {
 ══════════════════════════════════════════ */
 const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? d; } catch (e) { return d; } };
 const history    = read('studySyncSessionHistory', []);
+/* One subject, however it was typed: "MATHS", "Maths" and "maths" are grouped together (case-insensitive) and shown
+   with the spelling used most, tidied to Title Case when that spelling is all lower or all upper case. */
+const SUBJ_NAME = (() => {
+  const seen = {};
+  history.forEach(h => { const s = h && typeof h.subject === 'string' ? h.subject.trim().replace(/\s+/g, ' ') : ''; if (!s) return; const k = s.toLowerCase(); (seen[k] = seen[k] || {})[s] = (seen[k][s] || 0) + 1; });
+  const out = {};
+  Object.keys(seen).forEach(k => {
+    let best = Object.entries(seen[k]).sort((a, b) => b[1] - a[1])[0][0];
+    if (best === best.toLowerCase() || best === best.toUpperCase()) best = best.replace(/\S+/g, w => w[0].toUpperCase() + w.slice(1).toLowerCase());
+    out[k] = best;
+  });
+  return out;
+})();
+const subjName = s => { const t = typeof s === 'string' ? s.trim().replace(/\s+/g, ' ') : ''; return t ? (SUBJ_NAME[t.toLowerCase()] || t) : t; };
+history.forEach(h => { if (h && h.subject) h.subject = subjName(h.subject); });
 const streakData = read('studySyncStreak', { count: 0 });
 const sessions   = history.length;
 const hours      = history.reduce((s, h) => s + (h.hours || 0), 0);
@@ -598,221 +390,192 @@ runMap.forEach(r => {
 const treesCount = trees.filter(t => t.complete).length, growingCount = trees.length - treesCount;
 const progDone = activeRun ? (activeRun.focusDone || 0) : 0, progTotal = activeRun ? activeRun.cfg.rounds : 0;
 
-/* ── Stats cards ── */
-const $ = id => document.getElementById(id);
-$('statStreak').textContent   = streak;
-$('statSessions').textContent = sessions;
-$('statHours').textContent    = hours.toFixed(1);
-$('statTrees').textContent    = treesCount;
-
-/* ── Progress bar: the run in progress ── */
-const progPct = progTotal ? Math.min(100, progDone / progTotal * 100) : 0;
-$('progressFill').style.width = progPct + '%';
-$('nextTreeSessions').innerHTML = progTotal
-  ? '<strong>' + progDone + ' / ' + progTotal + '</strong> rounds of your current timer'
-  : 'A tree grows over one full run of your timer';
-$('nextTreeEmoji').textContent = !progTotal ? '🌱' : progPct < 34 ? '🌱' : progPct < 67 ? '🌿' : '🌳';
-$('nextTreeTitle').textContent = !progTotal ? 'Start a study session to plant a tree'
-  : progDone >= progTotal ? 'Your tree is fully grown! 🌳'
-  : progDone === 0 ? 'Your tree is a seed — finish a focus round to grow it'
-  : (progTotal - progDone) === 1 ? 'One more round and this tree is fully grown 🌳' : (progTotal - progDone) + ' more rounds to a fully grown tree 🌿';
-
 /* ══════════════════════════════════════════
-   FOREST SCENE
+   THE FLOATING ISLAND
+   The whole top of the page is a sunset sky. Your forest grows on an island floating above the clouds:
+   every finished timer run is a tree on it (the kind shows the subject), the run in progress is the sapling
+   by the little sign, and the island gets bigger every 5 trees (the dotted ring shows its next size).
+   Painted on a canvas in a 1600x900 frame; the still parts are drawn once, only what moves is redrawn.
 ══════════════════════════════════════════ */
-const scene   = $('fscene');
-const treesEl = $('fsTrees');
-const fxEl    = $('fsFx');
-const tipEl   = $('fsTip');
-const MAX_VISIBLE = 45;
+const $ = id => document.getElementById(id);
+$('islStats').innerHTML = `<b>${streak}</b>-day streak <i>·</i> <b>${sessions}</b> session${sessions === 1 ? '' : 's'} <i>·</i> <b>${hours.toFixed(1)}</b> hours <i>·</i> <b>${treesCount}</b> tree${treesCount === 1 ? '' : 's'}`;
 
 function loadSeen() { try { const v = parseInt(localStorage.getItem('studySyncForestSeen'), 10); return isNaN(v) ? null : v; } catch (e) { return null; } }
 function saveSeen(n) { try { localStorage.setItem('studySyncForestSeen', String(n)); } catch (e) { /* storage unavailable */ } }
-
 const seenBefore = loadSeen();
 const newCount = seenBefore === null ? 0 : Math.max(0, treesCount - seenBefore);
 const completeIdx = []; trees.forEach((t, i) => { if (t.complete) completeIdx.push(i); });
 const newSet = new Set(completeIdx.slice(Math.max(0, completeIdx.length - newCount)));
 
-function layout(n) {
-  // returns [{row, x}] for n trees. Rows: 0 back, 1 middle, 2 front.
-  const out = [];
-  if (n <= 5) {
-    for (let i = 0; i < n; i++) out.push({ row: 2, x: 12 + (n === 1 ? 38 : i * (62 / (n - 1))) });
-    return out;
+/* ── painted trees: every subject kind gets its own simple, flat tree ── */
+const KIND = { conifer: 'pine', blossom: 'cherry' };
+const TREE_COL = {
+  pine: ['#2e5a34', '#1e3e24', '#4a3424'], oak: ['#4a7a34', '#2e5422', '#4e3424'], maple: ['#e2702e', '#b04a1e', '#4a3024'],
+  cherry: ['#f2a8c0', '#d07898', '#4a3028'], autumn: ['#e8b23a', '#c0841e', '#4e3424'], lotus: ['#c8a0e8', '#9a72c4', '#4a3a3a'],
+  cyber: ['#3ad8c8', '#1a8a90', '#2a3a44'], bamboo: ['#7aba4a', '#4e8a2e', '#9ac25a'], palm: ['#5a9a3a', '#3a7a2a', '#8a6a44'],
+  fern: ['#5aa04a', '#3a7a34', '#3a5a2a'], cactus: ['#5a9a5a', '#3a7a44', '#f2a0c0'],
+};
+function ell(g, x, y, rx, ry, c) { g.fillStyle = c; g.beginPath(); g.ellipse(x, y, Math.max(.1, rx), Math.max(.1, ry), 0, 0, 7); g.fill(); }
+function paintTree(g, x, y, h, kind, seed) {
+  kind = KIND[kind] || kind; if (!TREE_COL[kind]) kind = 'oak';
+  const r = rng(seed), c = TREE_COL[kind], leaf = c[0], leafD = c[1], bark = c[2], tw = h * .07;
+  g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+  if (kind === 'pine') {
+    g.fillStyle = bark; g.fillRect(x - tw * .5, y - h * .25, tw, h * .25);
+    for (let i = 0; i < 4; i++) { const ty = y - h * .2 - i * h * .2, wd = h * (.34 - i * .07); g.fillStyle = i % 2 ? leaf : leafD; g.beginPath(); g.moveTo(x - wd, ty); for (let j = 0; j <= 6; j++) g.lineTo(x - wd + j * wd / 3, ty + (j % 2 ? -4 : 3) * h / 120); g.lineTo(x, ty - h * .3); g.closePath(); g.fill(); }
+    g.fillStyle = leaf; g.beginPath(); g.moveTo(x - h * .08, y - h * .82); g.lineTo(x, y - h); g.lineTo(x + h * .08, y - h * .82); g.fill();
+  } else if (kind === 'bamboo') {
+    [-.12, -.04, .05, .13].forEach((o, i) => { const sx = x + o * h, sh = h * (.78 + r() * .22); g.strokeStyle = i % 2 ? leaf : leafD; g.lineWidth = h * .045; g.beginPath(); g.moveTo(sx, y); g.lineTo(sx + o * h * .2, y - sh); g.stroke();
+      g.strokeStyle = 'rgba(40,60,20,.5)'; g.lineWidth = 1; for (let k = 1; k < 5; k++) { const jy = y - sh * k / 5; g.beginPath(); g.moveTo(sx - h * .025, jy); g.lineTo(sx + h * .025, jy); g.stroke(); }
+      for (let k = 0; k < 3; k++) { g.save(); g.translate(sx + o * h * .2, y - sh + k * h * .08); g.rotate((k % 2 ? 1 : -1) * (.9 + r() * .4)); ell(g, h * .07, 0, h * .08, h * .018, c[2]); g.restore(); } });
+  } else if (kind === 'palm') {
+    const tx = x + h * .12, ty = y - h * .82; g.strokeStyle = bark; g.lineWidth = h * .06; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x - h * .04, y - h * .45, tx, ty); g.stroke();
+    g.strokeStyle = 'rgba(0,0,0,.2)'; g.lineWidth = 1; for (let k = 1; k < 7; k++) { const u = k / 7, px = x + (tx - x) * u * u, py = y + (ty - y) * u; g.beginPath(); g.moveTo(px - h * .03, py); g.lineTo(px + h * .03, py + 2); g.stroke(); }
+    for (let k = 0; k < 7; k++) { const a = -Math.PI + k * Math.PI / 6 + (r() - .5) * .2, L = h * (.32 + r() * .08); g.fillStyle = k % 2 ? leaf : leafD; g.beginPath(); g.moveTo(tx, ty); g.quadraticCurveTo(tx + Math.cos(a) * L * .6, ty + Math.sin(a) * L * .6 - h * .1, tx + Math.cos(a) * L, ty + Math.sin(a) * L * .5 + h * .08); g.quadraticCurveTo(tx + Math.cos(a) * L * .5, ty + Math.sin(a) * L * .4, tx, ty); g.fill(); }
+    ell(g, tx, ty + 2, h * .03, h * .03, '#6a4a2a');
+  } else if (kind === 'fern') {
+    for (let k = 0; k < 9; k++) { const a = -Math.PI / 2 + (k - 4) * .32, L = h * (.5 + r() * .25); g.strokeStyle = k % 2 ? leaf : leafD; g.lineWidth = h * .02; g.beginPath(); const ex = x + Math.cos(a) * L, ey = y + Math.sin(a) * L * .9 + Math.abs(k - 4) * h * .06;
+      g.moveTo(x, y); g.quadraticCurveTo(x + Math.cos(a) * L * .4, y - L * .7, ex, ey); g.stroke();
+      for (let q = 1; q < 7; q++) { const u = q / 7, px = x + (ex - x) * u, py = y + (ey - y) * u - Math.sin(u * Math.PI) * L * .25; ell(g, px, py, h * .04 * (1 - u * .5), h * .015, k % 2 ? leaf : leafD); } }
+  } else if (kind === 'cactus') {
+    const cw = h * .16; g.fillStyle = leaf; g.beginPath(); g.roundRect ? g.roundRect(x - cw / 2, y - h * .85, cw, h * .85, cw / 2) : g.rect(x - cw / 2, y - h * .85, cw, h * .85); g.fill();
+    g.strokeStyle = leaf; g.lineWidth = cw * .7; g.beginPath(); g.moveTo(x - cw / 2, y - h * .38); g.lineTo(x - cw * 1.4, y - h * .38); g.lineTo(x - cw * 1.4, y - h * .6); g.moveTo(x + cw / 2, y - h * .5); g.lineTo(x + cw * 1.3, y - h * .5); g.lineTo(x + cw * 1.3, y - h * .7); g.stroke();
+    g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y - h * .8); g.lineTo(x, y - 2); g.stroke();
+    for (let p = 0; p < 5; p++) ell(g, x + Math.cos(p * 1.26) * cw * .28, y - h * .87 + Math.sin(p * 1.26) * cw * .2, cw * .2, cw * .14, c[2]);
+  } else {
+    g.fillStyle = bark; g.beginPath(); g.moveTo(x - tw, y); g.quadraticCurveTo(x - tw * .4, y - h * .3, x - tw * .3, y - h * .55); g.lineTo(x + tw * .3, y - h * .55); g.quadraticCurveTo(x + tw * .4, y - h * .3, x + tw, y); g.fill();
+    g.strokeStyle = bark; g.lineWidth = tw * .45; for (let b = 0; b < 3; b++) { const by = y - h * (.4 + b * .08), dir = b % 2 ? 1 : -1; g.beginPath(); g.moveTo(x, by); g.lineTo(x + dir * h * .16, by - h * .12); g.stroke(); }
+    const cr = h * .26, cy = y - h * .7;
+    for (let q = 0; q < 9; q++) { const a = q / 9 * Math.PI * 2, d = cr * (.45 + r() * .3); ell(g, x + Math.cos(a) * d, cy + Math.sin(a) * d * .75, cr * (.5 + r() * .2), cr * (.45 + r() * .2), q % 2 ? leafD : leaf); }
+    ell(g, x - cr * .1, cy - cr * .2, cr * .6, cr * .5, leaf);
+    g.fillStyle = 'rgba(255,255,230,.12)'; g.beginPath(); g.ellipse(x - cr * .35, cy - cr * .45, cr * .35, cr * .22, -.4, 0, 7); g.fill();
+    if (kind === 'cherry' || kind === 'lotus') for (let p = 0; p < 14; p++) ell(g, x - cr + r() * cr * 2, cy - cr * .6 + r() * cr * 1.3, h * .018, h * .018, kind === 'cherry' ? '#ffe0ea' : '#f4e2ff');
+    if (kind === 'cyber') for (let p = 0; p < 10; p++) { const px = x - cr + r() * cr * 2, py = cy - cr * .6 + r() * cr * 1.3; g.fillStyle = '#d8fff8'; g.fillRect(px, py, h * .025, h * .025); }
   }
-  const rows = n > 14 ? 3 : 2;
-  const perRow = Array.from({ length: rows }, () => []);
-  for (let i = 0; i < n; i++) perRow[i % rows].push(i);
-  perRow.forEach((idxs, ri) => {
-    const row = rows === 3 ? ri : ri + 1;
-    idxs.forEach((treeIdx, k) => {
-      const m = idxs.length, rr = rng(treeIdx * 7919 + 17);
-      out[treeIdx] = { row, x: 5 + (k + 0.5) / m * 82 + (rr() - 0.5) * (62 / m) };
-    });
-  });
+  g.restore();
+}
+function sprout(g, x, y, s) { g.strokeStyle = '#4a8a2a'; g.lineWidth = 2.5 * s; g.lineCap = 'round'; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - 20 * s); g.stroke(); ell(g, x - 7 * s, y - 20 * s, 7 * s, 4 * s, '#7aba4a'); ell(g, x + 7 * s, y - 23 * s, 7 * s, 4 * s, '#7aba4a'); }
+
+/* ── where everything goes (island coordinates, before the island's own size is applied) ── */
+const ISL = { cx: 800, cy: 462, rx: 322, ry: 98 }, POND = { x: 1020, y: 500 }, SAPL = { x: 1080, y: 448 };
+const ISL_MAX = 1, islG = Math.min(ISL_MAX, .76 + .06 * Math.floor(treesCount / 5)), islNext = Math.min(ISL_MAX, islG + .06);
+function spots(n) {
+  const out = [], m = Math.max(n + 2, 4);
+  for (let i = 0; out.length < n && i < n * 4 + 40; i++) {
+    const r = Math.min(.96, Math.sqrt((i + .6) / m)), th = i * 2.39996 + .5, x = ISL.cx + Math.cos(th) * r * ISL.rx, y = ISL.cy + Math.sin(th) * r * ISL.ry;
+    if (Math.hypot((x - POND.x) / 92, (y - POND.y) / 30) < 1 || Math.hypot((x - SAPL.x) / 48, (y - SAPL.y) / 24) < 1) continue;
+    out.push({ x, y });
+  }
   return out;
 }
+const MAX_VISIBLE = 45, start = Math.max(0, trees.length - MAX_VISIBLE), shown = trees.slice(start);
+const shrink = Math.max(.6, Math.min(1, 1.12 - shown.length * .012));
+const placed = spots(shown.length).map((p, k) => {
+  const t = shown[k], kind = getTreeForSubject(t.subject), seed = hashStr(t.id + ':' + t.subject);
+  const h = (92 + (seed % 34)) * shrink / islG * (t.complete ? 1 : .35 + .65 * t.growth);
+  return { x: p.x, y: p.y, h, t, kind, seed, idx: start + k, isNew: newSet.has(start + k) };
+}).sort((a, b) => a.y - b.y);
+const newOrder = placed.filter(p => p.isNew);
 
-const ROW = [ { s: 0.56, b: 0.40 }, { s: 0.78, b: 0.22 }, { s: 1, b: 0.04 } ]; // scale, bottom (fraction of scene)
+/* ── the canvas ── */
+const hero = $('fscene'), cv = $('islCanvas'), cx = cv.getContext('2d'), tipEl = $('fsTip');
+const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W = 0, H = 0, D = 1, S = 1, OX = 0, OY = 0, L = null, t0 = performance.now();
+function frame(g) { g.setTransform(D * S, 0, 0, D * S, D * OX, D * OY); }
+function isl(g) { g.translate(800, 470); g.scale(islG, islG); g.translate(-800, -470); }
+function layer(fn) { const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height; const g = c.getContext('2d'); fn(g); return c; }
+function grad(g, x0, y0, x1, y1, st) { const q = g.createLinearGradient(x0, y0, x1, y1); st.forEach(s => q.addColorStop(s[0], s[1])); return q; }
+function glow(g, x, y, r, col, a) { g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = a; const q = g.createRadialGradient(x, y, 0, x, y, r); q.addColorStop(0, col); q.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = q; g.fillRect(x - r, y - r, r * 2, r * 2); g.restore(); }
+function cloud(g, x, y, w, a) { g.fillStyle = `rgba(255,240,230,${a})`; for (let p = 0; p < 5; p++) { g.beginPath(); g.ellipse(x + (p - 2) * w * .3, y - (p % 2) * 18, w * .32, 28, 0, 0, 7); g.fill(); } }
 
-function addTree(opts) {
-  const el = document.createElement('div');
-  el.className = 'ft' + (opts.isNew ? ' is-new' : '') + (opts.className ? ' ' + opts.className : '');
-  el.style.left = opts.x + '%';
-  el.style.setProperty('--s', opts.scale);
-  el.style.setProperty('--b', (opts.bottom * 100) + '%');
-  el.style.zIndex = String(10 + opts.row * 10 + Math.round(opts.x / 10));
-  el.style.setProperty('--sw', (5 + (opts.seed % 40) / 10) + 's');
-  el.style.setProperty('--sd', (-(opts.seed % 70) / 10) + 's');
-  if (opts.isNew) el.style.setProperty('--gd', opts.delay + 's');
-  el.dataset.row = opts.row;
-  el.tabIndex = 0;
-  el.setAttribute('role', 'img');
-  el.setAttribute('aria-label', opts.label);
-  el.dataset.tip = opts.tip;
-  if (opts.node) { el.appendChild(opts.node); el.classList.add('has-canvas'); } else el.innerHTML = opts.svg || '';
-  treesEl.appendChild(el);
-  return el;
-}
-
-function buildScene() {
-  treesEl.innerHTML = '';
-  const start = Math.max(0, trees.length - MAX_VISIBLE);
-  const shown = trees.slice(start);
-  const pos = layout(shown.length);
-  shown.forEach((t, k) => {
-    const idx = start + k, kind = getTreeForSubject(t.subject);
-    const seed = hashStr(t.id + ':' + t.subject);
-    const rowDef = ROW[pos[k].row];
-    const isNew = newSet.has(idx);
-    const date = prettyDate(t.date);
-    const status = t.complete ? `${t.rounds} rounds · fully grown` : `${t.done} of ${t.rounds} rounds`;
-    addTree({
-      x: pos[k].x, row: pos[k].row, scale: rowDef.s, bottom: rowDef.b + (rng(seed)() - 0.5) * 0.03,
-      seed, isNew, delay: 0.5 + [...newSet].indexOf(idx) * 0.7,
-      node: window.TreeGrow.canvas(200, 280, { kind: kind.kind, g: t.growth, seed: seed % 997, detail: 0.5, crown: t.complete }),
-      label: `${t.subject}, ${kind.name}, ${status}`,
-      tip: `<strong>${esc(t.subject)}</strong><span>${esc(kind.name)} · ${esc(status)}${date ? ' · ' + esc(date) : ''}</span>`,
-    });
+function build() {
+  const b = hero.getBoundingClientRect(); W = Math.max(320, Math.round(b.width)); H = Math.max(400, Math.round(b.height));
+  D = Math.min(2, window.devicePixelRatio || 1); cv.width = Math.round(W * D); cv.height = Math.round(H * D);
+  S = Math.min(Math.max(W / 1600, H / 900), W / 820); OX = (W - 1600 * S) / 2; OY = (H - 900 * S) / 2 - H * .025;
+  L = {};
+  L.sky = layer(g => {
+    g.fillStyle = grad(g, 0, 0, 0, cv.height, [[0, '#3a5a8a'], [.55, '#e8a888'], [1, '#f2d2a8']]); g.fillRect(0, 0, cv.width, cv.height);
+    frame(g); glow(g, 1250, 520, 380, 'rgba(255,220,170,1)', .45);
+    const r = rng(5);
+    for (let c = 0; c < 14; c++) cloud(g, r() * 1600, 560 + r() * 320, 120 + r() * 160, .35 + r() * .3);
+    g.setTransform(D, 0, 0, D, 0, 0); for (let c = 0; c < 9; c++) cloud(g, (c / 8) * W, H - 18 - (c % 3) * 16, 220, .55);   /* a cloud bank along the bottom edge on any screen */
+    frame(g);
+    if (islNext > islG + .001) { g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2; g.setLineDash([6, 8]); g.beginPath(); g.ellipse(800, 470, 352 * islNext * 1.04, 118 * islNext * 1.04, 0, 0, 7); g.stroke(); g.setLineDash([]); }
   });
-
-  // The sapling at the edge of the scene is the run in progress: it is exactly as grown as that run.
-  const sk = activeRun ? getTreeForSubject(activeRun.subject) : getTreeForSubject(''), sg = progTotal ? Math.min(1, progDone / progTotal) : 0;
-  addTree({
-    x: 92, row: 2, scale: 0.55 + 0.45 * sg, bottom: ROW[2].b, seed: 99, className: 'ft-next',
-    node: window.TreeGrow.canvas(200, 280, { kind: sk.kind, g: Math.max(0.05, sg), seed: 42, detail: 0.5 }),
-    label: progTotal ? `Growing now: ${progDone} of ${progTotal} rounds` : 'Next tree: not started',
-    tip: progTotal ? `<strong>Growing now</strong><span>${progDone} / ${progTotal} rounds of your timer</span>` : '<strong>Next tree</strong><span>Start a study session to plant it</span>',
+  L.island = layer(g => {
+    frame(g); isl(g);
+    const r = rng(17);
+    g.fillStyle = grad(g, 0, 470, 0, 820, [[0, '#7a5a3e'], [1, '#3a2a20']]); g.beginPath(); g.moveTo(450, 470); g.bezierCurveTo(480, 620, 640, 700, 760, 800); g.lineTo(800, 840); g.lineTo(840, 790); g.bezierCurveTo(960, 690, 1110, 620, 1150, 470); g.closePath(); g.fill();
+    g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 2; for (let k = 0; k < 9; k++) { const sx = 520 + k * 70; g.beginPath(); g.moveTo(sx, 500); g.lineTo(sx + (r() - .5) * 40, 560 + r() * 120); g.stroke(); }
+    g.strokeStyle = '#4a3a24'; g.lineWidth = 3; for (let k = 0; k < 7; k++) { const rx = 560 + k * 80; g.beginPath(); g.moveTo(rx, 560); g.quadraticCurveTo(rx + 10, 640, rx - 6 + r() * 12, 700 + r() * 60); g.stroke(); }
+    ell(g, 800, 470, 352, 118, '#5a8a3a'); ell(g, 800, 462, 344, 108, '#6a9a44');
+    g.fillStyle = 'rgba(255,255,220,.12)'; g.beginPath(); g.ellipse(740, 430, 220, 50, -.1, 0, 7); g.fill();
+    ell(g, POND.x, POND.y, 70, 22, '#5aa0c0'); ell(g, POND.x - 14, POND.y - 6, 30, 5, 'rgba(255,255,255,.35)');
+    g.strokeStyle = '#c8a878'; g.lineWidth = 10; g.lineCap = 'round'; g.beginPath(); g.moveTo(520, 500); g.bezierCurveTo(640, 440, 760, 520, 940, 470); g.stroke();
+    /* the trees (new ones are drawn growing, every frame, until they are done) */
+    placed.forEach(p => { if (p.isNew && !reduce) return; ell(g, p.x + 10, p.y, p.h * .22, 6 / islG, 'rgba(0,0,0,.2)'); paintTree(g, p.x, p.y, p.h, p.kind.kind, p.seed); });
+    /* the run in progress: a sapling (or a small tree) by the sign */
+    const sg = progTotal ? Math.min(1, progDone / progTotal) : 0, kind = getTreeForSubject(activeRun ? activeRun.subject : '');
+    ell(g, SAPL.x, SAPL.y, 18, 5, '#5a3e24');
+    if (sg >= .34) paintTree(g, SAPL.x, SAPL.y, (34 + 46 * sg) / islG, kind.kind, 42); else sprout(g, SAPL.x, SAPL.y, 1 / islG + .2);
+    g.fillStyle = '#6a4a2a'; g.fillRect(SAPL.x + 38, SAPL.y - 28, 5, 40); g.fillStyle = '#8a5e38'; g.beginPath(); g.roundRect ? g.roundRect(SAPL.x + 10, SAPL.y - 50, 66, 28, 3) : g.rect(SAPL.x + 10, SAPL.y - 50, 66, 28); g.fill();
+    g.fillStyle = '#f2e6cc'; g.font = '700 15px Caveat, cursive'; g.textAlign = 'center'; g.fillText(progTotal ? `next: ${progDone}/${progTotal}` : 'next tree', SAPL.x + 43, SAPL.y - 30); g.textAlign = 'left';
   });
-
-  const caption = $('fsCaption');
-  const grow = growingCount ? ` · ${growingCount} still growing` : '';
-  if (treesCount === 0 && !growingCount) caption.textContent = 'Finish a full timer run to plant your first tree';
-  else if (newCount > 0) caption.textContent = `${treesCount} tree${treesCount === 1 ? '' : 's'}${grow} · ${newCount} new since your last visit ✨`;
-  else caption.textContent = `${treesCount} tree${treesCount === 1 ? '' : 's'}${grow}` + (trees.length > MAX_VISIBLE ? ` · showing the latest ${MAX_VISIBLE}` : '');
 }
-
-/* ── time of day ── */
-const SKY_ORDER = ['auto', 'day', 'dusk', 'night'];
-const SKY_ICON  = { auto: '🌤', day: '☀️', dusk: '🌅', night: '🌙' };
-function autoSky() { const h = new Date().getHours(); return h >= 6 && h < 17 ? 'day' : h >= 17 && h < 20 ? 'dusk' : 'night'; }
-let skyMode = 'auto';
-try { skyMode = localStorage.getItem('studySyncForestSky') || 'auto'; } catch (e) { /* ignore */ }
-if (!SKY_ORDER.includes(skyMode)) skyMode = 'auto';
-
-function rebuildFx(time) {
-  fxEl.innerHTML = '';
-  const stars = scene.querySelector('.fs-stars');
-  stars.innerHTML = '';
-  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (time === 'night') {
-    const r = rng(7);
-    for (let i = 0; i < 46; i++) {
-      const s = document.createElement('i');
-      s.style.cssText = `left:${f1(r() * 100)}%;top:${f1(r() * 55)}%;--tw:${f1(2 + r() * 4)}s;--td:${f1(-r() * 5)}s;` +
-                        `width:${r() > .85 ? 3 : 2}px;height:${r() > .85 ? 3 : 2}px;`;
-      stars.appendChild(s);
-    }
-  }
-  if (reduce) return;
-  const r = rng(time.length * 31);
-  const count = time === 'night' ? 18 : time === 'dusk' ? 12 : 9;
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement('span');
-    p.className = 'fs-mote fs-mote-' + (time === 'night' ? 'fly' : time === 'dusk' ? 'ember' : 'pollen');
-    p.style.cssText = `left:${f1(r() * 100)}%;top:${f1(35 + r() * 55)}%;--dur:${f1(6 + r() * 8)}s;--del:${f1(-r() * 12)}s;` +
-                      `--dx:${f1((r() - 0.5) * 80)}px;--dy:${f1(-20 - r() * 60)}px;`;
-    fxEl.appendChild(p);
+/* where a tree is on screen, for the hover tip */
+function toScreen(x, y) { const X = 800 + (x - 800) * islG, Y = 470 + (y - 470) * islG; return [OX + X * S, OY + Y * S]; }
+function draw(now) {
+  const t = (now - t0) / 1000, bob = reduce ? 0 : Math.sin(t * .6) * 6;
+  cx.setTransform(1, 0, 0, 1, 0, 0); cx.drawImage(L.sky, 0, 0);
+  cx.save(); cx.translate(0, bob * S * D); cx.drawImage(L.island, 0, 0);
+  frame(cx); cx.translate(0, bob); isl(cx);
+  if (!reduce) for (let i = 0; i < 26; i++) { const u = (t * .9 + (i * .618) % 1) % 1, x = 470 + ((i * 37) % 30) - u * 20, y = 480 + u * 340; cx.strokeStyle = `rgba(220,240,255,${.55 * (1 - u)})`; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(x, y); cx.lineTo(x - 2, y + 24); cx.stroke(); }
+  ell(cx, 482, 478, 18, 5, 'rgba(160,210,240,.55)');
+  newOrder.forEach((p, i) => {   /* trees earned since your last visit pop up one by one */
+    const k = reduce ? 1 : Math.max(0, Math.min(1, (t - .8 - i * .7) / 1.2)); if (k <= 0) return;
+    const e = 1 + 2.7 * Math.pow(k - 1, 3) + 1.7 * Math.pow(k - 1, 2);
+    ell(cx, p.x + 10, p.y, p.h * .22 * k, 6 / islG, 'rgba(0,0,0,.2)');
+    cx.save(); cx.translate(p.x, p.y); cx.scale(e, e); cx.translate(-p.x, -p.y); paintTree(cx, p.x, p.y, p.h, p.kind.kind, p.seed); cx.restore();
+    if (k < 1) glow(cx, p.x, p.y - p.h * .5, p.h * 1.2, 'rgba(255,240,160,1)', .6 * (1 - k));
+  });
+  cx.restore();
+  frame(cx);
+  if (!reduce) {
+    for (let b = 0; b < 4; b++) { const bx = (t * 30 + b * 420) % 1900 - 150, by = 300 + b * 30 + Math.sin(t * 2 + b) * 10, f = Math.abs(Math.sin(t * 7 + b)) * 6; cx.strokeStyle = '#3a2a3a'; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(bx - 9, by - f); cx.quadraticCurveTo(bx - 4, by - 2, bx, by); cx.quadraticCurveTo(bx + 4, by - 2, bx + 9, by - f); cx.stroke(); }
+    for (let c = 0; c < 4; c++) { const x = ((t * 12 + c * 500) % 2000) - 200, y = 250 + c * 60; cx.fillStyle = 'rgba(255,245,235,.35)'; for (let p = 0; p < 4; p++) { cx.beginPath(); cx.ellipse(x + p * 40, y - (p % 2) * 12, 50, 20, 0, 0, 7); cx.fill(); } }
   }
 }
+let raf = 0;
+function loop(now) { if (!cv.isConnected) return; if (!document.hidden) draw(now); raf = requestAnimationFrame(loop); }
+build();
+if (reduce) draw(performance.now() + 10000); else raf = requestAnimationFrame(loop);
+if (window.__forestResize) window.removeEventListener('resize', window.__forestResize);
+window.__forestResize = () => { if (!cv.isConnected) return; clearTimeout(window.__forestResizeT); window.__forestResizeT = setTimeout(() => { build(); if (reduce) draw(performance.now() + 10000); }, 150); };
+window.addEventListener('resize', window.__forestResize);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (cv.isConnected) { build(); if (reduce) draw(performance.now() + 10000); } });
 
-function applySky() {
-  const time = skyMode === 'auto' ? autoSky() : skyMode;
-  scene.dataset.time = time;
-  $('fsSkyBtn').textContent = SKY_ICON[skyMode];
-  $('fsSkyBtn').title = 'Time of day: ' + skyMode + ' (click to change)';
-  rebuildFx(time);
+/* ── hover / tap a tree for its subject and date ── */
+function treeAt(px, py) {
+  let hit = null;
+  placed.forEach(p => { const [sx, sy] = toScreen(p.x, p.y), hw = Math.max(14, p.h * .3 * islG * S), hh = p.h * islG * S; if (Math.abs(px - sx) < hw && py < sy + 4 && py > sy - hh) hit = p; });
+  const [ax, ay] = toScreen(SAPL.x + 20, SAPL.y); if (!hit && Math.abs(px - ax) < 40 * S && py < ay + 6 && py > ay - 60 * S) hit = 'sapling';
+  return hit;
 }
-$('fsSkyBtn').addEventListener('click', () => {
-  skyMode = SKY_ORDER[(SKY_ORDER.indexOf(skyMode) + 1) % SKY_ORDER.length];
-  try { localStorage.setItem('studySyncForestSky', skyMode); } catch (e) { /* ignore */ }
-  applySky();
-});
-
-/* ── tooltip ── */
-let tipFor = null;
-function showTip(el) {
-  tipFor = el;
-  tipEl.innerHTML = el.dataset.tip;
-  tipEl.hidden = false;
-  const s = scene.getBoundingClientRect(), r = el.getBoundingClientRect();
-  const w = tipEl.offsetWidth;
-  let left = r.left - s.left + r.width / 2 - w / 2;
-  left = Math.max(8, Math.min(left, s.width - w - 8));
-  tipEl.style.left = left + 'px';
-  tipEl.style.top = Math.max(8, r.top - s.top - tipEl.offsetHeight - 6) + 'px';
+function showTip(p, px, py) {
+  if (p === 'sapling') tipEl.innerHTML = progTotal ? `<strong>Growing now</strong><span>${progDone} / ${progTotal} rounds of your timer</span>` : '<strong>Your next tree</strong><span>Start a study session to plant it</span>';
+  else { const date = prettyDate(p.t.date), status = p.t.complete ? `${p.t.rounds} rounds · fully grown` : `${p.t.done} of ${p.t.rounds} rounds`; tipEl.innerHTML = `<strong>${esc(p.t.subject)}</strong><span>${esc(p.kind.name)} · ${esc(status)}${date ? ' · ' + esc(date) : ''}</span>`; }
+  tipEl.hidden = false; const w = tipEl.offsetWidth;
+  tipEl.style.left = Math.max(8, Math.min(px - w / 2, W - w - 8)) + 'px'; tipEl.style.top = Math.max(8, py - tipEl.offsetHeight - 18) + 'px';
 }
-function hideTip() { tipFor = null; tipEl.hidden = true; }
-treesEl.addEventListener('pointerover', e => { const t = e.target.closest('.ft'); if (t) showTip(t); });
-treesEl.addEventListener('pointerout', e => { if (!e.relatedTarget || !e.relatedTarget.closest || !e.relatedTarget.closest('.ft')) hideTip(); });
-treesEl.addEventListener('focusin', e => { const t = e.target.closest('.ft'); if (t) showTip(t); });
-treesEl.addEventListener('focusout', hideTip);
-treesEl.addEventListener('click', e => { const t = e.target.closest('.ft'); if (t) (tipFor === t ? hideTip() : showTip(t)); });
-scene.addEventListener('click', e => { if (!e.target.closest('.ft')) hideTip(); });
+function onPoint(e) { const b = hero.getBoundingClientRect(), px = e.clientX - b.left, py = e.clientY - b.top, p = treeAt(px, py); if (p) { showTip(p, px, py); hero.style.cursor = 'pointer'; } else { tipEl.hidden = true; hero.style.cursor = ''; } }
+hero.addEventListener('pointermove', onPoint);
+hero.addEventListener('click', onPoint);
+hero.addEventListener('pointerleave', () => { tipEl.hidden = true; });
 
-/* ── welcome burst for newly earned trees ── */
-function celebrateNew() {
-  if (newCount <= 0) return;
-  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduce) return;
-  treesEl.querySelectorAll('.ft.is-new').forEach((el, i) => {
-    setTimeout(() => {
-      const s = scene.getBoundingClientRect(), r = el.getBoundingClientRect();
-      const cx = r.left - s.left + r.width / 2, cy = r.bottom - s.top - 6;
-      const ring = document.createElement('span');
-      ring.className = 'fs-ring'; ring.style.left = cx + 'px'; ring.style.top = cy + 'px';
-      ring.addEventListener('animationend', () => ring.remove());
-      scene.appendChild(ring);
-      for (let n = 0; n < 12; n++) {
-        const sp = document.createElement('span');
-        sp.className = 'fs-spark';
-        const ang = Math.random() * Math.PI * 2, d = 30 + Math.random() * 60;
-        sp.style.cssText = `left:${cx}px;top:${cy - r.height * .4}px;`;
-        scene.appendChild(sp);
-        const a = sp.animate([
-          { transform: 'translate(0,0) scale(1)', opacity: 1 },
-          { transform: `translate(${Math.cos(ang) * d}px,${Math.sin(ang) * d - 30}px) scale(.3)`, opacity: 0 },
-        ], { duration: 900 + Math.random() * 600, easing: 'cubic-bezier(.15,.8,.3,1)', fill: 'forwards' });
-        a.onfinish = () => sp.remove();
-      }
-    }, 600 + i * 700 + 900);
-  });
-}
-
-buildScene();
-applySky();
-celebrateNew();
+const cap = $('fsCaption');
+const newBit = newCount > 0 ? `${newCount} new since your last visit ✨ · ` : '';
+cap.textContent = treesCount === 0 && !growingCount ? 'Finish a full timer run to plant your first tree on your island'
+  : newBit + (islNext > islG + .001 ? `your island grows a little with every 5 trees · ${5 - treesCount % 5} more to go` : 'your island is fully grown') + (trees.length > MAX_VISIBLE ? ` · showing the latest ${MAX_VISIBLE}` : '');
 saveSeen(treesCount);
 
 /* ══════════════════════════════════════════
@@ -825,7 +588,7 @@ if (trees.length === 0) {
       <span class="forest-empty-icon">🌱</span>
       <div class="forest-empty-title">Your forest is empty</div>
       <p class="forest-empty-sub">Finish a full run of your study timer to plant your first tree. The more rounds you plan, the longer it takes to grow, and every subject grows a different kind.</p>
-      <a href="/" class="forest-empty-btn">🌿 Start a session</a>
+      <a href="/" class="forest-empty-btn">Start a session</a>
     </div>`;
 } else {
   const subjectsSeen = [...new Set(trees.map(t => t.subject))];
@@ -847,8 +610,9 @@ if (trees.length === 0) {
     <div class="forest-section-title">🌲 Your trees (${trees.length})</div>
     <div class="legend">${legendHtml}</div>
     <div class="forest-grid">${gridHtml}</div>`;
-  forestSection.querySelectorAll('.tree-art').forEach(el => { const t = trees[+el.dataset.i], kind = getTreeForSubject(t.subject); el.appendChild(window.TreeGrow.canvas(124, 174, { kind: kind.kind, g: t.growth, seed: hashStr(t.id) % 997, detail: 0.4 })); });
-  forestSection.querySelectorAll('.legend-tree').forEach(el => el.appendChild(window.TreeGrow.canvas(60, 84, { kind: el.dataset.kind, g: 1, seed: 7, detail: 0.35 })));
+  const art = (w, h, kind, seed, grow) => { const c = document.createElement('canvas'), d = Math.min(2, window.devicePixelRatio || 1); c.width = w * d; c.height = h * d; const g = c.getContext('2d'); g.scale(d, d); paintTree(g, w / 2, h - 3, (h - 6) * (kind === 'palm' ? .86 : 1) * (.45 + .55 * grow), kind, seed); return c; };
+  forestSection.querySelectorAll('.tree-art').forEach(el => { const t = trees[+el.dataset.i], kind = getTreeForSubject(t.subject); el.appendChild(art(62, 87, kind.kind, hashStr(t.id + ':' + t.subject), t.complete ? 1 : t.growth)); });
+  forestSection.querySelectorAll('.legend-tree').forEach(el => el.appendChild(art(17, 24, el.dataset.kind, 7, 1)));
 }
 
 /* ══════════════════════════════════════════

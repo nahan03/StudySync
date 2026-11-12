@@ -5,25 +5,25 @@
 
 {% block extra_css %}
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Karla:wght@400;500;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--soil:#0E0A05;--bark:#1A1209;--moss:#1E2E1C;--canopy:#2E4A2C;--leaf:#4E7A34;--sprout:#7DB54A;--lime:#A8D870;--amber:#E4B84A;--cream:#F6EDD8;--fog:#9A8870;}
-body.stats-page{background:var(--soil);color:var(--cream);font-family:'DM Sans',sans-serif;min-height:100vh;}
+body.stats-page{background:var(--soil);color:var(--cream);font-family:'Karla',sans-serif;min-height:100vh;}
 
 .stats-nav{display:flex;align-items:center;gap:16px;padding:20px 40px;border-bottom:1px solid rgba(255,255,255,0.05);}
 .stats-nav-back{color:var(--fog);text-decoration:none;font-size:13px;display:flex;align-items:center;gap:6px;transition:color .2s;}
 .stats-nav-back:hover{color:var(--cream);}
-.stats-nav-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--cream);}
+.stats-nav-title{font-family:'Special Elite',serif;font-size:18px;font-weight:700;color:var(--cream);}
 
 .stats-wrap{max-width:960px;margin:0 auto;padding:40px;}
 .stats-hero{margin-bottom:40px;}
 .stats-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sprout);margin-bottom:10px;}
-.stats-heading{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,44px);font-weight:800;line-height:1.1;color:var(--cream);}
+.stats-heading{font-family:'Special Elite',serif;font-size:clamp(28px,4vw,44px);font-weight:800;line-height:1.1;color:var(--cream);}
 
 /* top KPIs */
 .stats-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:36px;}
 .kpi-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px 22px;}
-.kpi-num{font-family:'Playfair Display',serif;font-size:36px;font-weight:800;color:var(--sprout);line-height:1;}
+.kpi-num{font-family:'Special Elite',serif;font-size:36px;font-weight:800;color:var(--sprout);line-height:1;}
 .kpi-label{font-size:12px;color:var(--fog);margin-top:6px;text-transform:uppercase;letter-spacing:.06em;}
 
 /* sections */
@@ -56,7 +56,7 @@ body.stats-page{background:var(--soil);color:var(--cream);font-family:'DM Sans',
 /* accuracy */
 .accuracy-row{display:flex;gap:16px;flex-wrap:wrap;}
 .accuracy-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 20px;flex:1;min-width:140px;}
-.accuracy-pct{font-family:'Playfair Display',serif;font-size:28px;font-weight:800;line-height:1;}
+.accuracy-pct{font-family:'Special Elite',serif;font-size:28px;font-weight:800;line-height:1;}
 .accuracy-pct.green{color:var(--sprout);}
 .accuracy-pct.amber{color:var(--amber);}
 .accuracy-label{font-size:11px;color:var(--fog);margin-top:5px;text-transform:uppercase;letter-spacing:.06em;}
@@ -73,7 +73,7 @@ body.stats-page{background:var(--soil);color:var(--cream);font-family:'DM Sans',
 {% block content %}
 <nav class="stats-nav">
   <a href="/" class="stats-nav-back">← Home</a>
-  <span class="stats-nav-title">📊 Your Stats</span>
+  <span class="stats-nav-title">Your Stats</span>
 </nav>
 
 <div class="stats-wrap">
@@ -84,7 +84,7 @@ body.stats-page{background:var(--soil);color:var(--cream);font-family:'DM Sans',
 
   <!-- KPIs -->
   <div class="stats-kpis">
-    <div class="kpi-card"><div class="kpi-num" id="kpi-streak">—</div><div class="kpi-label">Day Streak 🔥</div></div>
+    <div class="kpi-card"><div class="kpi-num" id="kpi-streak">—</div><div class="kpi-label">Day Streak</div></div>
     <div class="kpi-card"><div class="kpi-num" id="kpi-sessions">—</div><div class="kpi-label">Total Sessions</div></div>
     <div class="kpi-card"><div class="kpi-num" id="kpi-hours">—</div><div class="kpi-label">Hours Studied</div></div>
     <div class="kpi-card"><div class="kpi-num" id="kpi-flashcards">—</div><div class="kpi-label">Flashcards</div></div>
