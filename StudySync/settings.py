@@ -140,6 +140,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
+# @login_required sends logged-out visitors to our own login page (Django's default is /accounts/login/, which doesn't exist here)
+LOGIN_URL = 'login'
+
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STORAGES = {
