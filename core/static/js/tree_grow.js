@@ -5,7 +5,7 @@
  *   TreeGrow.mount(canvas, () => opts)                           animate a canvas (wind, growth changes); returns { stop }
  *
  * kinds come from TreeArt.getTreeForSubject(): oak, maple, autumn, blossom, lotus, cyber, conifer,
- * palm, bamboo, cactus, fern, sprout.
+ * palm, bamboo, cactus, fern, crystal, sprout.
  */
 (function () {
   'use strict';
@@ -31,6 +31,7 @@
     palm:    { form: 'palm', trunk: [140, 108, 66], leaves: [[36, 112, 52], [62, 156, 70], [112, 198, 100]] },
     bamboo:  { form: 'bamboo', trunk: [128, 176, 66], leaves: [[60, 120, 40], [96, 168, 56], [150, 206, 90]] },
     cactus:  { form: 'cactus', trunk: [62, 140, 82], leaves: [[44, 112, 66], [62, 140, 82], [110, 190, 120]] },
+    crystal: { form: 'crystal', trunk: [58, 56, 74], leaves: [[58, 72, 170], [104, 138, 232], [196, 220, 255]], grass: [[52, 104, 52], [84, 148, 70]] },
     fern:    { form: 'bush', trunk: [60, 90, 40], leaves: [[34, 104, 52], [64, 150, 76], [124, 202, 112]] },
     sprout:  { form: 'broad', trunk: [86, 60, 40], leaves: [[34, 84, 34], [62, 124, 46], [118, 176, 66]], spread: 0.6, size: 1 },
   };
@@ -93,7 +94,7 @@
     ctx.fillStyle = mg; ctx.beginPath(); ctx.ellipse(cx, gy + 2, rx * 0.95, H * 0.034, 0, 0, TAU); ctx.fill();
     for (let i = 0; i < 26; i++) { // tufts of grass around the base
       const x = cx + (r() - 0.5) * rx * 1.7, hgt = rr(r, H * 0.018, H * 0.05), lean = (r() - 0.5) * 6;
-      ctx.strokeStyle = rgb(mix(st.leaves[0], st.leaves[1], r()), 0.9); ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(x, gy + 3); ctx.quadraticCurveTo(x + lean * 0.4, gy - hgt * 0.5, x + lean, gy - hgt); ctx.stroke();
+      ctx.strokeStyle = rgb(mix((st.grass || st.leaves)[0], (st.grass || st.leaves)[1], r()), 0.9); ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(x, gy + 3); ctx.quadraticCurveTo(x + lean * 0.4, gy - hgt * 0.5, x + lean, gy - hgt); ctx.stroke();
     }
     ctx.restore();
   }
@@ -263,7 +264,42 @@
     }
   }
 
-  const FORMS = { broad: drawBroad, conifer: drawConifer, palm: drawPalm, bamboo: drawBamboo, cactus: drawCactus, bush: drawBush };
+  /* Science: a slate trunk whose branches end in clusters of faceted crystal shards that twinkle */
+  function shard(ctx, x, y, a, L, w, c) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+    const face = (pts, col) => { ctx.fillStyle = col; ctx.beginPath(); pts.forEach(([u, v], i) => (i ? ctx.lineTo(u * w, v * L) : ctx.moveTo(u * w, v * L))); ctx.closePath(); ctx.fill(); };
+    face([[-0.5, 0], [-0.5, -0.72], [0, -1], [0.5, -0.72], [0.5, 0]], rgb(c[1]));
+    face([[-0.5, 0], [-0.5, -0.72], [0, -1], [-0.12, -0.74], [-0.12, 0]], rgb(c[0]));
+    face([[0.2, -0.06], [0.2, -0.74], [0, -1], [0.5, -0.72], [0.5, -0.06]], rgb(c[2], 0.75));
+    ctx.restore();
+  }
+  function drawCrystal(ctx, W, H, o, st) {
+    const g = o.g, gy = H * 0.92, cx = W / 2, t = o.t || 0, gt = clamp((g - 0.06) / 0.94, 0, 1), r = rng(o.seed + 73);
+    const hgt = H * 0.8 * (0.18 + 0.82 * smooth(gt)), tw = hgt * 0.045, c = st.leaves, top = gy - hgt * 0.56;
+    ctx.fillStyle = rgb(st.trunk); ctx.beginPath(); ctx.moveTo(cx - tw, gy); ctx.quadraticCurveTo(cx - tw * 0.3, gy - hgt * 0.3, cx - tw * 0.4, top); ctx.lineTo(cx + tw * 0.4, top); ctx.quadraticCurveTo(cx + tw * 0.3, gy - hgt * 0.3, cx + tw, gy); ctx.fill();
+    const tips = [[cx, top + hgt * 0.02, 0, 1]], nb = gt > 0.6 ? 4 : gt > 0.25 ? 2 : 0;
+    ctx.strokeStyle = rgb(st.trunk); ctx.lineCap = 'round'; ctx.lineWidth = Math.max(1.5, tw * 0.55);
+    for (let i = 0; i < nb; i++) {
+      const sd = i % 2 ? 1 : -1, by = gy - hgt * (0.26 + 0.08 * i), len = hgt * (i < 2 ? 0.26 : 0.18) * rr(r, 0.85, 1.1), a = sd * (0.8 - 0.12 * i), ex = cx + Math.sin(a) * len, ey = by - Math.cos(a) * len;
+      ctx.beginPath(); ctx.moveTo(cx, by); ctx.quadraticCurveTo(cx + Math.sin(a) * len * 0.3, by - len * 0.65, ex, ey); ctx.stroke();
+      tips.push([ex, ey, a * 0.7, i < 2 ? 0.66 : 0.5]);
+    }
+    const grow = smooth((gt - 0.05) / 0.6);
+    if (gt > 0.4) { // a cool glow behind the crown
+      const gr = ctx.createRadialGradient(cx, top - hgt * 0.15, 0, cx, top - hgt * 0.15, hgt * 0.5); gr.addColorStop(0, rgb(c[2], 0.28 * smooth((gt - 0.4) / 0.5))); gr.addColorStop(1, rgb(c[2], 0));
+      ctx.fillStyle = gr; ctx.fillRect(cx - hgt * 0.5, top - hgt * 0.65, hgt, hgt);
+    }
+    tips.slice(1).concat([tips[0]]).forEach(([x, y, a, sc]) => {
+      const n = sc === 1 ? 5 : 4, base = hgt * 0.36 * sc * (0.3 + 0.7 * grow);
+      for (let k = 0; k < n; k++) { const mid = k === Math.floor(n / 2), L = base * rr(r, 0.62, 1) * (mid ? 1.15 : 1); shard(ctx, x, y, a + (k - (n - 1) / 2) * 0.42 + rr(r, -0.08, 0.08), L, L * 0.3, c); }
+    });
+    if (gt > 0.5) for (let s = 0; s < 6; s++) { // twinkles
+      const px = cx + rr(r, -0.34, 0.34) * hgt, py = top - rr(r, 0.02, 0.4) * hgt, tw2 = 0.5 + 0.5 * Math.sin(t * 2.2 + s * 1.9), z = hgt * 0.022 * (0.5 + tw2);
+      ctx.fillStyle = `rgba(255,255,255,${(0.35 + 0.6 * tw2).toFixed(2)})`; ctx.beginPath(); ctx.moveTo(px, py - z * 2); ctx.lineTo(px + z * 0.4, py - z * 0.4); ctx.lineTo(px + z * 2, py); ctx.lineTo(px + z * 0.4, py + z * 0.4); ctx.lineTo(px, py + z * 2); ctx.lineTo(px - z * 0.4, py + z * 0.4); ctx.lineTo(px - z * 2, py); ctx.lineTo(px - z * 0.4, py - z * 0.4); ctx.closePath(); ctx.fill();
+    }
+  }
+
+  const FORMS = { broad: drawBroad, conifer: drawConifer, palm: drawPalm, bamboo: drawBamboo, cactus: drawCactus, bush: drawBush, crystal: drawCrystal };
 
   function draw(ctx, W, H, o) {
     o = Object.assign({ kind: 'oak', g: 1, seed: 1, t: 0, wind: 0, dpr: 1, detail: clamp(W / 240, 0.35, 1) }, o);

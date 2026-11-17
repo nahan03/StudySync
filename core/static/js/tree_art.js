@@ -17,6 +17,7 @@ const TREE_MAP = [
   { keywords: ['computer', 'coding', 'program', 'software', 'data', '=cs', '=it', 'robot', 'cyber', 'engineer'],      kind: 'cyber',     name: 'Cyber Tree'   },
   { keywords: ['econom', 'financ', 'market', 'business', 'account', 'law'],         kind: 'autumn',    name: 'Autumn Oak'   },
   { keywords: ['psychology', 'psych', 'mind', 'behaviour', 'cognitive'],        kind: 'lotus',     name: 'Lotus'        },
+  { keywords: ['scien', 'experiment', '=lab', 'stem'],                       kind: 'crystal',   name: 'Crystal Tree' },
 ];
 const DEFAULT_TREE = { kind: 'oak', name: 'Oak' };
 
@@ -57,6 +58,7 @@ const PAL = {
   cyber:   { trunk: '#16323C', leaves: ['#0F7E80', '#18C4C4', '#8CFAF2'] },
   conifer: { trunk: '#5A3A22', leaves: ['#1F5A3A', '#2A7A4E', '#46A874'] },
   fern:    { trunk: '#5A4A30', leaves: ['#2F7A3A', '#4AA050', '#86D072'] },
+  crystal: { trunk: '#3A3848', leaves: ['#3A48AA', '#688AE8', '#C4DCFF'] },
 };
 
 function broadleaf(kind, r) {
@@ -146,6 +148,25 @@ function lotus(r) {
   return s;
 }
 
+/* Science: a dark trunk crowned with faceted crystal shards */
+function crystal(r) {
+  const p = PAL.crystal, L = p.leaves;
+  let s = `<path d="M45 136 C47 114 46 100 46 88 L54 88 C54 100 53 114 55 136 Z" fill="${p.trunk}"/>` +
+          `<path d="M50 112 Q40 104 33 92 M50 104 Q60 96 67 84" stroke="${p.trunk}" stroke-width="3.4" stroke-linecap="round" fill="none"/>`;
+  const shard = (x, y, a, len, w) => {
+    const ca = Math.cos(a * Math.PI / 180), sa = Math.sin(a * Math.PI / 180), pt = (u, v) => `${f1(x + u * ca - v * sa)},${f1(y + u * sa + v * ca)}`;
+    return `<polygon points="${pt(-w / 2, 0)} ${pt(-w / 2, -len * .72)} ${pt(0, -len)} ${pt(w / 2, -len * .72)} ${pt(w / 2, 0)}" fill="${L[1]}"/>` +
+           `<polygon points="${pt(-w / 2, 0)} ${pt(-w / 2, -len * .72)} ${pt(0, -len)} ${pt(-w * .12, -len * .74)} ${pt(-w * .12, 0)}" fill="${L[0]}"/>` +
+           `<polygon points="${pt(w * .2, -len * .06)} ${pt(w * .2, -len * .74)} ${pt(0, -len)} ${pt(w * .5, -len * .72)} ${pt(w * .5, -len * .06)}" fill="${L[2]}" opacity=".75"/>`;
+  };
+  [[33, 94, -1], [67, 86, 1], [50, 90, 0]].forEach(([x, y, side]) => {
+    const n = side ? 4 : 5, big = side ? 30 : 46;
+    for (let k = 0; k < n; k++) { const a = side * 22 + (k - (n - 1) / 2) * 24 + (r() - .5) * 8; s += shard(x, y, a, big * (.62 + r() * .38) * (k === Math.floor(n / 2) ? 1.12 : 1), big * .3); }
+  });
+  [[28, 50], [70, 40], [52, 24], [40, 70]].forEach(([x, y]) => { s += `<path d="M${x} ${y - 4} L${x + 1} ${y - 1} L${x + 4} ${y} L${x + 1} ${y + 1} L${x} ${y + 4} L${x - 1} ${y + 1} L${x - 4} ${y} L${x - 1} ${y - 1} Z" fill="#FFFFFF" opacity=".9"/>`; });
+  return s;
+}
+
 function sprout() {
   return `<path d="M50 136 Q49 118 50 100" stroke="#5BAA45" stroke-width="3.2" fill="none" stroke-linecap="round"/>` +
          `<ellipse cx="40" cy="104" rx="11" ry="6" transform="rotate(-28 40 104)" fill="#7DC04A"/><ellipse cx="60" cy="98" rx="11" ry="6" transform="rotate(28 60 98)" fill="#5FA83A"/>`;
@@ -161,6 +182,7 @@ function treeSvg(kind, seed) {
     case 'cactus':  body = cactus(r); break;
     case 'fern':    body = fern(kind, r); break;
     case 'lotus':   body = lotus(r); break;
+    case 'crystal': body = crystal(r); break;
     case 'sprout':  body = sprout(); break;
     default:        body = broadleaf(kind, r);
   }
